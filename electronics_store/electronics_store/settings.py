@@ -170,3 +170,5 @@ ACCOUNT_FORMS = {
 }
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
+LOGIN_REDIRECT_URL = '/accounts/profile/'  # куда пользователь идет после успешного входа
+LOGOUT_REDIRECT_URL = '/'  # куда пользователь идет после выхода

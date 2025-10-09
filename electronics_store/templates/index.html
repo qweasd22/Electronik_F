@@ -1,0 +1,60 @@
+{% extends 'base_generic.html' %}
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+
+    <!-- Секция приветствия -->
+    <div class="jumbotron text-center bg-light p-5 rounded shadow-sm mb-5">
+        <h1 class="display-4 fw-bold">Добро пожаловать в Магазин электроники!</h1>
+        <p class="lead">У нас вы найдёте всё: от смартфонов до аксессуаров.</p>
+        <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-lg mt-3 shadow-sm">
+            Перейти в каталог
+        </a>
+    </div>
+
+    <!-- Секция популярных товаров -->
+    <h2 class="mb-4 fw-bold">Популярные товары</h2>
+    <div class="row g-4">
+        {% for product in products %}
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text text-muted mb-2">{{ product.price }} ₽</p>
+                    <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary mt-auto">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">Товары отсутствуют</p>
+        {% endfor %}
+    </div>
+
+    <!-- Секция регистрации/входа -->
+    <div class="row mt-5">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-4 border-0">
+                <h3 class="fw-bold mb-3 text-primary">Новый пользователь?</h3>
+                <p>Создайте аккаунт и следите за своими заказами!</p>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary w-100">
+                    Зарегистрироваться
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-4 border-0">
+                <h3 class="fw-bold mb-3 text-success">Уже есть аккаунт?</h3>
+                <p>Войдите и продолжите покупки.</p>
+                <a href="{% url 'accounts:login' %}" class="btn btn-success w-100">
+                    Войти
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
