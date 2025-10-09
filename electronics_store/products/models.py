@@ -1,15 +1,14 @@
 from django.db import models
+from accounts.models import CustomUser
 
 class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(max_length=100, unique=True)
-
     def __str__(self):
         return self.name
 
 class Brand(models.Model):
     name = models.CharField(max_length=100, unique=True)
-
     def __str__(self):
         return self.name
 
@@ -22,36 +21,43 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField(default=0)
     image = models.ImageField(upload_to='products/', blank=True, null=True)
+    screen_size = models.CharField(max_length=100, blank=True, null=True)
+    processor = models.CharField(max_length=100, blank=True, null=True)
+    memory = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    screen_size = models.CharField(max_length=100, null=True, blank=True)
-    processor = models.CharField(max_length=100, null=True, blank=True)
-    memory = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return self.name
+
     def average_rating(self):
-        reviews = self.reviews.filter(approved=True)
-        if reviews.exists():
-            return reviews.aggregate(models.Avg('rating'))['rating__avg']
-        return None
+        ratings = self.ratings.all()
+        if ratings:
+            return round(sum([rating.stars for rating in ratings]) / len(ratings), 1)  # Округление до 1 знака
+        return 0
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)
     image = models.ImageField(upload_to='product_images/')
-    is_main = models.BooleanField(default=False)  # Для главного изображения
-
+    is_main = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.product.name} - {self.id}"
-    
-from accounts.models import CustomUser
-from django.db import models
 
 class Review(models.Model):
     product = models.ForeignKey(Product, related_name='reviews', on_delete=models.CASCADE)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
-    rating = models.PositiveIntegerField(choices=[(i, i) for i in range(1, 6)])  # Оценка от 1 до 5
-    comment = models.TextField()
-    approved = models.BooleanField(default=False)  # Для модерации
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)  # модерация
 
     def __str__(self):
-        return f"Review for {self.product.name} by {self.user.username}"
+        return f"Отзыв от {self.user.username} на {self.product.name}"
+
+class Rating(models.Model):
+    product = models.ForeignKey(Product, related_name='ratings', on_delete=models.CASCADE)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    stars = models.IntegerField(choices=[(i, f'{i} ⭐') for i in range(1, 6)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} оценил {self.product.name} на {self.stars} ⭐"

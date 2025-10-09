@@ -8,14 +8,16 @@ class ProductFilterForm(forms.Form):
     max_price = forms.DecimalField(required=False, decimal_places=2, max_digits=10, label="Макс. цена")
     search = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Поиск по названию', 'class': 'form-control'}), label='Поиск')
 
+# products/forms.py
 from django import forms
-from .models import Review
+from .models import Review, Rating
 
 class ReviewForm(forms.ModelForm):
     class Meta:
         model = Review
-        fields = ['rating', 'comment']
-        widgets = {
-            'comment': forms.Textarea(attrs={'placeholder': 'Напишите ваш отзыв...', 'rows': 3}),
-            'rating': forms.Select(choices=[(i, i) for i in range(1, 6)], attrs={'class': 'form-control'}),
-        }
+        fields = ['text']
+
+class RatingForm(forms.ModelForm):
+    class Meta:
+        model = Rating
+        fields = ['stars']
