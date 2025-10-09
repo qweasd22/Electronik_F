@@ -1,8 +1,9 @@
-# products/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Product, Review, Rating
 from .forms import ProductFilterForm, ReviewForm, RatingForm
 from django.contrib.auth.decorators import login_required
+
+from orders.models import CartItem
 
 def product_list(request):
     form = ProductFilterForm(request.GET)
@@ -26,30 +27,38 @@ def product_list(request):
         if search:
             products = products.filter(name__icontains=search)
 
-    return render(request, 'products/product_list.html', {'products': products, 'form': form})
+    cart_items = {}
+    if request.user.is_authenticated:
+        user_cart = CartItem.objects.filter(user=request.user)
+        cart_items = {item.product.id: item.quantity for item in user_cart}
+
+    return render(request, 'products/product_list.html', {'products': products, 'form': form, 'cart_items': cart_items})
 
 
 def product_detail(request, id):
     product = get_object_or_404(Product, id=id)
-    reviews = product.reviews.filter(is_approved=True)  # Показываем только одобренные отзывы
-    average_rating = product.average_rating()  # Средний рейтинг продукта
+    reviews = product.reviews.filter(is_approved=True)
+    average_rating = product.average_rating()
 
-    # Получаем все рейтинги для продукта (для использования в шаблоне)
     ratings_for_product = Rating.objects.filter(product=product)
 
-    # Обработка формы отзыва
+    # Проверка количества товара в корзине
+    quantity_in_cart = 0
+    if request.user.is_authenticated:
+        cart_item = CartItem.objects.filter(user=request.user, product=product).first()
+        if cart_item:
+            quantity_in_cart = cart_item.quantity
+
     if request.method == 'POST' and request.user.is_authenticated:
         review_form = ReviewForm(request.POST)
         rating_form = RatingForm(request.POST)
 
         if review_form.is_valid() and rating_form.is_valid():
-            # Сохраняем отзыв
             review = review_form.save(commit=False)
             review.product = product
             review.user = request.user
             review.save()
 
-            # Сохраняем рейтинг
             rating = rating_form.save(commit=False)
             rating.product = product
             rating.user = request.user
@@ -64,7 +73,8 @@ def product_detail(request, id):
         'product': product,
         'reviews': reviews,
         'average_rating': average_rating,
-        'ratings_for_product': ratings_for_product,  # Передаем все рейтинги для продукта
+        'ratings_for_product': ratings_for_product,
         'review_form': review_form,
         'rating_form': rating_form,
+        'quantity_in_cart': quantity_in_cart
     })

@@ -1,0 +1,21 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Оформление заказа</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="address" class="form-label">Адрес доставки</label>
+            <textarea name="address" class="form-control" id="address" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="delivery_method" class="form-label">Способ доставки</label>
+            <select name="delivery_method" class="form-select" required>
+                <option value="standard">Обычная доставка</option>
+                <option value="express">Экспресс доставка</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-success">Подтвердить заказ</button>
+    </form>
+</div>
+{% endblock %}

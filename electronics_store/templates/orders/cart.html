@@ -1,0 +1,41 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Корзина</h2>
+    {% if cart_items %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Цена</th>
+                <th>Количество</th>
+                <th>Сумма</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.product.price }} ₽</td>
+                <td>
+                    <form action="{% url 'orders:update_cart' item.id %}" method="post" class="d-flex">
+                        {% csrf_token %}
+                        <button type="submit" name="action" value="decrease" class="btn btn-sm btn-outline-secondary me-1">-</button>
+                        <input type="text" value="{{ item.quantity }}" readonly class="form-control form-control-sm text-center me-1" style="width:50px;">
+                        <button type="submit" name="action" value="increase" class="btn btn-sm btn-outline-secondary me-1">+</button>
+                        <button type="submit" name="action" value="remove" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+                <td>{{ item.total_price }} ₽</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h4>Итого: {{ total }} ₽</h4>
+    <a href="{% url 'orders:checkout' %}" class="btn btn-primary">Оформить заказ</a>
+    {% else %}
+    <p>Ваша корзина пуста.</p>
+    {% endif %}
+</div>
+{% endblock %}

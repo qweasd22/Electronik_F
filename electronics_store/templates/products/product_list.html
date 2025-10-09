@@ -1,38 +1,42 @@
 {% extends 'base_generic.html' %}
 {% load static %}
 {% block content %}
-    <h1>Каталог товаров</h1>
-
-    <!-- Форма фильтрации -->
-    <form method="get">
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary">Фильтровать</button>
-    </form>
-
-    <div class="row mt-4">
+<div class="container mt-5">
+    <div class="row">
         {% for product in products %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm">
-                    {% if product.image %}
-                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                    {% else %}
-                        <img src="{% static 'media/no_image.jpeg' %}" class="card-img-top" alt="Нет изображения">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="card-text text-truncate">{{ product.description }}</p>
-                        <p class="fw-bold">{{ product.price }} ₽</p>
-                        {% if product.average_rating %}
-                            <h6>Средний рейтинг: {{ product.average_rating|floatformat:1 }} ⭐</h6>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% else %}
+                <img src="{% static 'media/no_image.jpeg' %}" class="card-img-top" alt="Нет изображения">
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text fw-bold">{{ product.price }} ₽</p>
+                    <p class="mb-2">Средняя оценка: {{ product.average_rating }} ⭐</p>
+                    <div class="mt-auto">
+                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary w-100 mb-2">Подробнее</a>
+                        {% if user.is_authenticated %}
+                            {% if cart_items.product.id %}
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="badge bg-success">В корзине: {{ cart_items.product.id }}</span>
+                                    <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-sm btn-outline-success">+</a>
+                                </div>
+                            {% else %}
+                                <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success w-100">В корзину</button>
+                                </form>
+                            {% endif %}
                         {% else %}
-                            <h6>Нет отзывов для этого товара.</h6>
+                            <p class="text-muted text-center">Войдите, чтобы добавить в корзину</p>
                         {% endif %}
-                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary w-100">Подробнее</a>
                     </div>
                 </div>
             </div>
-        {% empty %}
-            <p>Товары не найдены.</p>
+        </div>
         {% endfor %}
     </div>
+</div>
 {% endblock %}

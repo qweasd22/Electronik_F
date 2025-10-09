@@ -1,0 +1,12 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card shadow-lg p-4">
+        <h2 class="fw-bold mb-3">Спасибо за ваш заказ!</h2>
+        <p>Ваш заказ №{{ order.id }} успешно принят.</p>
+        <p>Общая сумма: {{ order.total_price }} ₽</p>
+        <p>Мы свяжемся с вами для подтверждения и доставки.</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary mt-3">Вернуться в магазин</a>
+    </div>
+</div>
+{% endblock %}

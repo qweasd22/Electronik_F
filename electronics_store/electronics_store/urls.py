@@ -7,6 +7,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),  # если есть приложение accounts
     path('products/', include('products.urls', namespace='products')),  # наш каталог
+    path('orders/', include('orders.urls', namespace='orders')),
+    
 ]
 
 # Для медиа-файлов (картинки товаров)
