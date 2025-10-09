@@ -1,12 +1,17 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),  # Для регистрации и аутентификации
-    
-    # path('products/', include('products.urls')),  # Для каталога товаров
-    # path('orders/', include('orders.urls')),  # Для корзины и заказов
-    # path('blog/', include('blog.urls')),  # Для блога
-    # path('promotions/', include('promotions.urls')),  # Для акций и скидок
+    path('accounts/', include('accounts.urls')),  # если есть приложение accounts
+    path('products/', include('products.urls', namespace='products')),  # наш каталог
 ]
+
+# Для медиа-файлов (картинки товаров)
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Для статических файлов (css, javascript)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -1,0 +1,34 @@
+<!-- products/product_list.html -->
+{% extends 'base_generic.html' %}
+{% load static %}
+{% block content %}
+    <h1>Каталог товаров</h1>
+
+    <!-- Форма фильтрации -->
+    <form method="get">
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Фильтровать</button>
+    </form>
+
+    <div class="row mt-4">
+        {% for product in products %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                    {% else %}
+                        <img src="{% static 'media/no_image.jpeg' %}" class="card-img-top" alt="Нет изображения">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        <p class="card-text text-truncate">{{ product.description }}</p>
+                        <p class="fw-bold">{{ product.price }} ₽</p>
+                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary w-100">Подробнее</a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>Товары не найдены.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

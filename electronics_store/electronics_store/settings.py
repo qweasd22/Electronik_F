@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-l+yml%8lszhiueg9dumi+6o6v%p)-h2p1+8kr0!5n+4e$3llpf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'allauth',  # Для регистрации и аутентификации
     'crispy_forms',  # Для удобного рендеринга форм с Bootstrap
     'crispy_bootstrap5',  # Для использования Bootstrap 5 с crispy_forms
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [
@@ -61,6 +62,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'electronics_store.urls'
@@ -140,7 +142,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Медиа файлы (для загрузки изображений)
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIAFILES_DIRS = [os.path.join(BASE_DIR, 'media')]
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

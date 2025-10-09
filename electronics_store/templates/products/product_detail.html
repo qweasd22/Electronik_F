@@ -1,0 +1,25 @@
+<!-- products/product_detail.html -->
+{% extends 'base_generic.html' %}
+{% load static %}
+{% block content %}
+    <div class="card mb-4">
+        <div class="row g-0">
+            <div class="col-md-4">
+                {% if product.image %}
+                    <img src="{{ product.image.url }}" class="img-fluid rounded-start" alt="{{ product.name }}">
+                {% else %}
+                    <img src="{% static 'media/no_image.jpeg' %}" class="img-fluid rounded-start" alt="Нет изображения">
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p class="fw-bold">{{ product.price }} ₽</p>
+                    <p class="card-text"><small class="text-muted">Категория: {{ product.category }}</small></p>
+                    <p class="card-text"><small class="text-muted">Бренд: {{ product.brand }}</small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
