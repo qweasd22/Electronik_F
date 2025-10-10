@@ -1,0 +1,39 @@
+{% extends 'base_generic.html' %}
+{% block title %}Контакты{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h2 class="fw-bold mb-4">Контакты</h2>
+
+    <!-- Если есть сообщение об успехе -->
+    {% if messages %}
+        <div class="alert alert-success">
+            {% for message in messages %}
+                <p>{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Форма обратной связи -->
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="id_name" class="form-label">Ваше имя</label>
+            {{ form.name }}
+        </div>
+        <div class="mb-3">
+            <label for="id_email" class="form-label">Ваш email</label>
+            {{ form.email }}
+        </div>
+        <div class="mb-3">
+            <label for="id_phone_number" class="form-label">Номер телфона</label>
+            {{ form.phone_number }}
+        <div class="mb-3">
+            <label for="id_message" class="form-label">Сообщение</label>
+            {{ form.message }}
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Отправить</button>
+    </form>
+</div>
+{% endblock %}

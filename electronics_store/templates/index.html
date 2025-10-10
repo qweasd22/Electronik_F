@@ -54,6 +54,42 @@
         <p class="text-center">Товары с рейтингом выше 4 звезд отсутствуют</p>
         {% endfor %}
     </div>
+    <h2 class="my-5 fw-bold">Новости</h2>
+    <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            {% for news_item in news %}
+            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="card shadow-sm">
+                            {% if news_item.image %}
+                                <img src="{{ news_item.image.url }}" class="card-img-top" alt="{{ news_item.title }}">
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ news_item.title }}</h5>
+                                <p class="card-text">{{ news_item.summary }}</p>
+                                <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn btn-primary">Читать дальше</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Предыдущий</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Следующий</span>
+        </button>
+    </div>
+
+    <!-- Ссылка на все новости -->
+    <div class="text-center mt-4">
+        <a href="{% url 'news:news_list' %}" class="btn btn-outline-secondary">Посмотреть все новости</a>
+    </div>
 
     <!-- Секция регистрации/входа -->
     {% if not user.is_authenticated %}

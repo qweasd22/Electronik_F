@@ -24,8 +24,14 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
+                {% if user.is_authenticated and user.is_superuser %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'admin:index' %}">Админка</a></li>
+                {% endif %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'news:news_list' %}">Новости</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'products:product_list' %}">Товары</a></li>
                 {% if user.is_authenticated %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">Профиль</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'orders:cart' %}">Корзина</a></li>
                 <form action="{% url 'accounts:logout' %}" method="post">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger btn-sm">Выйти</button>
@@ -33,6 +39,7 @@
                 {% else %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Войти</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'accounts:signup' %}">Регистрация</a></li>
+                
                 {% endif %}
             </ul>
         </div>

@@ -189,3 +189,22 @@ button:hover {
         width: 100%;
     }
 }
+/* Стили для слайдера новостей */
+.carousel-item {
+    padding: 20px;
+}
+
+.carousel-item img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.carousel-inner .carousel-item {
+    transition: transform 0.5s ease;
+}
+
+.carousel-inner .carousel-item.active {
+    transform: translateX(0);
+}

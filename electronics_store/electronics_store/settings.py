@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'orders',
     'news',
     'promotions',
+    'blog',
 
     # Дополнительные пакеты
     'allauth',  # Для регистрации и аутентификации
@@ -182,3 +183,12 @@ CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 LOGIN_REDIRECT_URL = '/accounts/profile/'  # куда пользователь идет после успешного входа
 LOGOUT_REDIRECT_URL = '/'  # куда пользователь идет после выхода
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'electronik223213@gmail.com'  # Ваш email
+EMAIL_HOST_PASSWORD = 'avtn lasc oijr aftb'  # Ваш пароль или app password
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+ADMIN_EMAIL = 'electronik223213@gmail.com'  # Email администратора для получения уведомлений

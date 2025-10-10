@@ -4,13 +4,20 @@ from django.conf import settings
 from django.conf.urls.static import static
 from . import views
 
+
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),  # если есть приложение accounts
     path('products/', include('products.urls', namespace='products')),  # наш каталог
     path('orders/', include('orders.urls', namespace='orders')),
-    path('', views.index, name='home'),
+   
     path('blog/', include('blog.urls', namespace='blog')),
+    path('news/', include('news.urls', namespace='news')),
+    path('contact/', views.contact_view, name='contact'),
+    path('', views.index, name='home'),
+    
     
     
 ]
