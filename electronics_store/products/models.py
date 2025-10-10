@@ -2,6 +2,19 @@ from django.utils import timezone
 from django.db import models
 from accounts.models import CustomUser
 
+class Sale(models.Model):
+    name = models.CharField("Название скидки", max_length=255)
+    discount_percentage = models.DecimalField("Процент скидки", max_digits=5, decimal_places=2)
+    start_date = models.DateTimeField("Дата начала скидки")
+    end_date = models.DateTimeField("Дата окончания скидки", null=True, blank=True)
+    is_active = models.BooleanField("Активна", default=True)
+
+    class Meta:
+        verbose_name = "Скидка"
+        verbose_name_plural = "Скидки"
+
+    def __str__(self):
+        return f"{self.name} - {self.discount_percentage}%"
 
 class Category(models.Model):
     name = models.CharField("Название категории", max_length=100, unique=True)
@@ -40,7 +53,7 @@ class Product(models.Model):
     memory = models.CharField("Оперативная память", max_length=100, blank=True, null=True)
     created_at = models.DateTimeField("Дата добавления", auto_now_add=True)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
-    promotions = models.ManyToManyField('Promotion', verbose_name="Акции", related_name='products_in_promotion', blank=True)
+    sales = models.ManyToManyField(Sale, blank=True, related_name="products", verbose_name="Скидки")
 
     class Meta:
         verbose_name = "Товар"
@@ -56,24 +69,12 @@ class Product(models.Model):
         return 0
     
     def get_discounted_price(self):
-        """Возвращает цену товара с учётом активных скидок"""
-        # Находим все активные акции для товара
-        current_promotions = self.promotions.filter(
-            active=True, 
-            start_date__lte=timezone.now(), 
-            end_date__gte=timezone.now()
-        )
-        
-        # Если акции активны, применим максимальную скидку
-        if current_promotions.exists():
-            max_discount = max(
-                [promotion.discount.discount_percent for promotion in current_promotions]
-            )
-            # Применяем максимальную скидку
-            return self.price * (1 - max_discount / 100)
-        
-        # Если нет активных акций, возвращаем стандартную цену
-        return self.price
+        """Метод для получения цены со скидкой, если она есть."""
+        price = self.price
+        for sale in self.sales.filter(is_active=True):  # Проверяем только активные скидки
+            price = price * (1 - sale.discount_percentage / 100) 
+            price = round(price, 2)
+        return price
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, verbose_name="Товар", related_name='images', on_delete=models.CASCADE)
@@ -116,42 +117,6 @@ class Rating(models.Model):
     def __str__(self):
         return f"{self.user.username} оценил {self.product.name} на {self.stars} ⭐"
     
-class Discount(models.Model):
-    name = models.CharField("Название скидки", max_length=200)
-    description = models.TextField("Описание", blank=True, null=True)
-    discount_percent = models.PositiveIntegerField("Процент скидки", default=0)
-    start_date = models.DateTimeField("Дата начала", default=timezone.now)
-    end_date = models.DateTimeField("Дата окончания")
-    active = models.BooleanField("Активно", default=True)
-    
-    class Meta:
-        verbose_name = "Скидка"
-        verbose_name_plural = "Скидки"
+from django.db import models
+from products.models import Product  # Импортируем модель товара
 
-    def __str__(self):
-        return self.name
-
-    def is_active(self):
-        now = timezone.now()
-        return self.active and self.start_date <= now <= self.end_date
-
-
-class Promotion(models.Model):
-    name = models.CharField("Название акции", max_length=200)
-    description = models.TextField("Описание акции", blank=True, null=True)
-    discount = models.ForeignKey(Discount, verbose_name="Скидка", on_delete=models.CASCADE, related_name="promotions")
-    products = models.ManyToManyField("Product", verbose_name="Товары в акции", related_name='promotions_for_product')
-    start_date = models.DateTimeField("Дата начала", default=timezone.now)
-    end_date = models.DateTimeField("Дата окончания")
-    active = models.BooleanField("Активно", default=True)
-    
-    class Meta:
-        verbose_name = "Акция"
-        verbose_name_plural = "Акции"
-
-    def __str__(self):
-        return self.name
-
-    def is_active(self):
-        now = timezone.now()
-        return self.active and self.start_date <= now <= self.end_date

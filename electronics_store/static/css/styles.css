@@ -18,3 +18,83 @@ body {
 .table thead th {
     font-weight: 600;
 }
+/* Основные стили для формы */
+.container {
+    max-width: 900px;
+    margin-top: 50px;
+}
+
+h2 {
+    font-family: 'Arial', sans-serif;
+    color: #2C3E50;
+    margin-bottom: 20px;
+}
+
+h4 {
+    font-size: 1.2rem;
+    color: #34495E;
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    background-color: #2980B9;
+    border-color: #2980B9;
+    color: white;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #1C5983;
+    border-color: #1C5983;
+}
+
+.list-group-item {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.list-group-item:hover {
+    background-color: #ecf0f1;
+}
+
+.badge {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+select.form-select {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+textarea.form-control {
+    padding: 12px;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    min-height: 120px;
+}
+
+/* Респонсивность */
+@media (max-width: 768px) {
+    .row .col-md-6 {
+        margin-bottom: 20px;
+    }
+
+    .list-group-item {
+        font-size: 0.9rem;
+    }
+
+    h4 {
+        font-size: 1rem;
+    }
+}

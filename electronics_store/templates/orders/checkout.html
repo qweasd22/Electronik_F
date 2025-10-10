@@ -1,30 +1,58 @@
 {% extends 'base_generic.html' %}
+{% load custom_filters %}
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Оформление заказа</h2>
-
+    <h2 class="text-center mb-4">Оформление заказа</h2>
     <form method="post" id="checkout-form">
         {% csrf_token %}
-        
-        <div class="mb-3">
-            <label for="address" class="form-label">Адрес доставки</label>
-            <textarea name="address" class="form-control" id="address" rows="3" required>{{ form.address.value }}</textarea>
-        </div>
-        
-        <div class="mb-3">
-            <label for="delivery_method" class="form-label">Способ доставки</label>
-            <select name="delivery_method" id="delivery_method" class="form-select" required>
-                <option value="standard" {% if delivery_method == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
-                <option value="express" {% if delivery_method == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
-            </select>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label for="address" class="form-label">Адрес доставки</label>
+                <textarea id="address" name="address" class="form-control" placeholder="Введите ваш адрес" required></textarea>
+            </div>
+
+            <div class="col-md-6">
+                <label for="delivery_method" class="form-label">Способ доставки</label>
+                <select name="delivery_method" id="delivery_method" class="form-select" required>
+                    <option value="standard" {% if delivery_method == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
+                    <option value="express" {% if delivery_method == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
+                </select>
+            </div>
         </div>
 
-        <!-- Отображаем итоговую сумму с учетом доставки -->
-        <h4>Итого за товары: {{ total_price }} ₽</h4>
-        <h4><strong>Общая сумма: {{ total }} ₽</strong></h4>
+        <h4 class="mt-4">Ваш заказ</h4>
+        <ul class="list-group mb-4">
+            {% for item in cart_items %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>{{ item.product.name }}</strong> ({{ item.quantity }})
+                        <br>
+                        <small>Цена без скидки: {{ item.product.price }} ₽</small>
+                        {% if item.product.get_discounted_price != item.product.price %}
+                            <br><small>Цена со скидкой: {{ item.product.get_discounted_price }} ₽</small>
+                        {% endif %}
+                    </div>
+                    <span class="badge bg-info text-dark">₽  {{ item.product.get_discounted_price|multiply:item.quantity }} </span>
 
-        <button type="submit" class="btn btn-success">Подтвердить заказ</button>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h4 class="mt-4">Итого:</h4>
+        <div class="row">
+            <div class="col-md-6">
+                <p>Стоимость товаров без скидки: <strong>{{ total_price_without_discount }} ₽</strong></p>
+                <p>Стоимость товаров со скидкой: <strong>{{ total_price_with_discount }} ₽</strong></p>
+            </div>
+            <div class="col-md-6">
+                <p>Доставка: <span id="delivery-cost">{{ delivery_cost }} ₽</span></p>
+                
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Оформить заказ</button>
     </form>
 </div>
 
@@ -33,10 +61,10 @@
     document.getElementById('delivery_method').addEventListener('change', function() {
         var form = document.getElementById('checkout-form');
         var formData = new FormData(form);
-        
+
         // Убедитесь, что отправляется данные формы
         formData.append('delivery_method', this.value);
-        
+
         fetch("{% url 'orders:checkout' %}", {
             method: 'POST',
             body: formData,
@@ -47,9 +75,9 @@
         .then(response => response.json())
         .then(data => {
             // Обновляем общую сумму и стоимость доставки
-            document.querySelector('h4 strong').textContent = `Общая сумма: ${data.total} ₽`;
-            document.querySelector('h4:nth-child(2)').textContent = `Стоимость доставки: ${data.delivery_cost} ₽`;
-            document.querySelector('h4:nth-child(1)').textContent = `Итого за товары: ${data.total_price} ₽`;
+            document.getElementById('delivery-cost').textContent = `${data.delivery_cost} ₽`;
+            document.getElementById('total-without-discount').textContent = `${data.total_without_discount} ₽`;
+            document.getElementById('total-with-discount').textContent = `${data.total_with_discount} ₽`;
         })
         .catch(error => console.log(error));
     });

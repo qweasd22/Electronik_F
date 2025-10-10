@@ -91,46 +91,57 @@ def checkout(request):
     if not cart_items.exists():
         return redirect('products:product_list')  # Корзина пуста
 
-    total_price = sum(item.total_price() for item in cart_items)
+    # Стоимость товаров
+    total_price_without_discount = sum(item.product.price * item.quantity for item in cart_items)
+    total_price_with_discount = sum(item.product.get_discounted_price() * item.quantity for item in cart_items)
 
-    # Устанавливаем стоимость доставки в зависимости от выбора
+    # Стоимость доставки
     delivery_method = request.POST.get('delivery_method', 'standard')  # По умолчанию 'standard'
-    if delivery_method == 'express':
-        delivery_cost = 500
-    else:
-        delivery_cost = 200
+    delivery_cost = 200 if delivery_method == 'standard' else 500  # Стоимость доставки по умолчанию
 
     # Рассчитываем общую сумму
-    total = total_price + delivery_cost
-    
-    # Используем заголовок для определения, что запрос является AJAX
+    total_without_discount = total_price_without_discount + delivery_cost
+    total_with_discount = total_price_with_discount + delivery_cost
+
+    # Если это AJAX запрос
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-        # Отправляем данные обратно на фронтенд в формате JSON
         return JsonResponse({
-            'total_price': total_price,
+            'total_price_without_discount': total_price_without_discount,
+            'total_price_with_discount': total_price_with_discount,
             'delivery_cost': delivery_cost,
-            'total': total,
+            'total_without_discount': total_without_discount,
+            'total_with_discount': total_with_discount,
         })
 
+    # Если это POST-запрос (отправка формы)
     if request.method == 'POST':
         address = request.POST['address']
 
-        # Создаем заказ
+        # Создаем заказ без передачи total_price
         order = Order.objects.create(
             user=user,
             address=address,
             delivery_method=delivery_method,
-            total_price=total,  # Учитываем стоимость товаров и доставку
+            # total_price не передаем, так как это вычисляемое свойство
         )
 
-        # Переносим товары из корзины в заказ
+        # Переносим товары из корзины в заказ и сохраняем информацию о скидке
         for item in cart_items:
+            price_at_purchase = item.product.get_discounted_price()
+            discount_applied = item.product.get_discounted_price() < item.product.price
             OrderItem.objects.create(
                 order=order,
                 product=item.product,
                 quantity=item.quantity,
-                price_at_purchase=item.product.price,
+                price_at_purchase=price_at_purchase,
+                discount_applied=discount_applied,
             )
+
+        # Рассчитываем общую цену для заказа
+        order_total_price = order.total_price()  # Используем метод total_price, чтобы получить итоговую сумму
+        # Применяем расчет к заказу, если нужно, например, обновить заказ
+        order.total_price = order_total_price  # Если вы хотите хранить итоговую сумму
+        order.save()
 
         # Очищаем корзину
         cart_items.delete()
@@ -140,10 +151,13 @@ def checkout(request):
 
     return render(request, 'orders/checkout.html', {
         'cart_items': cart_items,
-        'total_price': total_price,
+        'total_price_without_discount': total_price_without_discount,
+        'total_price_with_discount': total_price_with_discount,
         'delivery_cost': delivery_cost,
-        'total': total,  # Общая сумма с учетом доставки
+        'total_without_discount': total_without_discount,
+        'total_with_discount': total_with_discount,
     })
+
 
 
 @login_required

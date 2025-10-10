@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',  # Для работы allauth
-
+    
     # Приложения для проекта
     'accounts',
     'products',
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'crispy_forms',  # Для удобного рендеринга форм с Bootstrap
     'crispy_bootstrap5',  # Для использования Bootstrap 5 с crispy_forms
     'widget_tweaks',
+    'django'
     
 ]
 

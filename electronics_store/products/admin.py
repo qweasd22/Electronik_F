@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Brand, Product, ProductImage, Review, Rating, Promotion, Discount
+from .models import Category, Brand, Product, ProductImage, Review, Rating
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -33,7 +33,12 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('name', 'category', 'brand', 'price', 'stock', 'average_rating')
     list_filter = ('category', 'brand',)
     search_fields = ('name', 'description')
-    inlines = [ProductImageInline, ReviewInline, RatingInline]
+    list_filter = ('sales',)  # Фильтрация по скидкам
+    filter_horizontal = ('sales',)  # Для выбора скидок через многострочный список
+    
+    def get_sales_count(self, obj):
+        return obj.sales.count()  # Считаем количество скидок на товар
+    get_sales_count.short_description = "Количество скидок"
 
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
@@ -56,16 +61,23 @@ class RatingAdmin(admin.ModelAdmin):
 from django.contrib import admin
 
 
-class DiscountAdmin(admin.ModelAdmin):
-    list_display = ('name', 'discount_percent', 'start_date', 'end_date', 'active')
-    list_filter = ('active', 'start_date', 'end_date')
-    search_fields = ('name',)
+# admin.py для приложения "promotions" или другого, где хранится модель Sale
 
-# Модель для акций
-class PromotionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'discount', 'start_date', 'end_date', 'active')
-    list_filter = ('active', 'start_date', 'end_date')
-    search_fields = ('name',)
+from django.contrib import admin
+from .models import Sale, Product
 
-admin.site.register(Discount, DiscountAdmin)
-admin.site.register(Promotion, PromotionAdmin)
+@admin.register(Sale)
+class SaleAdmin(admin.ModelAdmin):
+    list_display = ('name', 'discount_percentage', 'start_date', 'end_date', 'is_active')
+    list_filter = ('is_active', 'start_date', 'end_date')
+    search_fields = ('name',)
+    ordering = ('-start_date',)
+    list_editable = ('is_active', 'discount_percentage')
+
+    # Форма для добавления/редактирования скидки
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'discount_percentage', 'start_date', 'end_date', 'is_active')
+        }),
+    )
+    date_hierarchy = 'start_date'

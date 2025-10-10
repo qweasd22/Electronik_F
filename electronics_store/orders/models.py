@@ -83,7 +83,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey(Product, verbose_name="Товар", on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField("Количество", default=1)
     price_at_purchase = models.DecimalField("Цена на момент покупки", max_digits=10, decimal_places=2)
-
+    discount_applied = models.BooleanField("Скидка применена", default=False)
     class Meta:
         verbose_name = "Товар в заказе"
         verbose_name_plural = "Товары в заказе"
