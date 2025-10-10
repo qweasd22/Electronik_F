@@ -17,6 +17,7 @@ urlpatterns = [
     path('news/', include('news.urls', namespace='news')),
     path('contact/', views.contact_view, name='contact'),
     path('', views.index, name='home'),
+    path('about/', views.about, name='about'),
     
     
     

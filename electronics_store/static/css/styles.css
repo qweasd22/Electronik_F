@@ -208,3 +208,45 @@ button:hover {
 .carousel-inner .carousel-item.active {
     transform: translateX(0);
 }
+/* Используем стиль для правильного отображения меток */
+.form-floating {
+    position: relative;
+}
+
+.form-floating label {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    color: #6c757d;
+    transition: all 0.2s ease-in-out;
+}
+
+.form-floating input,
+.form-floating textarea {
+    padding: 0.75rem 0.75rem 0.75rem 0.75rem;
+    border-radius: 0.375rem;
+    border: 1px solid #ccc;
+}
+
+.form-floating input:focus,
+.form-floating textarea:focus {
+    border-color: #495057;
+    box-shadow: none;
+}
+
+/* Сдвигаем метку, когда поле в фокусе или заполнено */
+.form-floating.focus-within label {
+    top: -0.75rem;
+    left: 0.75rem;
+    font-size: 0.75rem;
+    color: #495057;
+}
+
+/* Убираем подсветку ошибок с фоном для текстовых полей */
+.form-floating .text-danger {
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+

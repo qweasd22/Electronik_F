@@ -1,0 +1,49 @@
+{% extends 'base_generic.html' %}
+{% block title %}Контакты{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="text-center mb-5 fw-bold">Контакты</h1>
+
+    <!-- Информация об организации -->
+    <div class="row mb-5">
+        <div class="col-lg-6 mb-4">
+            <h3 class="fw-bold text-primary">О нас</h3>
+            <p class="lead">Мы — надежный поставщик электроники, предлагающий широкий ассортимент товаров для дома, работы и отдыха. Мы стремимся предложить вам только самые качественные и современные устройства по доступным ценам.</p>
+        </div>
+
+        <div class="col-lg-6">
+            <h3 class="fw-bold text-primary">Контактная информация</h3>
+            <ul class="list-unstyled">
+                <li><strong>Адрес:</strong> ул. Электронная, 123, Москва, Россия</li>
+                <li><strong>Телефон:</strong> +7 (800) 123-45-67</li>
+                <li><strong>Email:</strong> <a href="mailto:info@electronics.com">info@electronics.com</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Карта -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-primary">Наша локация</h3>
+            <div class="embed-responsive embed-responsive-16by9">
+                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d19764.338237950644!2d36.13125824310911!3d51.741406807513975!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x412f02568f08fd6b%3A0x64edad13fcb51388!2z0JXQstGA0L7Qv9Cw!5e0!3m2!1sru!2sru!4v1760113057180!5m2!1sru!2sru"" class="embed-responsive-item" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- Ссылка на форму обратной связи -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h3 class="fw-bold text-primary text-center">Есть вопросы?</h3>
+            <p class="text-center">Мы всегда готовы помочь. Перейдите в форму обратной связи, чтобы задать свой вопрос или оставить отзыв.</p>
+            <div class="text-center">
+                <a href="{% url 'contact' %}" class="btn btn-primary btn-lg shadow-sm">
+                    Оставить сообщение
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
