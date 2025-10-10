@@ -30,3 +30,22 @@ def profile(request):
     orders = Order.objects.filter(user=request.user)
 
     return render(request, 'accounts/profile.html', {'form': form, 'orders': orders})
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+@login_required
+def cancel_order(request, order_id):
+    """Отмена заказа пользователем"""
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if order.status == 'delivered':
+        messages.error(request, f"Заказ {order.id} уже доставлен и не может быть отменен.")
+    else:
+        try:
+            order.cancel()  # Попытка отмены
+            messages.success(request, f"Заказ {order.id} успешно отменен.")
+        except ValueError as e:
+            messages.error(request, str(e))  # Показ ошибки, если заказ уже доставлен
+
+    return redirect('accounts:profile')  # Перенаправляем на страницу профиля

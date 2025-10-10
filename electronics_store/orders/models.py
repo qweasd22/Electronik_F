@@ -37,6 +37,7 @@ class Order(models.Model):
         ('paid', 'Оплачен'),
         ('shipped', 'Отправлен'),
         ('delivered', 'Доставлен'),
+        ('cancelled', 'Отменен')
     ]
 
     user = models.ForeignKey(CustomUser, verbose_name="Пользователь", on_delete=models.CASCADE)
@@ -55,6 +56,12 @@ class Order(models.Model):
         for item in self.items.all():
             total += item.total_price  # Используем свойство total_price
         return total
+
+    def cancel(self):
+        if self.status == 'delivered':
+            raise ValueError("Заказ уже доставлен и не может быть отменен.")
+        self.status = 'cancelled'
+        self.save()
 
     def __str__(self):
         return f"Заказ {self.id} - {self.user.username}"
