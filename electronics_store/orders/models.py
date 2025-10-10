@@ -39,7 +39,10 @@ class Order(models.Model):
         ('delivered', 'Доставлен'),
         ('cancelled', 'Отменен')
     ]
-
+    DELIVERY_COST = {
+        'standard': Decimal('200.00'),  # Цена обычной доставки
+        'express': Decimal('500.00'),   # Цена экспресс-доставки
+    }
     user = models.ForeignKey(CustomUser, verbose_name="Пользователь", on_delete=models.CASCADE)
     created_at = models.DateTimeField("Дата создания", default=timezone.now)
     address = models.TextField("Адрес доставки")
@@ -51,10 +54,18 @@ class Order(models.Model):
         verbose_name = "Заказ"
         verbose_name_plural = "Заказы"
 
+    @property
+    def delivery_cost(self):
+        """Возвращает стоимость доставки в зависимости от выбранного способа"""
+        return self.DELIVERY_COST.get(self.delivery_method, Decimal('0.00'))
+    
     def total_price(self):
         total = Decimal(0)
+        # Суммируем цены всех товаров
         for item in self.items.all():
-            total += item.total_price  # Используем свойство total_price
+            total += item.total_price
+        # Прибавляем стоимость доставки
+        total += self.delivery_cost
         return total
 
     def cancel(self):

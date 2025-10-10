@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Brand, Product, ProductImage, Review, Rating
+from .models import Category, Brand, Product, ProductImage, Review, Rating, Promotion, Discount
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -52,3 +52,20 @@ class RatingAdmin(admin.ModelAdmin):
     list_display = ('product', 'user', 'stars', 'created_at')
     list_filter = ('stars', 'created_at')
     search_fields = ('user__username', 'product__name')
+
+from django.contrib import admin
+
+
+class DiscountAdmin(admin.ModelAdmin):
+    list_display = ('name', 'discount_percent', 'start_date', 'end_date', 'active')
+    list_filter = ('active', 'start_date', 'end_date')
+    search_fields = ('name',)
+
+# Модель для акций
+class PromotionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'discount', 'start_date', 'end_date', 'active')
+    list_filter = ('active', 'start_date', 'end_date')
+    search_fields = ('name',)
+
+admin.site.register(Discount, DiscountAdmin)
+admin.site.register(Promotion, PromotionAdmin)

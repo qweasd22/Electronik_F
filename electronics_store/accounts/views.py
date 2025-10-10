@@ -49,3 +49,4 @@ def cancel_order(request, order_id):
             messages.error(request, str(e))  # Показ ошибки, если заказ уже доставлен
 
     return redirect('accounts:profile')  # Перенаправляем на страницу профиля
+

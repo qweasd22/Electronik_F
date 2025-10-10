@@ -13,4 +13,5 @@ urlpatterns = [
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('profile/', views.profile, name='profile'),
     path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),  # Отмена заказа
+    
 ]

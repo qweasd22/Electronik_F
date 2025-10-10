@@ -1,17 +1,29 @@
 {% extends 'base_generic.html' %}
+{% load static %}
 {% block title %}Главная{% endblock %}
 
 {% block content %}
 <div class="container my-5">
 
     <!-- Секция приветствия -->
+    {% if user.is_authenticated %}
+    <div class="jumbotron text-center bg-light p-5 rounded shadow-sm mb-5">
+        <h1 class="display-4 fw-bold">Добро пожаловать, {{ user.username }}!</h1>
+        <p class="lead">У нас вы найдёте всё: от смартфонов до аксессуаров.</p>
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg mt-3 shadow-sm">
+            Перейти в каталог
+        </a>
+        
+    </div>
+    {% else %}
     <div class="jumbotron text-center bg-light p-5 rounded shadow-sm mb-5">
         <h1 class="display-4 fw-bold">Добро пожаловать в Магазин электроники!</h1>
         <p class="lead">У нас вы найдёте всё: от смартфонов до аксессуаров.</p>
-        <a href="{% url 'products:catalog' %}" class="btn btn-primary btn-lg mt-3 shadow-sm">
+        <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg mt-3 shadow-sm">
             Перейти в каталог
         </a>
     </div>
+    {% endif %}
 
     <!-- Секция популярных товаров -->
     <h2 class="mb-4 fw-bold">Популярные товары</h2>
@@ -19,10 +31,19 @@
         {% for product in products %}
         <div class="col-sm-6 col-md-4 col-lg-3">
             <div class="card h-100 shadow-sm">
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+                <!-- Проверка на наличие изображения товара -->
+                <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}" 
+                     class="card-img-top" alt="{{ product.name }}">
                 <div class="card-body d-flex flex-column">
                     <h5 class="card-title">{{ product.name }}</h5>
                     <p class="card-text text-muted mb-2">{{ product.price }} ₽</p>
+                    <p class="card-text mb-2">Рейтинг: {{ product.avg_rating }} ★</p>
+                    {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'orders:add_to_cart' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-primary mt-auto">Добавить в корзину</button>
+                    </form>
+                    {% endif %}
                     <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary mt-auto">
                         Подробнее
                     </a>
@@ -30,11 +51,12 @@
             </div>
         </div>
         {% empty %}
-        <p class="text-center">Товары отсутствуют</p>
+        <p class="text-center">Товары с рейтингом выше 4 звезд отсутствуют</p>
         {% endfor %}
     </div>
 
     <!-- Секция регистрации/входа -->
+    {% if not user.is_authenticated %}
     <div class="row mt-5">
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm p-4 border-0">
@@ -55,6 +77,19 @@
             </div>
         </div>
     </div>
+    {% else %}
+    <div class="row mt-5">
+        <div class="col-md-12 mb-4">
+            <div class="card shadow-sm p-4 border-0">
+                <h3 class="fw-bold mb-3">Добро пожаловать, {{ user.username }}!</h3>
+                <p>Вы уже залогинены, продолжайте покупки или посетите свой профиль.</p>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-primary w-100">
+                    Перейти в профиль
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
 </div>
 {% endblock %}

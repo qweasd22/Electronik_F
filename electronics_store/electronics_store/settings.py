@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-l+yml%8lszhiueg9dumi+6o6v%p)-h2p1+8kr0!5n+4e$3llpf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost']
+ALLOWED_HOSTS = ['localhost', '192.168.2.3']
 
 
 # Application definition
@@ -84,7 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'electronics_store.wsgi.application'
-
+SITE_ID = 1
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases

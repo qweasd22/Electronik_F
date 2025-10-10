@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from products.models import Product
 from .models import CartItem, Order, OrderItem
@@ -90,36 +91,58 @@ def checkout(request):
     if not cart_items.exists():
         return redirect('products:product_list')  # Корзина пуста
 
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            order = form.save(commit=False)
-            order.user = user
-            order.total_price = sum(item.total_price() for item in cart_items)  # Используем total_price
-            order.status = 'processing'  # Устанавливаем статус по умолчанию
-            order.save()
+    total_price = sum(item.total_price() for item in cart_items)
 
-            # Переносим товары из корзины в заказ
-            for item in cart_items:
-                OrderItem.objects.create(
-                    order=order,
-                    product=item.product,
-                    quantity=item.quantity,
-                    price_at_purchase=item.product.price
-                )
-
-            # Очищаем корзину
-            cart_items.delete()
-
-            # Оповещаем пользователя
-            messages.success(request, "Ваш заказ успешно оформлен!")
-            return redirect('orders:order_success', order_id=order.id)
+    # Устанавливаем стоимость доставки в зависимости от выбора
+    delivery_method = request.POST.get('delivery_method', 'standard')  # По умолчанию 'standard'
+    if delivery_method == 'express':
+        delivery_cost = 500
     else:
-        form = OrderForm()
+        delivery_cost = 200
+
+    # Рассчитываем общую сумму
+    total = total_price + delivery_cost
+    
+    # Используем заголовок для определения, что запрос является AJAX
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        # Отправляем данные обратно на фронтенд в формате JSON
+        return JsonResponse({
+            'total_price': total_price,
+            'delivery_cost': delivery_cost,
+            'total': total,
+        })
+
+    if request.method == 'POST':
+        address = request.POST['address']
+
+        # Создаем заказ
+        order = Order.objects.create(
+            user=user,
+            address=address,
+            delivery_method=delivery_method,
+            total_price=total,  # Учитываем стоимость товаров и доставку
+        )
+
+        # Переносим товары из корзины в заказ
+        for item in cart_items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price_at_purchase=item.product.price,
+            )
+
+        # Очищаем корзину
+        cart_items.delete()
+
+        # Оповещаем пользователя
+        return redirect('orders:order_success', order_id=order.id)
 
     return render(request, 'orders/checkout.html', {
-        'form': form,
         'cart_items': cart_items,
+        'total_price': total_price,
+        'delivery_cost': delivery_cost,
+        'total': total,  # Общая сумма с учетом доставки
     })
 
 

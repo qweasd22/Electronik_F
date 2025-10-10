@@ -9,3 +9,8 @@ class OrderForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Адрес доставки'}),
             'delivery_method': forms.Select(attrs={'class': 'form-select'}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # В зависимости от способа доставки, цена доставки будет отображаться
+        self.fields['delivery_method'].widget.attrs.update({'class': 'form-select'})

@@ -1,21 +1,58 @@
 {% extends 'base_generic.html' %}
+
 {% block content %}
 <div class="container mt-5">
     <h2>Оформление заказа</h2>
-    <form method="post">
+
+    <form method="post" id="checkout-form">
         {% csrf_token %}
+        
         <div class="mb-3">
             <label for="address" class="form-label">Адрес доставки</label>
-            <textarea name="address" class="form-control" id="address" rows="3" required></textarea>
+            <textarea name="address" class="form-control" id="address" rows="3" required>{{ form.address.value }}</textarea>
         </div>
+        
         <div class="mb-3">
             <label for="delivery_method" class="form-label">Способ доставки</label>
-            <select name="delivery_method" class="form-select" required>
-                <option value="standard">Обычная доставка</option>
-                <option value="express">Экспресс доставка</option>
+            <select name="delivery_method" id="delivery_method" class="form-select" required>
+                <option value="standard" {% if delivery_method == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
+                <option value="express" {% if delivery_method == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
             </select>
         </div>
+
+        <!-- Отображаем итоговую сумму с учетом доставки -->
+        <h4>Итого за товары: {{ total_price }} ₽</h4>
+        <h4><strong>Общая сумма: {{ total }} ₽</strong></h4>
+
         <button type="submit" class="btn btn-success">Подтвердить заказ</button>
     </form>
 </div>
+
+<script>
+    // Отправка AJAX-запроса при изменении метода доставки
+    document.getElementById('delivery_method').addEventListener('change', function() {
+        var form = document.getElementById('checkout-form');
+        var formData = new FormData(form);
+        
+        // Убедитесь, что отправляется данные формы
+        formData.append('delivery_method', this.value);
+        
+        fetch("{% url 'orders:checkout' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest', // Указываем, что это AJAX запрос
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Обновляем общую сумму и стоимость доставки
+            document.querySelector('h4 strong').textContent = `Общая сумма: ${data.total} ₽`;
+            document.querySelector('h4:nth-child(2)').textContent = `Стоимость доставки: ${data.delivery_cost} ₽`;
+            document.querySelector('h4:nth-child(1)').textContent = `Итого за товары: ${data.total_price} ₽`;
+        })
+        .catch(error => console.log(error));
+    });
+</script>
+
 {% endblock %}
