@@ -39,9 +39,9 @@
                     {% for order in orders %}
                     <tr>
                         <td>{{ order.id }}</td>
-                        <td>{{ order.created_at }}</td>
-                        <td>{{ order.total_price }}</td>
-                        <td>{{ order.status }}</td>
+                        <td>{{ order.created_at|date:"d M Y, H:i" }}</td>  <!-- Форматируем дату -->
+                        <td>{{ order.total_price|floatformat:2 }} ₽</td>  <!-- Форматируем цену -->
+                        <td>{{ order.get_status_display }}</td>  <!-- Получаем текстовое значение статуса -->
                     </tr>
                     {% empty %}
                     <tr>

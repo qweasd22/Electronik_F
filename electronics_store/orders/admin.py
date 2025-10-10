@@ -8,23 +8,64 @@ class CartItemAdmin(admin.ModelAdmin):
 
 @admin.register(OrderItem)
 class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'product', 'quantity', 'total_price')
-    search_fields = ('order__id', 'product__name')
+    list_display = ('product', 'quantity', 'price_at_purchase', 'total_price')
 
+    def total_price(self, obj):
+        return obj.total_price  # Используйте метод total_price
+    total_price.short_description = 'Общая цена'
+
+    def save_model(self, request, obj, form, change):
+        if obj.quantity is None:
+            obj.quantity = 1  # Значение по умолчанию
+        if obj.price_at_purchase is None:
+            obj.price_at_purchase = 0  # Значение по умолчанию
+
+        super().save_model(request, obj, form, change)
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
-    readonly_fields = ('product', 'quantity', 'total_price')
     extra = 0
+    fields = ('product', 'quantity', 'price_at_purchase', 'total_price')
+    readonly_fields = ('total_price',)
 
-@admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'created_at', 'delivery_method', 'is_paid', 'total_price')
-    list_filter = ('is_paid', 'delivery_method', 'created_at')
-    search_fields = ('user__username', 'id')
+    # Список отображаемых полей на главной странице заказов
+    list_display = ('id', 'user', 'created_at', 'status', 'is_paid', 'total_price', 'delivery_method', 'address')
+    
+    # Фильтры для поиска
+    list_filter = ('status', 'is_paid', 'delivery_method')
+    
+    # Поиск по полям
+    search_fields = ('user__username', 'address')
+    
+    # Сортировка заказов по дате
+    ordering = ('-created_at',)
+    
+    # Включаем возможность редактировать товары в заказе
     inlines = [OrderItemInline]
-    actions = ['mark_as_paid']
 
-    def mark_as_paid(self, request, queryset):
-        queryset.update(is_paid=True)
-        self.message_user(request, "Выбранные заказы отмечены как оплаченные.")
-    mark_as_paid.short_description = "Отметить выбранные заказы как оплаченные"
+    # Параметры для редактирования заказов
+    fields = ('user', 'created_at', 'status', 'is_paid', 'address', 'delivery_method')
+    
+    # Указываем, что поле created_at только для чтения
+    readonly_fields = ('created_at',)  
+
+    # Сохранение модели, в случае нового заказа устанавливаем статус "processing"
+    def save_model(self, request, obj, form, change):
+        if not change:  # Если это новый заказ
+            obj.status = 'processing'  # Устанавливаем статус по умолчанию
+        super().save_model(request, obj, form, change)
+
+admin.site.register(Order, OrderAdmin)
+
+
+from django.contrib import admin
+from .models import SaleEvent
+
+class SaleEventAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action', 'order_id', 'product', 'quantity', 'total_price', 'timestamp')
+    list_filter = ('action', 'timestamp', 'user')
+    search_fields = ('user__username', 'product__name', 'order_id')
+
+admin.site.register(SaleEvent, SaleEventAdmin)
+
+

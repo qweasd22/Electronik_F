@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, CustomUserChangeForm
+from orders.models import Order
 
 def signup(request):
     if request.method == 'POST':
@@ -24,5 +25,8 @@ def profile(request):
             return redirect('accounts:profile')
     else:
         form = CustomUserChangeForm(instance=request.user)
-    orders = request.user.orders.all() if hasattr(request.user, 'orders') else []
+
+    # Получаем все заказы текущего пользователя
+    orders = Order.objects.filter(user=request.user)
+
     return render(request, 'accounts/profile.html', {'form': form, 'orders': orders})

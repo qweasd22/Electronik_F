@@ -12,6 +12,7 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
 class Brand(models.Model):
     name = models.CharField("Бренд", max_length=100, unique=True)
 
@@ -21,6 +22,7 @@ class Brand(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Product(models.Model):
     name = models.CharField("Название товара", max_length=200)
@@ -50,6 +52,7 @@ class Product(models.Model):
             return round(sum([rating.stars for rating in ratings]) / len(ratings), 1)
         return 0
 
+
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, verbose_name="Товар", related_name='images', on_delete=models.CASCADE)
     image = models.ImageField("Изображение", upload_to='product_images/')
@@ -61,6 +64,7 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"{self.product.name} - {self.id}"
+
 
 class Review(models.Model):
     product = models.ForeignKey(Product, verbose_name="Товар", related_name='reviews', on_delete=models.CASCADE)
@@ -75,6 +79,7 @@ class Review(models.Model):
 
     def __str__(self):
         return f"Отзыв от {self.user.username} на {self.product.name}"
+
 
 class Rating(models.Model):
     product = models.ForeignKey(Product, verbose_name="Товар", related_name='ratings', on_delete=models.CASCADE)
