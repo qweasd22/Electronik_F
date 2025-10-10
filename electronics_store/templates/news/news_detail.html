@@ -1,0 +1,14 @@
+{% extends 'base_generic.html' %}
+{%load static %}
+{% block content %}
+    <div class="news-detail">
+        <h1>{{ news.title }}</h1>
+        <p><strong>Дата публикации:</strong> {{ news.published_at|date:"d M Y" }}</p>
+        {% if news.image %}
+            <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
+        {% endif %}
+        <div class="news-content">
+            <p>{{ news.content }}</p>
+        </div>
+    </div>
+{% endblock %}

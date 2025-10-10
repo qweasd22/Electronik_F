@@ -10,6 +10,7 @@ urlpatterns = [
     path('products/', include('products.urls', namespace='products')),  # наш каталог
     path('orders/', include('orders.urls', namespace='orders')),
     path('', views.index, name='home'),
+    path('blog/', include('blog.urls', namespace='blog')),
     
     
 ]

@@ -77,18 +77,6 @@
             </div>
         </div>
     </div>
-    {% else %}
-    <div class="row mt-5">
-        <div class="col-md-12 mb-4">
-            <div class="card shadow-sm p-4 border-0">
-                <h3 class="fw-bold mb-3">Добро пожаловать, {{ user.username }}!</h3>
-                <p>Вы уже залогинены, продолжайте покупки или посетите свой профиль.</p>
-                <a href="{% url 'accounts:profile' %}" class="btn btn-primary w-100">
-                    Перейти в профиль
-                </a>
-            </div>
-        </div>
-    </div>
     {% endif %}
 
 </div>

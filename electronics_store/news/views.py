@@ -1,3 +1,6 @@
+from django.shortcuts import render
+
+# Create your views here.
 from django.shortcuts import render, get_object_or_404
 from .models import News, Category
 
@@ -10,7 +13,7 @@ def news_list(request):
         news = News.objects.filter(is_published=True)
     
     categories = Category.objects.all()  # Для фильтрации
-    return render(request, 'blog/news_list.html', {
+    return render(request, 'news/news_list.html', {
         'news': news,
         'categories': categories,
         'selected_category': category_filter
@@ -19,4 +22,4 @@ def news_list(request):
 def news_detail(request, pk):
     """Отображает подробную новость"""
     news_item = get_object_or_404(News, pk=pk, is_published=True)
-    return render(request, 'blog/news_detail.html', {'news': news_item})
+    return render(request, 'news/news_detail.html', {'news': news_item})

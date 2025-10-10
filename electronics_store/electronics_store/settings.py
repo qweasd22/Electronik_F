@@ -43,7 +43,7 @@ INSTALLED_APPS = [
     'accounts',
     'products',
     'orders',
-    'blog',
+    'news',
     'promotions',
 
     # Дополнительные пакеты
