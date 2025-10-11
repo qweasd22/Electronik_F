@@ -8,19 +8,98 @@
             <h2 class="card-title text-center mb-4 fw-bold text-primary">Создать аккаунт</h2>
             <form method="post" novalidate>
                 {% csrf_token %}
-                {% for field in form %}
+
+                <!-- Поле для ввода Email -->
                 <div class="form-floating mb-3">
-                    {{ field }}
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {% for error in field.errors %}
-                    <div class="text-danger small mt-1">{{ error }}</div>
-                    {% endfor %}
+                    {{ form.email }}
+                    <label for="{{ form.email.id_for_label }}">Электронная почта</label>
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.email.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
-                {% endfor %}
+
+                <!-- Поле для ввода Имени -->
+                <div class="form-floating mb-3">
+                    {{ form.first_name }}
+                    <label for="{{ form.first_name.id_for_label }}">Имя</label>
+                    {% if form.first_name.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.first_name.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле для ввода Фамилии -->
+                <div class="form-floating mb-3">
+                    {{ form.last_name }}
+                    <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+                    {% if form.last_name.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.last_name.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-floating mb-3">
+                    {{ form.username }}
+                    <label for="{{ form.username.id_for_label }}">Логин</label>
+                    {% if form.username.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.username.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                <!-- Поле для ввода Номера телефона -->
+                <div class="form-floating mb-3">
+                    <input type="tel" onkeyup="this.value = this.value.replace(/[^\d]/g,'');" name="phone_number" id="id_phone_number" class="form-control" placeholder="Номер телефона" maxlength="11" inputmode="numeric" required>
+                    <label for="id_phone_number">Номер телефона</label>
+                    {% if form.phone_number.errors %}
+                        <div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле для ввода Пароля -->
+                <div class="form-floating mb-3">
+                    {{ form.password1 }}
+                    <label for="{{ form.password1.id_for_label }}">Пароль</label>
+                    {% if form.password1.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.password1.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Поле для повторного ввода пароля -->
+                <div class="form-floating mb-3">
+                    {{ form.password2 }}
+                    <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
+                    {% if form.password2.errors %}
+                        <div class="text-danger small mt-1">
+                            {% for error in form.password2.errors %}
+                                <div>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Кнопка для отправки формы -->
                 <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
                     <i class="bi bi-person-plus-fill me-2"></i> Зарегистрироваться
                 </button>
             </form>
+
             <p class="text-center mt-3 small">
                 Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a>
             </p>
@@ -28,3 +107,21 @@
     </div>
 </div>
 {% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var phoneField = document.getElementById('id_phone_number');
+        
+        if (phoneField) {
+            phoneField.addEventListener('input', function(e) {
+                // Убираем все символы, которые не являются цифрами
+                phoneField.value = phoneField.value.replace(/[^0-9]/g, '');
+
+                // Ограничиваем длину до 11 символов
+                if (phoneField.value.length > 11) {
+                    phoneField.value = phoneField.value.slice(0, 11);
+                }
+            });
+        }
+    });
+</script>
