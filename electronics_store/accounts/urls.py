@@ -8,10 +8,11 @@ from . import views
 app_name = 'accounts'
 
 urlpatterns = [
-    path('signup/', views.login, name='signup'),
+    path('signup/', views.signup, name='signup'),
     path('login/', views.user_login, name='login'),
     path('accounts/logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('profile/', views.profile, name='profile'),
     path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),  # Отмена заказа
+    
     
 ]

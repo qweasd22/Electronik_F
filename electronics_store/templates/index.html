@@ -15,6 +15,7 @@
         </a>
         
     </div>
+    
     {% else %}
     <div class="jumbotron text-center bg-light p-5 rounded shadow-sm mb-5">
         <h1 class="display-4 fw-bold">Добро пожаловать в Магазин электроники!</h1>
@@ -22,6 +23,28 @@
         <a href="{% url 'products:product_list' %}" class="btn btn-primary btn-lg mt-3 shadow-sm">
             Перейти в каталог
         </a>
+    </div>
+    {% endif %}
+    {% if not user.is_authenticated %}
+    <div class="row mt-5">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-4 border-0">
+                <h3 class="fw-bold mb-3 text-primary">Новый пользователь?</h3>
+                <p>Создайте аккаунт и следите за своими заказами!</p>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-primary w-100">
+                    Зарегистрироваться
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm p-4 border-0">
+                <h3 class="fw-bold mb-3 text-success">Уже есть аккаунт?</h3>
+                <p>Войдите и продолжите покупки.</p>
+                <a href="{% url 'accounts:login' %}" class="btn btn-success w-100">
+                    Войти
+                </a>
+            </div>
+        </div>
     </div>
     {% endif %}
 
@@ -101,29 +124,7 @@
     </div>
     
 
-    <!-- Секция регистрации/входа -->
-    {% if not user.is_authenticated %}
-    <div class="row mt-5">
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm p-4 border-0">
-                <h3 class="fw-bold mb-3 text-primary">Новый пользователь?</h3>
-                <p>Создайте аккаунт и следите за своими заказами!</p>
-                <a href="{% url 'accounts:signup' %}" class="btn btn-primary w-100">
-                    Зарегистрироваться
-                </a>
-            </div>
-        </div>
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm p-4 border-0">
-                <h3 class="fw-bold mb-3 text-success">Уже есть аккаунт?</h3>
-                <p>Войдите и продолжите покупки.</p>
-                <a href="{% url 'accounts:login' %}" class="btn btn-success w-100">
-                    Войти
-                </a>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+    
 
 </div>
 {% endblock %}

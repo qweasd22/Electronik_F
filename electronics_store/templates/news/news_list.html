@@ -17,7 +17,7 @@
     <div class="news-list">
         {% for news_item in news %}
             <div class="news-item">
-                <h2><a href="{% url 'news:news_detail' pk=news_item.id %}">{{ news_item.title }}</a></h2>
+                <h2>{{ news_item.title }}</h2>
                 <p>{{ news_item.summary }}</p>
                 <p><strong>Дата публикации:</strong> {{ news_item.published_at|date:"d M Y" }}</p>
                 {% if news_item.image %}

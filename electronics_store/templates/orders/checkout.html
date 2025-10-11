@@ -1,6 +1,7 @@
 {% extends 'base_generic.html' %}
 {% load custom_filters %}
 
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Оформление заказа</h2>
@@ -34,7 +35,7 @@
                             <br><small>Цена со скидкой: {{ item.product.get_discounted_price }} ₽</small>
                         {% endif %}
                     </div>
-                    <span class="badge bg-info text-dark">₽  {{ item.product.get_discounted_price|multiply:item.quantity }} </span>
+                    <span class="badge bg-info text-dark">₽ {{ item.product.get_discounted_price|multiply:item.quantity }}</span>
 
                 </li>
             {% endfor %}
@@ -54,6 +55,7 @@
 </div>
 
 <script>
+    
     // Отправка AJAX-запроса при изменении метода доставки
     document.getElementById('delivery_method').addEventListener('change', function() {
         var form = document.getElementById('checkout-form');
@@ -78,6 +80,8 @@
         })
         .catch(error => console.log(error));
     });
+
+    
 </script>
 
 
