@@ -4,8 +4,9 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm, CustomUserChangeForm
 from orders.models import Order
+from django.contrib import messages
 from accounts.models import CustomUser
-
+from django.contrib.auth.forms import AuthenticationForm
 def signup(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -32,6 +33,32 @@ def signup(request):
 
     return render(request, 'accounts/signup.html', {'form': form})
 
+def user_login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            # Получаем логин и пароль из формы
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+
+            # Пытаемся аутентифицировать пользователя
+            user = authenticate(username=username, password=password)
+
+            if user is not None:
+                # Если аутентификация прошла успешно, логиним пользователя
+                login(request, user)
+                return redirect('home')  # или куда направить после входа
+            else:
+                # Если пользователь не найден или пароль неверный
+                messages.error(request, "Неверный логин или пароль.")
+        else:
+            # Если форма не валидна
+            messages.error(request, "Неверный логин или пароль.")
+
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'accounts/login.html', {'form': form})
 @login_required
 def profile(request):
     if request.method == 'POST':
