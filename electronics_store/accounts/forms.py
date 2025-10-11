@@ -1,12 +1,12 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import CustomUser
-
+from django.core.exceptions import ValidationError
 # Форма регистрации
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
-        fields = ('email', 'first_name','phone_number', 'last_name', 'password1', 'password2')
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'username', 'password1', 'password2')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -15,6 +15,13 @@ class CustomUserCreationForm(UserCreationForm):
                 'class': 'form-control',
                 'placeholder': field.label
             })
+
+    # Проверка уникальности имени пользователя
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        if CustomUser.objects.filter(username=username).exists():
+            raise ValidationError("Пользователь с таким именем уже существует. Пожалуйста, выберите другое имя.")
+        return username
 
 # Форма входа
 class CustomLoginForm(AuthenticationForm):

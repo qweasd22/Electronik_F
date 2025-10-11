@@ -1,6 +1,7 @@
 {% extends 'base_generic.html' %}
 {% load custom_filters %}
 
+
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-center mb-4">Оформление заказа</h2>
@@ -34,7 +35,7 @@
                             <br><small>Цена со скидкой: {{ item.product.get_discounted_price }} ₽</small>
                         {% endif %}
                     </div>
-                    <span class="badge bg-info text-dark">₽  {{ item.product.get_discounted_price|multiply:item.quantity }} </span>
+                    <span class="badge bg-info text-dark">₽ {{ item.product.get_discounted_price|multiply:item.quantity }}</span>
 
                 </li>
             {% endfor %}
@@ -43,12 +44,9 @@
         <h4 class="mt-4">Итого:</h4>
         <div class="row">
             <div class="col-md-6">
-                <p>Стоимость товаров без скидки: <strong>{{ total_price_without_discount }} ₽</strong></p>
-                <p>Стоимость товаров со скидкой: <strong>{{ total_price_with_discount }} ₽</strong></p>
-            </div>
-            <div class="col-md-6">
                 <p>Доставка: <span id="delivery-cost">{{ delivery_cost }} ₽</span></p>
-                
+                <p>Итого без скидки: <strong id="total-without-discount">{{ total_without_discount }} ₽</strong></p>
+                <p>Итого со скидкой: <strong id="total-with-discount">{{ total_with_discount }} ₽</strong></p>
             </div>
         </div>
 
@@ -57,6 +55,7 @@
 </div>
 
 <script>
+    
     // Отправка AJAX-запроса при изменении метода доставки
     document.getElementById('delivery_method').addEventListener('change', function() {
         var form = document.getElementById('checkout-form');
@@ -81,6 +80,9 @@
         })
         .catch(error => console.log(error));
     });
+
+    
 </script>
+
 
 {% endblock %}

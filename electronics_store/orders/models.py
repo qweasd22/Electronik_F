@@ -49,6 +49,7 @@ class Order(models.Model):
     delivery_method = models.CharField("Способ доставки", max_length=50, choices=DELIVERY_CHOICES)
     is_paid = models.BooleanField("Оплачен", default=False)
     status = models.CharField("Статус заказа", max_length=20, choices=STATUS_CHOICES, default='processing')
+    
 
     class Meta:
         verbose_name = "Заказ"

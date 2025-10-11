@@ -6,8 +6,20 @@
     <div class="col-md-6 col-lg-5">
         <div class="card shadow-lg p-4 mb-4 border-0">
             <h2 class="card-title text-center mb-4 fw-bold text-primary">Вход в аккаунт</h2>
+
+            <!-- Вывод сообщений об ошибках -->
+            {% if messages %}
+                <div class="mb-3">
+                    {% for message in messages %}
+                        <div class="alert alert-danger">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             <form method="post" novalidate>
                 {% csrf_token %}
+                
+                <!-- Обработка полей формы -->
                 {% for field in form %}
                     <div class="form-floating mb-3">
                         <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.value|default:'' }}" placeholder="{{ field.label }}">
@@ -17,10 +29,12 @@
                         {% endfor %}
                     </div>
                 {% endfor %}
+
                 <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
                     <i class="bi bi-box-arrow-in-right me-2"></i> Войти
                 </button>
             </form>
+
             <p class="text-center mt-3 small">
                 Нет аккаунта? <a href="{% url 'accounts:signup' %}">Зарегистрироваться</a>
             </p>
