@@ -3,36 +3,62 @@ from .models import Product, Review, Rating
 from .forms import ProductFilterForm, ReviewForm, RatingForm
 from django.contrib.auth.decorators import login_required
 
+from django.shortcuts import render
+from .models import Product, Category, Brand
 from orders.models import CartItem
 
 def product_list(request):
-    form = ProductFilterForm(request.GET)
+    # Получаем данные из GET-запроса
+    category_filter = request.GET.get('category')
+    brand_filter = request.GET.get('brand')
+    min_price_filter = request.GET.get('min_price')
+    max_price_filter = request.GET.get('max_price')
+    search_filter = request.GET.get('search')
+
+    # Начальный запрос для всех товаров
     products = Product.objects.all()
 
-    if form.is_valid():
-        category = form.cleaned_data.get('category')
-        brand = form.cleaned_data.get('brand')
-        min_price = form.cleaned_data.get('min_price')
-        max_price = form.cleaned_data.get('max_price')
-        search = form.cleaned_data.get('search')
+    # Фильтрация по категории
+    if category_filter:
+        products = products.filter(category__id=category_filter)
 
-        if category:
-            products = products.filter(category=category)
-        if brand:
-            products = products.filter(brand=brand)
-        if min_price is not None:
-            products = products.filter(price__gte=min_price)
-        if max_price is not None:
-            products = products.filter(price__lte=max_price)
-        if search:
-            products = products.filter(name__icontains=search)
+    # Фильтрация по бренду
+    if brand_filter:
+        products = products.filter(brand__id=brand_filter)
 
-    cart_items = {}
-    if request.user.is_authenticated:
-        user_cart = CartItem.objects.filter(user=request.user)
-        cart_items = {item.product.id: item.quantity for item in user_cart}
+    # Фильтрация по минимальной цене
+    if min_price_filter:
+        try:
+            products = products.filter(price__gte=float(min_price_filter))
+        except ValueError:
+            pass  # Если не удалось преобразовать в число, не применяем фильтр
 
-    return render(request, 'products/product_list.html', {'products': products, 'form': form, 'cart_items': cart_items})
+    # Фильтрация по максимальной цене
+    if max_price_filter:
+        try:
+            products = products.filter(price__lte=float(max_price_filter))
+        except ValueError:
+            pass  # Если не удалось преобразовать в число, не применяем фильтр
+
+    # Фильтрация по названию товара
+    if search_filter and search_filter != 'None':
+        products = products.filter(name__icontains=search_filter)
+
+    # Получаем список категорий и брендов для фильтрации в форме
+    categories = Category.objects.all()
+    brands = Brand.objects.all()
+
+    return render(request, 'products/product_list.html', {
+        'products': products,
+        'categories': categories,
+        'brands': brands,
+        'selected_category': category_filter,
+        'selected_brand': brand_filter,
+        'selected_min_price': min_price_filter,
+        'selected_max_price': max_price_filter,
+        'selected_search': search_filter,
+    })
+
 
 
 def product_detail(request, id):

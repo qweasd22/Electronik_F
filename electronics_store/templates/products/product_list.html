@@ -2,6 +2,48 @@
 {% load static %}
 {% block content %}
 <div class="container mt-5">
+    <form method="GET" action="{% url 'products:product_list' %}">
+    <div class="row">
+        <div class="col-md-3">
+            <label for="category">Категория</label>
+            <select name="category" id="category" class="form-control">
+                <option value="">Все категории</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <label for="brand">Бренд</label>
+            <select name="brand" id="brand" class="form-control">
+                <option value="">Все бренды</option>
+                {% for brand in brands %}
+                    <option value="{{ brand.id }}" {% if brand.id == selected_brand %}selected{% endif %}>{{ brand.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label for="min_price">Минимальная цена</label>
+            <input type="number" name="min_price" id="min_price" class="form-control" value="{{ selected_min_price }}">
+        </div>
+
+        <div class="col-md-2">
+            <label for="max_price">Максимальная цена</label>
+            <input type="number" name="max_price" id="max_price" class="form-control" value="{{ selected_max_price }}">
+        </div>
+
+        <div class="col-md-2">
+            <label for="search">Поиск</label>
+            <input type="text" name="search" id="search" class="form-control" value="{{ selected_search }}">
+        </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Фильтровать</button>
+</form>
+
+
     <div class="row">
         {% for product in products %}
         <div class="col-md-4 mb-4">
@@ -17,25 +59,12 @@
                     <p class="mb-2">Средняя оценка: {{ product.average_rating }} ⭐</p>
                     <div class="mt-auto">
                         <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary w-100 mb-2">Подробнее</a>
-                        {% if user.is_authenticated %}
-                            {% if cart_items.product.id %}
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success">В корзине: {{ cart_items.product.id }}</span>
-                                    <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-sm btn-outline-success">+</a>
-                                </div>
-                            {% else %}
-                                <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-lg mt-3 shadow-sm">В корзину</button>
-                                </form>
-                            {% endif %}
-                        {% else %}
-                            <p class="text-muted text-center">Войдите, чтобы добавить в корзину</p>
-                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
+        {% empty %}
+        <p>Товары не найдены по заданным фильтрам.</p>
         {% endfor %}
     </div>
 </div>
