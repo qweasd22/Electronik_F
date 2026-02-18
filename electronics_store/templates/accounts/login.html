@@ -2,43 +2,108 @@
 {% block title %}Вход{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-lg p-4 mb-4 border-0">
-            <h2 class="card-title text-center mb-4 fw-bold text-primary">Вход в аккаунт</h2>
+<div class="login-container position-relative py-5">
 
-            <!-- Вывод сообщений об ошибках -->
-            {% if messages %}
-                <div class="mb-3">
-                    {% for message in messages %}
-                        <div class="alert alert-danger">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
+    <!-- Декоративные фигуры -->
+    <div class="decor-shape shape-top-left"></div>
+    <div class="decor-shape shape-bottom-right"></div>
 
-            <form method="post" novalidate>
-                {% csrf_token %}
-                
-                <!-- Обработка полей формы -->
-                {% for field in form %}
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg p-5 border-0 rounded-4 login-card">
+                <h2 class="card-title text-center mb-4 fw-bold text-primary">Вход в аккаунт</h2>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
                     <div class="form-floating mb-3">
-                        <input type="{{ field.type }}" name="{{ field.name }}" id="{{ field.id_for_label }}" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.value|default:'' }}" placeholder="{{ field.label }}">
+                        <input type="{{ field.field.widget.input_type }}" name="{{ field.html_name }}" id="{{ field.id_for_label }}"
+                               class="form-control {% if field.errors %}is-invalid{% endif %}"
+                               value="{{ field.value|default:'' }}" placeholder="{{ field.label }}">
                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
                         {% for error in field.errors %}
                             <div class="text-danger small mt-1">{{ error }}</div>
                         {% endfor %}
                     </div>
-                {% endfor %}
+                    {% endfor %}
 
-                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Войти
-                </button>
-            </form>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Войти
+                    </button>
+                </form>
 
-            <p class="text-center mt-3 small">
-                Нет аккаунта? <a href="{% url 'accounts:signup' %}">Зарегистрироваться</a>
-            </p>
+                <p class="text-center mt-3 small">
+                    Нет аккаунта? <a href="{% url 'accounts:signup' %}">Зарегистрироваться</a>
+                </p>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.login-container {
+    position: relative;
+    background-color: #f8f9fa;
+    min-height: 75vh;
+}
+
+/* --- Карточка формы --- */
+.login-card {
+    background: linear-gradient(135deg, #ffffff, #f1f5f9);
+    box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.login-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1rem 2rem rgba(0,0,0,0.15);
+}
+
+/* --- Поля формы --- */
+.form-floating input, .form-floating select {
+    border-radius: 0.75rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.05);
+}
+
+/* --- Кнопка --- */
+.btn-primary {
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: transform 0.2s, background 0.2s;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+/* --- Декоративные фигуры --- */
+.decor-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    z-index: 0;
+}
+.shape-top-left {
+    width: 120px;
+    height: 120px;
+    top: -20px;
+    left: -20px;
+    background: linear-gradient(135deg, #007bff, #00d4ff);
+}
+.shape-bottom-right {
+    width: 180px;
+    height: 180px;
+    bottom: -40px;
+    right: -40px;
+    background: linear-gradient(135deg, #6f42c1, #d63384);
+}
+
+/* --- Адаптивность --- */
+@media(max-width: 768px) {
+    .login-card {
+        padding: 2rem;
+    }
+}
+</style>
 {% endblock %}

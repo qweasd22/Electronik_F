@@ -1,88 +1,153 @@
 {% extends 'base_generic.html' %}
 {% load custom_filters %}
 
+{% block title %}Оформление заказа{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center mb-4">Оформление заказа</h2>
-    <form method="post" id="checkout-form">
-        {% csrf_token %}
+<div class="checkout-container position-relative py-5">
 
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label for="address" class="form-label">Адрес доставки</label>
-                <textarea id="address" name="address" class="form-control" placeholder="Введите ваш адрес" required></textarea>
+    <!-- Декоративные фигуры -->
+    <div class="decor-shape shape-top-left"></div>
+    <div class="decor-shape shape-bottom-right"></div>
+
+    <div class="container">
+        <h2 class="text-center mb-4 fw-bold text-primary">Оформление заказа</h2>
+
+        <form method="post" id="checkout-form">
+            {% csrf_token %}
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <label for="address" class="form-label fw-semibold">Адрес доставки</label>
+                    <textarea id="address" name="address" class="form-control rounded-3 shadow-sm" placeholder="Введите ваш адрес" required></textarea>
+                </div>
+                <div class="col-md-6">
+                    <label for="delivery_method" class="form-label fw-semibold">Способ доставки</label>
+                    <select name="delivery_method" id="delivery_method" class="form-select rounded-3 shadow-sm" required>
+                        <option value="standard" {% if delivery_method == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
+                        <option value="express" {% if delivery_method == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="col-md-6">
-                <label for="delivery_method" class="form-label">Способ доставки</label>
-                <select name="delivery_method" id="delivery_method" class="form-select" required>
-                    <option value="standard" {% if delivery_method == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
-                    <option value="express" {% if delivery_method == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
-                </select>
-            </div>
-        </div>
-
-        <h4 class="mt-4">Ваш заказ</h4>
-        <ul class="list-group mb-4">
-            {% for item in cart_items %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
+            <h4 class="fw-bold mb-3">Ваш заказ</h4>
+            <div class="order-items mb-4">
+                {% for item in cart_items %}
+                <div class="card order-item-card shadow-sm rounded-4 p-3 mb-3 d-flex justify-content-between align-items-center flex-wrap">
                     <div>
-                        <strong>{{ item.product.name }}</strong> ({{ item.quantity }})
-                        <br>
-                        <small>Цена без скидки: {{ item.product.price }} ₽</small>
+                        <h5 class="fw-bold mb-1">{{ item.product.name }} ({{ item.quantity }})</h5>
+                        <p class="mb-0 text-muted">Цена без скидки: {{ item.product.price }} ₽</p>
                         {% if item.product.get_discounted_price != item.product.price %}
-                            <br><small>Цена со скидкой: {{ item.product.get_discounted_price }} ₽</small>
+                        <p class="mb-0 text-success">Цена со скидкой: {{ item.product.get_discounted_price }} ₽</p>
                         {% endif %}
                     </div>
-                    <span class="badge bg-info text-dark">₽ {{ item.product.get_discounted_price|multiply:item.quantity }}</span>
-
-                </li>
-            {% endfor %}
-        </ul>
-
-        <h4 class="mt-4">Итого:</h4>
-        <div class="row">
-            <div class="col-md-6">
-                <p>Доставка: <span id="delivery-cost">{{ delivery_cost }} ₽</span></p>
-                <p>Итого без скидки: <strong id="total-without-discount">{{ total_without_discount }} ₽</strong></p>
-                <p>Итого со скидкой: <strong id="total-with-discount">{{ total_with_discount }} ₽</strong></p>
+                    <span class="badge bg-info text-dark fs-5">₽ {{ item.product.get_discounted_price|multiply:item.quantity }}</span>
+                </div>
+                {% endfor %}
             </div>
-        </div>
 
-        <button type="submit" class="btn btn-primary w-100">Оформить заказ</button>
-    </form>
+            <h4 class="fw-bold">Итого:</h4>
+            <div class="card summary-card shadow-sm rounded-4 p-4 mb-4">
+                <p class="mb-2">Доставка: <span id="delivery-cost" class="fw-semibold">{{ delivery_cost }} ₽</span></p>
+                <p class="mb-2">Итого без скидки: <span id="total-without-discount" class="fw-semibold">{{ total_without_discount }} ₽</span></p>
+                <p class="mb-0">Итого со скидкой: <span id="total-with-discount" class="fw-bold text-primary">{{ total_with_discount }} ₽</span></p>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg w-100">Оформить заказ</button>
+        </form>
+    </div>
 </div>
 
 <script>
-    
-    // Отправка AJAX-запроса при изменении метода доставки
-    document.getElementById('delivery_method').addEventListener('change', function() {
-        var form = document.getElementById('checkout-form');
-        var formData = new FormData(form);
+document.getElementById('delivery_method').addEventListener('change', function() {
+    var form = document.getElementById('checkout-form');
+    var formData = new FormData(form);
+    formData.append('delivery_method', this.value);
 
-        // Убедитесь, что отправляется данные формы
-        formData.append('delivery_method', this.value);
-
-        fetch("{% url 'orders:checkout' %}", {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest', // Указываем, что это AJAX запрос
-            },
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Обновляем общую сумму и стоимость доставки
-            document.getElementById('delivery-cost').textContent = `${data.delivery_cost} ₽`;
-            document.getElementById('total-without-discount').textContent = `${data.total_without_discount} ₽`;
-            document.getElementById('total-with-discount').textContent = `${data.total_with_discount} ₽`;
-        })
-        .catch(error => console.log(error));
-    });
-
-    
+    fetch("{% url 'orders:checkout' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {'X-Requested-With': 'XMLHttpRequest'},
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('delivery-cost').textContent = `${data.delivery_cost} ₽`;
+        document.getElementById('total-without-discount').textContent = `${data.total_without_discount} ₽`;
+        document.getElementById('total-with-discount').textContent = `${data.total_with_discount} ₽`;
+    })
+    .catch(error => console.log(error));
+});
 </script>
+{% endblock %}
 
+{% block extra_css %}
+<style>
+.checkout-container {
+    position: relative;
+    background-color: #f8f9fa;
+    min-height: 75vh;
+}
 
+/* --- Декоративные фигуры --- */
+.decor-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    z-index: 0;
+}
+.shape-top-left {
+    width: 120px;
+    height: 120px;
+    top: -20px;
+    left: -20px;
+    background: linear-gradient(135deg, #007bff, #00d4ff);
+}
+.shape-bottom-right {
+    width: 180px;
+    height: 180px;
+    bottom: -40px;
+    right: -40px;
+    background: linear-gradient(135deg, #6f42c1, #d63384);
+}
+
+/* --- Карточки товаров --- */
+.order-item-card {
+    background: linear-gradient(135deg, #ffffff, #f1f5f9);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.order-item-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.12);
+}
+
+/* --- Сводка --- */
+.summary-card {
+    background: #ffffff;
+    border-radius: 1rem;
+    padding: 1rem 1.5rem;
+}
+
+/* --- Форма --- */
+textarea.form-control, select.form-select {
+    border-radius: 0.75rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.05);
+}
+
+/* --- Кнопка --- */
+.btn-primary {
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.2s;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+/* --- Адаптив --- */
+@media(max-width: 768px) {
+    .order-item-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+</style>
 {% endblock %}

@@ -1,0 +1,112 @@
+.about-page {
+    position: relative;
+    padding: 50px 20px;
+    background-color: #f9f9fb;
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* Хедер */
+.about-header {
+    position: relative;
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(135deg, #6a8cff 0%, #b0c4ff 100%);
+    color: #fff;
+    border-radius: 0 0 30px 30px;
+    margin-bottom: 40px;
+}
+
+.about-header h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.about-header p.subtitle {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Декоративная фигура в хедере */
+.header-decor {
+    position: absolute;
+    bottom: -20px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+}
+
+/* Карточки информации */
+.info-card {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+/* Анимация при загрузке */
+.animated-card {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s forwards;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Карта */
+.map-wrapper {
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Иконки контактов */
+.contact-list li {
+    font-size: 1rem;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+}
+
+/* Декоративные фигуры по бокам */
+.decor-left,
+.decor-right {
+    position: absolute;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(200, 220, 255, 0.3);
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.decor-left {
+    left: -50px;
+    transform: translateY(-50%);
+}
+
+.decor-right {
+    right: -50px;
+    transform: translateY(-50%);
+}
+
+/* Кнопки */
+.btn-primary {
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+}

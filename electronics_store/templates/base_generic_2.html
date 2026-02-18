@@ -13,6 +13,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Кастомные стили -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Стили для домашней страницы -->
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
 </head>
 <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa;">
 
@@ -73,8 +75,7 @@
                 <li class="nav-item"><a class="nav-link" href="{% url 'news:news_list' %}">Новости</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'products:product_list' %}">Товары</a></li>
                 <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">Контакты</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Войти</a></li>
-                <li class="nav-item"><a class="nav-link" href="{% url 'accounts:signup' %}">Регистрация</a></li>
+                
 
                 {% endif %}
             </ul>

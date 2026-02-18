@@ -2,126 +2,131 @@
 {% block title %}Регистрация{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6 col-lg-5">
-        <div class="card shadow-lg p-4 mb-4 border-0">
-            <h2 class="card-title text-center mb-4 fw-bold text-primary">Создать аккаунт</h2>
-            <form method="post" novalidate>
-                {% csrf_token %}
+<div class="register-container position-relative py-5">
 
-                <!-- Поле для ввода Email -->
-                <div class="form-floating mb-3">
-                    {{ form.email }}
-                    <label for="{{ form.email.id_for_label }}">Электронная почта</label>
-                    {% if form.email.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.email.errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+    <!-- Декоративные фигуры -->
+    <div class="decor-shape shape-top-left"></div>
+    <div class="decor-shape shape-bottom-right"></div>
 
-                <!-- Поле для ввода Имени -->
-                <div class="form-floating mb-3">
-                    {{ form.first_name }}
-                    <label for="{{ form.first_name.id_for_label }}">Имя</label>
-                    {% if form.first_name.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.first_name.errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Поле для ввода Фамилии -->
-                <div class="form-floating mb-3">
-                    {{ form.last_name }}
-                    <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
-                    {% if form.last_name.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.last_name.errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg p-5 border-0 rounded-4 register-card">
+                <h2 class="card-title text-center mb-4 fw-bold text-primary">Создать аккаунт</h2>
                 
-                <div class="form-floating mb-3">
-                    {{ form.username }}
-                    <label for="{{ form.username.id_for_label }}">Логин</label>
-                    {% if form.username.errors %}
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    {% for field in form %}
+                    <div class="form-floating mb-3">
+                        {{ field }}
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.errors %}
                         <div class="text-danger small mt-1">
-                            {% for error in form.username.errors %}
-                                <div>{{ error }}</div>
+                            {% for error in field.errors %}
+                            <div>{{ error }}</div>
                             {% endfor %}
                         </div>
-                    {% endif %}
-                </div>
-                <!-- Поле для ввода Номера телефона -->
-                <div class="form-floating mb-3">
-                    <input type="tel" onkeyup="this.value = this.value.replace(/[^\d]/g,'');" name="phone_number" id="id_phone_number" class="form-control" placeholder="Номер телефона" maxlength="11" inputmode="numeric" required>
-                    <label for="id_phone_number">Номер телефона</label>
-                    {% if form.phone_number.errors %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+
+                    <!-- Поле для телефона отдельно -->
+                    <div class="form-floating mb-3">
+                        <input type="tel" onkeyup="this.value = this.value.replace(/[^\d]/g,'');" name="phone_number" id="id_phone_number" class="form-control" placeholder="Номер телефона" maxlength="11" inputmode="numeric" required>
+                        <label for="id_phone_number">Номер телефона</label>
+                        {% if form.phone_number.errors %}
                         <div class="text-danger small mt-1">{{ form.phone_number.errors }}</div>
-                    {% endif %}
-                </div>
+                        {% endif %}
+                    </div>
 
-                <!-- Поле для ввода Пароля -->
-                <div class="form-floating mb-3">
-                    {{ form.password1 }}
-                    <label for="{{ form.password1.id_for_label }}">Пароль</label>
-                    {% if form.password1.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.password1.errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
+                        <i class="bi bi-person-plus-fill me-2"></i> Зарегистрироваться
+                    </button>
+                </form>
 
-                <!-- Поле для повторного ввода пароля -->
-                <div class="form-floating mb-3">
-                    {{ form.password2 }}
-                    <label for="{{ form.password2.id_for_label }}">Повторите пароль</label>
-                    {% if form.password2.errors %}
-                        <div class="text-danger small mt-1">
-                            {% for error in form.password2.errors %}
-                                <div>{{ error }}</div>
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <!-- Кнопка для отправки формы -->
-                <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
-                    <i class="bi bi-person-plus-fill me-2"></i> Зарегистрироваться
-                </button>
-            </form>
-
-            <p class="text-center mt-3 small">
-                Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a>
-            </p>
+                <p class="text-center mt-3 small">
+                    Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a>
+                </p>
+            </div>
         </div>
     </div>
 </div>
 {% endblock %}
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var phoneField = document.getElementById('id_phone_number');
-        
-        if (phoneField) {
-            phoneField.addEventListener('input', function(e) {
-                // Убираем все символы, которые не являются цифрами
-                phoneField.value = phoneField.value.replace(/[^0-9]/g, '');
+{% block extra_css %}
+<style>
+.register-container {
+    position: relative;
+    background-color: #f8f9fa;
+    min-height: 75vh;
+}
 
-                // Ограничиваем длину до 11 символов
-                if (phoneField.value.length > 11) {
-                    phoneField.value = phoneField.value.slice(0, 11);
-                }
-            });
-        }
-    });
+/* --- Карточка формы --- */
+.register-card {
+    background: linear-gradient(135deg, #ffffff, #f1f5f9);
+    box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.register-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 1rem 2rem rgba(0,0,0,0.15);
+}
+
+/* --- Поля формы --- */
+.form-floating input, .form-floating select {
+    border-radius: 0.75rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.05);
+}
+
+/* --- Кнопка --- */
+.btn-primary {
+    border-radius: 0.75rem;
+    font-weight: 600;
+    transition: transform 0.2s, background 0.2s;
+}
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
+
+/* --- Декоративные фигуры --- */
+.decor-shape {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.12;
+    z-index: 0;
+}
+.shape-top-left {
+    width: 120px;
+    height: 120px;
+    top: -20px;
+    left: -20px;
+    background: linear-gradient(135deg, #007bff, #00d4ff);
+}
+.shape-bottom-right {
+    width: 180px;
+    height: 180px;
+    bottom: -40px;
+    right: -40px;
+    background: linear-gradient(135deg, #6f42c1, #d63384);
+}
+
+/* --- Адаптивность --- */
+@media(max-width: 768px) {
+    .register-card {
+        padding: 2rem;
+    }
+}
+</style>
+{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var phoneField = document.getElementById('id_phone_number');
+    if (phoneField) {
+        phoneField.addEventListener('input', function(e) {
+            phoneField.value = phoneField.value.replace(/[^0-9]/g, '');
+            if (phoneField.value.length > 11) phoneField.value = phoneField.value.slice(0, 11);
+        });
+    }
+});
 </script>

@@ -1,49 +1,75 @@
 {% extends 'base_generic.html' %}
-{% block title %}Контакты{% endblock %}
+{% load static %}
+{% block title %}О нас{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-    <h1 class="text-center mb-5 fw-bold">Контакты</h1>
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
 
-    <!-- Информация об организации -->
-    <div class="row mb-5">
-        <div class="col-lg-6 mb-4">
-            <h3 class="fw-bold text-primary">О нас</h3>
-            <p class="lead">Мы — надежный поставщик электроники, предлагающий широкий ассортимент товаров для дома, работы и отдыха. Мы стремимся предложить вам только самые качественные и современные устройства по доступным ценам.</p>
-        </div>
+<div class="about-page">
 
-        <div class="col-lg-6">
-            <h3 class="fw-bold text-primary">Контактная информация</h3>
-            <ul class="list-unstyled">
-                <li><strong>Адрес:</strong> ул. Запольная, 60, Курск, 305040</li>
-                <li><strong>Телефон:</strong> +7 (4712) 745-123</li>
+    <!-- Хедер -->
+    <header class="about-header text-center mb-5">
+        <h1>О нашей компании</h1>
+        <p class="subtitle">Качественная электроника и лучший сервис для вас</p>
+        <div class="header-decor"></div>
+    </header>
 
-            </ul>
-        </div>
-    </div>
+    <div class="container">
 
-    <!-- Карта -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <h3 class="fw-bold text-primary">Наша локация</h3>
-            <div class="embed-responsive embed-responsive-16by9">
-                <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor" class="embed-responsive-item" width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+        <!-- Информация об организации -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="info-card p-4 h-100 shadow-sm animated-card">
+                    <h3 class="fw-bold text-primary mb-3">О нас</h3>
+                    <p>Мы — надежный поставщик электроники, предлагающий широкий ассортимент товаров для дома, работы и отдыха. Мы стремимся предложить вам только самые качественные и современные устройства по доступным ценам.</p>
+                </div>
             </div>
-
-        </div>
-    </div>
-
-    <!-- Ссылка на форму обратной связи -->
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h3 class="fw-bold text-primary text-center">Есть вопросы?</h3>
-            <p class="text-center">Мы всегда готовы помочь. Перейдите в форму обратной связи, чтобы задать свой вопрос или оставить отзыв.</p>
-            <div class="text-center">
-                <a href="{% url 'contact' %}" class="btn btn-primary btn-lg shadow-sm">
-                    Оставить сообщение
-                </a>
+            <div class="col-md-6">
+                <div class="info-card p-4 h-100 shadow-sm animated-card">
+                    <h3 class="fw-bold text-primary mb-3">Контактная информация</h3>
+                    <ul class="list-unstyled contact-list mb-0">
+                        <li><i class="bi bi-geo-alt-fill me-2 text-primary"></i> <strong>Адрес:</strong> ул. Запольная, 60, Курск, 305040</li>
+                        <li><i class="bi bi-telephone-fill me-2 text-primary"></i> <strong>Телефон:</strong> +7 (4712) 745-123</li>
+                        <li><i class="bi bi-envelope-fill me-2 text-primary"></i> <strong>Email:</strong> info@example.com</li>
+                    </ul>
+                </div>
             </div>
         </div>
+
+        <!-- Карта -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="info-card shadow-sm p-4 animated-card">
+                    <h3 class="fw-bold text-primary mb-3">Наша локация</h3>
+                    <div class="map-wrapper rounded">
+                        <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
+                            width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ссылка на форму обратной связи -->
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center">
+                <div class="info-card shadow-sm p-4 animated-card">
+                    <h3 class="fw-bold text-primary mb-3">Есть вопросы?</h3>
+                    <p>Мы всегда готовы помочь. Перейдите в форму обратной связи, чтобы задать свой вопрос или оставить отзыв.</p>
+                    <a href="{% url 'contact' %}" class="btn btn-primary btn-lg shadow-sm mt-3">
+                        Оставить сообщение
+                    </a>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <!-- Декоративные фигуры -->
+    <div class="decor-left"></div>
+    <div class="decor-right"></div>
+
 </div>
+
+<!-- Подключаем Bootstrap Icons для иконок -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 {% endblock %}
