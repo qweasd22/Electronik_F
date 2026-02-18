@@ -1,84 +1,138 @@
 {% extends 'base_generic.html' %}
 {% load static %}
 {% load widget_tweaks %}
+
+
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+<div class="products-page">
+
+    <!-- Хедер -->
+    <header class="news-header mb-5">
+        <h1>{{ product.name }}</h1>
+        <p>Подробная информация о продукте</p>
+        <div class="header-decor"></div>
+    </header>
+
+    <div class="row g-4">
+
+        <!-- Галерея изображений -->
         <div class="col-md-5">
-            {% if product.image %}
-            <img src="{{ product.image.url }}" class="img-fluid" alt="{{ product.name }}">
-            {% else %}
-            <img src="{% static 'media/no_image.jpeg' %}" class="img-fluid" alt="Нет изображения">
-            {% endif %}
-        </div>
-        <div class="col-md-7">
-    <h2 class="fw-bold">{{ product.name }}</h2>
-<p class="fw-bold h4">{{ product.price }} ₽</p>
-<p class="mb-2">Средняя оценка: {{ average_rating }} ⭐</p>
-<p>{{ product.description }}</p>
-
-    {% if user.is_authenticated %}
-        <div class="mb-3">
-            {% if quantity_in_cart > 0 %}
-            <!-- Карточка количества товара в корзине -->
-            <div class="card p-2 mb-3 border">
-                <div class="d-flex align-items-center justify-content-between">
-                    <span>В корзине: <strong>{{ quantity_in_cart }}</strong> шт.</span>
-                    <div class="btn-group" role="group" aria-label="Cart controls">
-                        <a href="{% url 'orders:decrease_cart' product.id %}" class="btn btn-outline-secondary">-</a>
-                        <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-outline-secondary">+</a>
-                        <a href="{% url 'orders:remove_from_cart' product.id %}" class="btn btn-danger">Удалить</a>
+            {% if product.images.all %}
+            <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for img in product.images.all %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ img.image.url }}" class="d-block w-100 product-detail-img" alt="{{ product.name }}">
                     </div>
-                    <div><a href="{% url 'orders:cart'  %}" class="btn btn-outline-secondary">Перейти в корзину</a></div>
+                    {% endfor %}
                 </div>
+
+                {% if product.images.count > 1 %}
+                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Назад</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Вперед</span>
+                </button>
+                {% endif %}
             </div>
+
+            {% if product.images.count > 1 %}
+            <!-- Мини-превью -->
+            <div class="d-flex gap-2 flex-wrap justify-content-center">
+                {% for img in product.images.all %}
+                <img src="{{ img.image.url }}" class="product-thumb" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}">
+                {% endfor %}
+            </div>
+            {% endif %}
+
             {% else %}
-            <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-success btn-lg w-100 mb-3">Добавить в корзину</button>
-            </form>
+            <img src="{% static 'media/no_image.jpeg' %}" class="product-detail-img" alt="Нет изображения">
             {% endif %}
         </div>
-    {% else %}
-        <a href="{% url 'accounts:login' %}" class="btn btn-success btn-lg w-100 mb-3">Войдите, чтобы купить</a>
-    {% endif %}
-</div>
 
+        <!-- Информация о товаре -->
+        <div class="col-md-7 d-flex flex-column">
+            <h2 class="product-detail-title">{{ product.name }}</h2>
+            <p class="product-price h4">{{ product.price }} ₽</p>
+            <p class="product-rating">⭐ {{ average_rating }}</p>
+            <p class="product-description">{{ product.description }}</p>
+
+            {% if product.additional_info %}
+            <div class="card mb-3 p-3 shadow-sm additional-info-card">
+                <h5>Дополнительная информация</h5>
+                <p>{{ product.additional_info|linebreaksbr }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Корзина -->
+            {% if user.is_authenticated %}
+                <div class="mt-auto">
+                    {% if quantity_in_cart > 0 %}
+                        <div class="card p-3 mb-3 shadow-sm cart-card">
+                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                                <span>В корзине: <strong>{{ quantity_in_cart }}</strong> шт.</span>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'orders:decrease_cart' product.id %}" class="btn btn-outline-secondary">-</a>
+                                    <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-outline-secondary">+</a>
+                                    <a href="{% url 'orders:remove_from_cart' product.id %}" class="btn btn-danger">Удалить</a>
+                                </div>
+                                <a href="{% url 'orders:cart' %}" class="btn btn-outline-primary">Перейти в корзину</a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-add btn-lg w-100 mb-3">Добавить в корзину</button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% else %}
+                <a href="{% url 'accounts:login' %}" class="btn btn-add btn-lg w-100 mb-3">Войдите, чтобы купить</a>
+            {% endif %}
 
             <hr>
+
+            <!-- Отзывы -->
             <h4>Отзывы</h4>
             {% for review in reviews %}
-            <div class="list-group-item border-0 mb-3">
+            <div class="card p-3 mb-3 shadow-sm review-card">
                 <p><strong>{{ review.user.username }}</strong> ({{ review.created_at|date:"d.m.Y H:i" }})</p>
                 <p>{{ review.text }}</p>
                 {% for r in review.user.ratings.all %}
                     {% if r.product == product %}
-                    <p>Оценка: {{ r.stars }} ⭐</p>
+                        <p>Оценка: {{ r.stars }} ⭐</p>
                     {% endif %}
                 {% endfor %}
             </div>
             {% empty %}
-            <p>Отзывов пока нет.</p>
+                <p>Отзывов пока нет.</p>
             {% endfor %}
 
             {% if user.is_authenticated %}
-            <hr>
-            <h5 class="fw-bold mb-3">Оставить отзыв</h5>
-            <form method="post">
-                {% csrf_token %}
-                <div class="form-floating mb-3">
-    {{ review_form.text|add_class:"form-control" }}
-    <label for="{{ review_form.text.id_for_label }}">Ваш отзыв</label>
-</div>
-<div class="form-floating mb-3">
-    {{ rating_form.stars|add_class:"form-control" }}
-    <label for="{{ rating_form.stars.id_for_label }}">Ваша оценка</label>
-</div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-100">Оставить отзыв</button>
-            </form>
+                <hr>
+                <h5 class="mb-3">Оставить отзыв</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="form-floating mb-3">
+                        {{ review_form.text|add_class:"form-control" }}
+                        <label for="{{ review_form.text.id_for_label }}">Ваш отзыв</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        {{ rating_form.stars|add_class:"form-control" }}
+                        <label for="{{ rating_form.stars.id_for_label }}">Ваша оценка</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Оставить отзыв</button>
+                </form>
             {% endif %}
         </div>
+
     </div>
+
+    <div class="decor-left"></div>
+    <div class="decor-right"></div>
 </div>
 {% endblock %}

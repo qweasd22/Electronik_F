@@ -5,91 +5,120 @@
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/home.css' %}">
 
-<div class="home-container">
+<!-- боковые декоративные фигуры -->
+<div class="side-circle1"></div>
+<div class="side-circle2"></div>
+<div class="side-circle3"></div>
+<div class="side-circle4"></div>
 
-    {% if not user.is_authenticated %}
-    <section class="auth-section">
-        <div class="auth-cards">
-            <div class="auth-card">
-                <h3>Новый пользователь?</h3>
-                <p>Создайте аккаунт и следите за своими заказами!</p>
-                <a href="{% url 'accounts:signup' %}" class="btn-primary">Зарегистрироваться</a>
+<!-- Авторизация -->
+<section class="auth-section reveal">
+  <div class="section-content">
+    <div class="auth-cards">
+      {% if not user.is_authenticated %}
+      <div class="auth-card">
+        <h3>Новый пользователь?</h3>
+        <p>Создайте аккаунт и следите за своими заказами!</p>
+        <a href="{% url 'accounts:signup' %}" class="btn-primary">Зарегистрироваться</a>
+      </div>
+      <div class="auth-card">
+        <h3>Уже есть аккаунт?</h3>
+        <p>Войдите и продолжите покупки.</p>
+        <a href="{% url 'accounts:login' %}" class="btn-primary">Войти</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Популярные товары -->
+<section class="products-section reveal">
+  <div class="section-content">
+    <h2>Популярные товары</h2>
+    <div class="products-grid">
+      {% for product in products %}
+      <div class="product-card">
+        <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}" alt="{{ product.name }}">
+        <div class="product-info">
+          <h5>{{ product.name }}</h5>
+          <p class="price">{{ product.price }} ₽</p>
+          <p class="rating">Рейтинг: {{ product.avg_rating }} ★</p>
+          <div class="product-actions">
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'orders:add_to_cart' product.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn-outline">Добавить в корзину</button>
+            </form>
+            {% endif %}
+            <a href="{% url 'products:product_detail' product.id %}" class="btn-outline">Подробнее</a>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <p class="empty-msg">Товары с рейтингом выше 4 звезд отсутствуют</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Новости -->
+<section class="news-section reveal">
+  <div class="section-content">
+    <h2>Новости</h2>
+    <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner">
+        {% for news_item in news %}
+        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+          <div class="news-card">
+            {% if news_item.image %}
+            <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
+            {% endif %}
+            <div class="news-info">
+              <h5>{{ news_item.title }}</h5>
+              <p>{{ news_item.summary }}</p>
+              <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn-primary">Читать дальше</a>
             </div>
-            <div class="auth-card">
-                <h3>Уже есть аккаунт?</h3>
-                <p>Войдите и продолжите покупки.</p>
-                <a href="{% url 'accounts:login' %}" class="btn-primary">Войти</a>
-            </div>
+          </div>
         </div>
-    </section>
-    {% endif %}
+        {% endfor %}
+      </div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon"></span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
+        <span class="carousel-control-next-icon"></span>
+      </button>
+    </div>
+    <div class="news-link">
+      <a href="{% url 'news:news_list' %}" class="btn-outline">Посмотреть все новости</a>
+    </div>
+  </div>
+</section>
 
-    <section class="products-section">
-        <h2>Популярные товары</h2>
-        <div class="products-grid">
-            {% for product in products %}
-            <div class="product-card">
-                <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
-                     alt="{{ product.name }}">
-                <div class="product-info">
-                    <h5>{{ product.name }}</h5>
-                    <p class="price">{{ product.price }} ₽</p>
-                    <p class="rating">Рейтинг: {{ product.avg_rating }} ★</p>
-                    <div class="product-actions">
-                        {% if user.is_authenticated %}
-                        <form method="post" action="{% url 'orders:add_to_cart' product.id %}">
-                            {% csrf_token %}
-                            <button type="submit" class="btn-outline">Добавить в корзину</button>
-                        </form>
-                        {% endif %}
-                        <a href="{% url 'products:product_detail' product.id %}" class="btn-outline">Подробнее</a>
-                    </div>
-                </div>
-            </div>
-            {% empty %}
-            <p class="empty-msg">Товары с рейтингом выше 4 звезд отсутствуют</p>
-            {% endfor %}
-        </div>
-    </section>
+<!-- Локация -->
+<section class="location-section reveal">
+  <div class="section-content">
+    <h2>Наша локация</h2>
+    <div class="map-container">
+      <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
+              width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+  </div>
+</section>
 
-    <section class="news-section">
-        <h2>Новости</h2>
-        <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                {% for news_item in news %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="news-card">
-                        {% if news_item.image %}
-                        <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
-                        {% endif %}
-                        <div class="news-info">
-                            <h5>{{ news_item.title }}</h5>
-                            <p>{{ news_item.summary }}</p>
-                            <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn-primary">Читать дальше</a>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#newsCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#newsCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-            </button>
-        </div>
-        <div class="news-link">
-            <a href="{% url 'news:news_list' %}" class="btn-outline">Посмотреть все новости</a>
-        </div>
-    </section>
+<script>
+const revealElements = document.querySelectorAll('.reveal');
+const revealOnScroll = () => {
+  const windowHeight = window.innerHeight;
+  revealElements.forEach(el => {
+    const elementTop = el.getBoundingClientRect().top;
+    if(elementTop < windowHeight - 100){
+      el.classList.add('visible');
+    }
+  });
+};
+window.addEventListener('scroll', revealOnScroll);
+window.addEventListener('load', revealOnScroll);
+</script>
 
-    <section class="location-section">
-        <h2>Наша локация</h2>
-        <div class="map-container">
-            <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
-                    width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
-        </div>
-    </section>
-
-</div>
 {% endblock %}

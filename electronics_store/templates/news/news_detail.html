@@ -1,14 +1,21 @@
 {% extends 'base_generic.html' %}
-{%load static %}
+{% load static %}
 {% block content %}
-    <div class="news-detail">
-        <h1>{{ news.title }}</h1>
-        <p><strong>Дата публикации:</strong> {{ news.published_at|date:"d M Y" }}</p>
-        {% if news.image %}
-            <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
-        {% endif %}
-        <div class="news-content">
-            <p>{{ news.content }}</p>
-        </div>
+<link rel="stylesheet" href="{% static 'css/news.css' %}">
+<div class="news-page news-detail-page">
+    <h1 class="page-title">{{ news.title }}</h1>
+    <p class="news-date"><strong>Дата публикации:</strong> {{ news.published_at|date:"d M Y" }}</p>
+
+    {% if news.image %}
+        <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
+    {% endif %}
+
+    <div class="news-content">
+        <p>{{ news.content }}</p>
     </div>
+
+    <!-- Декоративные фигуры по бокам -->
+    <div class="decor-left"></div>
+    <div class="decor-right"></div>
+</div>
 {% endblock %}

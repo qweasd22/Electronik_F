@@ -1,42 +1,85 @@
 {% extends 'base_generic.html' %}
 {% load static %}
+
+
+
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        {% for product in products %}
-        <div class="col-md-4 mb-4">
-            <div class="card h-100 shadow-sm">
-                {% if product.image %}
-                <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                {% else %}
-                <img src="{% static 'media/no_image.jpeg' %}" class="card-img-top" alt="Нет изображения">
-                {% endif %}
-                <div class="card-body d-flex flex-column">
-                    <h5 class="card-title">{{ product.name }}</h5>
-                    <p class="card-text fw-bold">{{ product.price }} ₽</p>
-                    <p class="mb-2">Средняя оценка: {{ product.average_rating }} ⭐</p>
-                    <div class="mt-auto">
-                        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-outline-primary w-100 mb-2">Подробнее</a>
-                        {% if user.is_authenticated %}
-                            {% if cart_items.product.id %}
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-success">В корзине: {{ cart_items.product.id }}</span>
-                                    <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-sm btn-outline-success">+</a>
-                                </div>
-                            {% else %}
-                                <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-primary btn-lg mt-3 shadow-sm">В корзину</button>
-                                </form>
-                            {% endif %}
-                        {% else %}
-                            <p class="text-muted text-center">Войдите, чтобы добавить в корзину</p>
-                        {% endif %}
-                    </div>
+<link rel="stylesheet" href="{% static 'css/products.css' %}">
+<div class="products-page">
+
+    <!-- Хедер -->
+    <header class="news-header">
+        <h1>Наши товары</h1>
+        <p>Выберите лучший продукт для себя</p>
+        <div class="header-decor"></div>
+    </header>
+
+    <!-- Фильтры -->
+    <form method="GET" action="{% url 'products:product_list' %}" class="news-filter mb-5">
+        <select name="category">
+            <option value="">Все категории</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if category.id == selected_category %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <select name="brand">
+            <option value="">Все бренды</option>
+            {% for brand in brands %}
+                <option value="{{ brand.id }}" {% if brand.id == selected_brand %}selected{% endif %}>
+                    {{ brand.name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <input type="number" name="min_price" placeholder="Мин. цена" value="{{ selected_min_price }}">
+        <input type="number" name="max_price" placeholder="Макс. цена" value="{{ selected_max_price }}">
+        <input type="text" name="search" placeholder="Поиск" value="{{ selected_search }}">
+
+        <button type="submit">Фильтровать</button>
+    </form>
+
+    <!-- Сетка товаров -->
+    <div class="news-list">
+    {% for product in products %}
+    <div class="news-item">
+        {% if product.image %}
+            <img src="{{ product.image.url }}" alt="{{ product.name }}" class="news-image">
+        {% else %}
+            <img src="{% static 'media/no_image.jpeg' %}" alt="Нет изображения" class="news-image">
+        {% endif %}
+
+        <h2>{{ product.name }}</h2>
+        <p class="product-price">{{ product.price }} ₽</p>
+        <p class="product-rating">⭐ {{ product.average_rating }}</p>
+
+        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-detail w-100 mb-2">Подробнее</a>
+
+        {% if user.is_authenticated %}
+            {% if cart_items.product.id %}
+                <div class="d-flex justify-content-between align-items-center cart-badge">
+                    <span class="badge bg-success">В корзине: {{ cart_items.product.id }}</span>
+                    <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-sm btn-outline-success">+</a>
                 </div>
-            </div>
-        </div>
-        {% endfor %}
+            {% else %}
+                <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-add mt-3">В корзину</button>
+                </form>
+            {% endif %}
+        {% else %}
+            <p class="text-muted text-center mt-3">Войдите, чтобы добавить в корзину</p>
+        {% endif %}
     </div>
+    {% endfor %}
+</div>
+
+
+    <!-- Декоративные фигуры по бокам -->
+    <div class="decor-left"></div>
+    <div class="decor-right"></div>
+
 </div>
 {% endblock %}

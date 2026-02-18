@@ -1,0 +1,137 @@
+/* Общий контейнер страницы новостей */
+.news-page {
+    position: relative;
+    padding: 50px 20px;
+    max-width: 1200px;
+    margin: auto;
+    background-color: #f9f9fb;
+}
+
+/* Заголовок страницы */
+.page-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+    color: #222;
+    font-weight: 600;
+}
+
+/* Форма фильтра */
+.news-filter {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 40px;
+}
+
+.news-filter select,
+.news-filter button {
+    padding: 8px 15px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.news-filter button:hover {
+    background-color: #e0e4ff;
+    border-color: #99aaff;
+}
+
+/* Сетка новостей */
+.news-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+/* Отдельный блок новости */
+.news-item {
+    background: #fff;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.news-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+}
+
+/* Картинка новости */
+.news-image {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+/* Дата публикации */
+.news-date {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+/* Контент новости на детальной странице */
+.news-content {
+    line-height: 1.7;
+    font-size: 1.1rem;
+    color: #333;
+    margin-top: 20px;
+}
+
+/* Декоративные фигуры */
+.decor-left,
+.decor-right {
+    position: absolute;
+    top: 50%;
+    width: 100px;
+    height: 100px;
+    background: rgba(200, 220, 255, 0.3);
+    border-radius: 50%;
+    z-index: -1;
+}
+
+.decor-left {
+    left: -50px;
+    transform: translateY(-50%);
+}
+
+.decor-right {
+    right: -50px;
+    transform: translateY(-50%);
+}
+/* Хедер новостей */
+.news-header {
+    position: relative;
+    text-align: center;
+    padding: 60px 20px 40px;
+    background: linear-gradient(135deg, #6a8cff 0%, #b0c4ff 100%);
+    color: #fff;
+    border-radius: 0 0 30px 30px;
+    margin-bottom: 40px;
+}
+
+.news-header h1 {
+    font-size: 3rem;
+    margin-bottom: 10px;
+}
+
+.news-header p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+}
+
+/* Декоративная фигура в хедере */
+.header-decor {
+    position: absolute;
+    bottom: -20px;
+    right: 20px;
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+}

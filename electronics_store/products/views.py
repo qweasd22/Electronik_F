@@ -1,12 +1,12 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Product, Review, Rating
+from .models import Product, Review, Rating, Category, Brand
 from .forms import ProductFilterForm, ReviewForm, RatingForm
 from django.contrib.auth.decorators import login_required
-
 from orders.models import CartItem
-
+from django.db.models import Q
 def product_list(request):
-    form = ProductFilterForm(request.GET)
+    # Используем форму для фильтрации
+    form = ProductFilterForm(request.GET or None)
     products = Product.objects.all()
 
     if form.is_valid():
@@ -16,10 +16,11 @@ def product_list(request):
         max_price = form.cleaned_data.get('max_price')
         search = form.cleaned_data.get('search')
 
+        # Фильтрация по ForeignKey корректно
         if category:
-            products = products.filter(category=category)
+            products = products.filter(category__id=category.id)
         if brand:
-            products = products.filter(brand=brand)
+            products = products.filter(brand__id=brand.id)
         if min_price is not None:
             products = products.filter(price__gte=min_price)
         if max_price is not None:
@@ -27,12 +28,30 @@ def product_list(request):
         if search:
             products = products.filter(name__icontains=search)
 
+    # Корзина пользователя
     cart_items = {}
     if request.user.is_authenticated:
         user_cart = CartItem.objects.filter(user=request.user)
         cart_items = {item.product.id: item.quantity for item in user_cart}
 
-    return render(request, 'products/product_list.html', {'products': products, 'form': form, 'cart_items': cart_items})
+    # Передаём категории и бренды для фильтров
+    categories = Category.objects.all()
+    brands = Brand.objects.all()
+
+    context = {
+        'products': products,
+        'form': form,
+        'cart_items': cart_items,
+        'categories': categories,
+        'brands': brands,
+        'selected_category': form.cleaned_data.get('category') if form.is_valid() else None,
+        'selected_brand': form.cleaned_data.get('brand') if form.is_valid() else None,
+        'selected_min_price': form.cleaned_data.get('min_price') if form.is_valid() else '',
+        'selected_max_price': form.cleaned_data.get('max_price') if form.is_valid() else '',
+        'selected_search': form.cleaned_data.get('search') if form.is_valid() else '',
+    }
+
+    return render(request, 'products/product_list.html', context)
 
 
 def product_detail(request, id):

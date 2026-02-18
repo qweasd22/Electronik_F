@@ -48,12 +48,10 @@ class Product(models.Model):
     price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
     stock = models.PositiveIntegerField("Количество на складе", default=0)
     image = models.ImageField("Изображение", upload_to='products/', blank=True, null=True)
-    screen_size = models.CharField("Размер экрана", max_length=100, blank=True, null=True)
-    processor = models.CharField("Процессор", max_length=100, blank=True, null=True)
-    memory = models.CharField("Оперативная память", max_length=100, blank=True, null=True)
     created_at = models.DateTimeField("Дата добавления", auto_now_add=True)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
     sales = models.ManyToManyField(Sale, blank=True, related_name="products", verbose_name="Скидки")
+    additional_info = models.TextField("Дополнительная информация", blank=True)
 
     class Meta:
         verbose_name = "Товар"

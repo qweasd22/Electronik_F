@@ -1,14 +1,22 @@
 {% extends 'base_generic.html' %}
-{%load static %}
+{% load static %}
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/news.css' %}">
+<div class="news-page">
+    <div class="news-header">
     <h1>Новости</h1>
+    <p>Следите за последними событиями и обновлениями</p>
+    <div class="header-decor"></div>
+</div>
     
     <!-- Фильтр по категориям -->
-    <form method="GET" action="{% url 'news:news_list' %}">
+    <form method="GET" action="{% url 'news:news_list' %}" class="news-filter">
         <select name="category">
             <option value="">Все категории</option>
             {% for category in categories %}
-                <option value="{{ category.name }}" {% if category.name == selected_category %}selected{% endif %}>{{ category.name }}</option>
+                <option value="{{ category.name }}" {% if category.name == selected_category %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
             {% endfor %}
         </select>
         <button type="submit">Фильтровать</button>
@@ -17,13 +25,18 @@
     <div class="news-list">
         {% for news_item in news %}
             <div class="news-item">
-                <h2>{{ news_item.title }}</h2>
-                <p>{{ news_item.summary }}</p>
-                <p><strong>Дата публикации:</strong> {{ news_item.published_at|date:"d M Y" }}</p>
                 {% if news_item.image %}
                     <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-image">
                 {% endif %}
+                <h2>{{ news_item.title }}</h2>
+                <p>{{ news_item.summary }}</p>
+                <p class="news-date"><strong>Дата публикации:</strong> {{ news_item.published_at|date:"d M Y" }}</p>
             </div>
         {% endfor %}
     </div>
+
+    <!-- Декоративные фигуры по бокам -->
+    <div class="decor-left"></div>
+    <div class="decor-right"></div>
+</div>
 {% endblock %}
