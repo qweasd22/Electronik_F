@@ -2,14 +2,14 @@
 {% load static %}
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/news.css' %}">
+
 <div class="news-page">
     <div class="news-header">
-    <h1>Новости</h1>
-    <p>Следите за последними событиями и обновлениями</p>
-    <div class="header-decor"></div>
-</div>
-    
-    <!-- Фильтр по категориям -->
+        <h1>Новости</h1>
+        <p>Следите за последними событиями и обновлениями</p>
+        <div class="header-decor"></div>
+    </div>
+
     <form method="GET" action="{% url 'news:news_list' %}" class="news-filter">
         <select name="category">
             <option value="">Все категории</option>
@@ -24,18 +24,33 @@
 
     <div class="news-list">
         {% for news_item in news %}
-            <div class="news-item">
+            <article class="news-item">
                 {% if news_item.image %}
-                    <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-image">
+                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-image-link">
+                        <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-image">
+                    </a>
                 {% endif %}
-                <h2>{{ news_item.title }}</h2>
+
+                <h2>
+                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-title-link">
+                        {{ news_item.title }}
+                    </a>
+                </h2>
+
                 <p>{{ news_item.summary }}</p>
-                <p class="news-date"><strong>Дата публикации:</strong> {{ news_item.published_at|date:"d M Y" }}</p>
-            </div>
+                <p class="news-date">
+                    <strong>Дата публикации:</strong> {{ news_item.published_at|date:"d.m.Y" }}
+                </p>
+
+                <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="btn btn-primary">
+                    Читать полностью
+                </a>
+            </article>
+        {% empty %}
+            <p>Новостей пока нет.</p>
         {% endfor %}
     </div>
 
-    <!-- Декоративные фигуры по бокам -->
     <div class="decor-left"></div>
     <div class="decor-right"></div>
 </div>

@@ -1,21 +1,31 @@
 from django.db.models import Avg
-from products.models import Product
+from django.db.models.functions import Coalesce
 from django.shortcuts import render
-
+from django.core.paginator import Paginator
+from products.models import Product
 from news.models import News
 
 def index(request):
-    # Используем аннотирование для вычисления среднего рейтинга
-    popular_products = Product.objects.annotate(
-        avg_rating=Avg('ratings__stars')
-    ).filter(avg_rating__gt=4).order_by('-avg_rating')
-    news = News.objects.filter(is_published=True).order_by('-published_at')[:5]  # Последние 5 новостей
+    popular_products_qs = (
+        Product.objects.annotate(
+            avg_rating=Coalesce(Avg('ratings__stars'), 0.0)
+        )
+        .order_by('-avg_rating', '-id')
+    )
 
-    
+    news_qs = News.objects.filter(
+        is_published=True
+    ).order_by('-published_at')
+
+    products_paginator = Paginator(popular_products_qs, 4)
+    news_paginator = Paginator(news_qs, 3)
+
+    products_page_obj = products_paginator.get_page(request.GET.get('products_page', 1))
+    news_page_obj = news_paginator.get_page(request.GET.get('news_page', 1))
 
     return render(request, 'index.html', {
-        'products': popular_products,
-        'news': news
+        'products_page_obj': products_page_obj,
+        'news_page_obj': news_page_obj,
     })
 from django.core.mail import send_mail
 from django.conf import settings

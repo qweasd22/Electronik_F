@@ -1,102 +1,209 @@
-{% extends 'base_generic_2.html' %}
+{% extends 'base_generic.html' %}
 {% load static %}
 {% block title %}Главная{% endblock %}
 
-{% block content %}
-<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% block hero %}
+<section class="hero-modern">
+    <div class="hero-modern__bg"></div>
+    <div class="hero-grid-pattern"></div>
+    <div class="hero-decor hero-decor--one"></div>
+    <div class="hero-decor hero-decor--two"></div>
 
-<div class="container my-5  ">
+    <div class="container hero-modern__content">
+        <div class="hero-modern__layout">
+            <div class="hero-modern__text">
+                <span class="hero-badge">Надежная техника • Быстрая доставка • Удобные заказы</span>
 
-    {% if not user.is_authenticated %}
-    <section class="auth-section reveal">
-        <div class="auth-cards">
-            <div class="auth-card">
-                <h3>Новый пользователь?</h3>
-                <p>Создайте аккаунт и следите за своими заказами!</p>
-                <a href="{% url 'accounts:signup' %}" class="btn-primary">Зарегистрироваться</a>
-            </div>
-            <div class="auth-card">
-                <h3>Уже есть аккаунт?</h3>
-                <p>Войдите и продолжите покупки.</p>
-                <a href="{% url 'accounts:login' %}" class="btn-primary">Войти</a>
-            </div>
-        </div>
-    </section>
-    {% endif %}
+                {% if user.is_authenticated %}
+                    <h1>Добро пожаловать, {{ user.username }}.</h1>
+                {% else %}
+                    <h1>Техника для дома, работы и жизни — удобно, быстро и современно.</h1>
+                {% endif %}
 
-    <section class="products-section reveal">
-        <div class="side-circle1"></div>
-        <h2>Популярные товары</h2>
-        <div class="products-grid">
-            {% for product in products %}
-            <div class="product-card">
-                <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}" alt="{{ product.name }}">
-                <div class="product-info">
-                    <h5>{{ product.name }}</h5>
-                    <p class="price">{{ product.price }} ₽</p>
-                    <p class="rating">Рейтинг: {{ product.avg_rating }} ★</p>
-                    <div class="product-actions">
-                        
-                        <a href="{% url 'products:product_detail' product.id %}" class="btn-outline">Подробнее</a>
+                <p>
+                    Выбирайте электронику, следите за новинками, оформляйте заказы онлайн
+                    и получайте качественный сервис в одном магазине.
+                </p>
+
+                <div class="hero-actions">
+                    <a href="{% url 'products:product_list' %}" class="btn btn-accent btn-lg">Перейти в каталог</a>
+                    <a href="{% url 'news:news_list' %}" class="btn btn-accent-outline btn-lg">Смотреть новости</a>
+                </div>
+
+                <div class="hero-features">
+                    <div class="hero-feature">
+                        <span class="hero-feature__num">500+</span>
+                        <span class="hero-feature__text">товаров в каталоге</span>
+                    </div>
+                    <div class="hero-feature">
+                        <span class="hero-feature__num">24/7</span>
+                        <span class="hero-feature__text">прием заявок</span>
+                    </div>
+                    <div class="hero-feature">
+                        <span class="hero-feature__num">100%</span>
+                        <span class="hero-feature__text">контроль заказов</span>
                     </div>
                 </div>
             </div>
-            {% empty %}
-            <p class="empty-msg">Товары с рейтингом выше 4 звезд отсутствуют</p>
-            {% endfor %}
-        </div>
-    </section>
 
-    <section class="news-section reveal">
-        <h2>Новости</h2>
-        <div id="newsCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                {% for news_item in news %}
-                <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                    <div class="news-card">
-                        {% if news_item.image %}
-                        <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}">
-                        {% endif %}
-                        <div class="news-info">
-                            <h5>{{ news_item.title }}</h5>
-                            <p>{{ news_item.summary }}</p>
-                            <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn-primary">Читать дальше</a>
+            <div class="hero-modern__visual">
+                <div class="hero-panel hero-panel--main">
+                    <div class="hero-panel__label">Популярная категория</div>
+                    <h3>Смартфоны и гаджеты</h3>
+                    <p>Актуальные модели, аксессуары и выгодные предложения каждый день.</p>
+                </div>
+
+                <div class="hero-mini-cards">
+                    <div class="hero-mini-card">
+                        <div class="hero-mini-card__icon">⚡</div>
+                        <div>
+                            <strong>Быстрая обработка</strong>
+                            <p>Оперативное подтверждение заказов</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-mini-card">
+                        <div class="hero-mini-card__icon">🚚</div>
+                        <div>
+                            <strong>Доставка</strong>
+                            <p>Отслеживание заказа в личном кабинете</p>
+                        </div>
+                    </div>
+
+                    <div class="hero-mini-card">
+                        <div class="hero-mini-card__icon">💳</div>
+                        <div>
+                            <strong>Оплата</strong>
+                            <p>Картой или наличными при получении</p>
                         </div>
                     </div>
                 </div>
-                {% endfor %}
             </div>
-            
         </div>
-        <div class="news-link">
-            <a href="{% url 'news:news_list' %}" class="btn-outline">Посмотреть все новости</a>
+    </div>
+
+</section>
+{% endblock %}
+
+{% block content %}
+<section class="section-block">
+    <div class="section-head">
+        <div>
+            <span class="section-kicker">Каталог</span>
+            <h2>Популярные товары</h2>
         </div>
-    </section>
+        <a href="{% url 'products:product_list' %}" class="section-link">Все товары</a>
+    </div>
 
-    <section class="location-section reveal">
-        <h2>Наша локация</h2>
-        <div class="map-container">
-            <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
-                    width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    <div class="cards-grid cards-grid--products">
+        {% for product in products_page_obj %}
+            <article class="card-modern product-card-modern">
+                <div class="card-modern__image-wrap">
+                    <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
+                         alt="{{ product.name }}"
+                         class="card-modern__image">
+                </div>
+
+                <div class="card-modern__body">
+                    <h3>{{ product.name }}</h3>
+                    <p class="product-price">{{ product.price }} ₽</p>
+                    <p class="product-rating">Рейтинг: {{ product.avg_rating|floatformat:2 }} ★</p>
+
+                    <a href="{% url 'products:product_detail' product.id %}" class="btn btn-accent-outline w-100">
+                        Подробнее
+                    </a>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-state">Популярные товары пока отсутствуют.</p>
+        {% endfor %}
+    </div>
+
+    {% if products_page_obj.paginator.num_pages > 1 %}
+        <nav class="section-pagination" aria-label="Popular products pagination">
+            {% if products_page_obj.has_previous %}
+                <a class="pagination-link" href="?products_page={{ products_page_obj.previous_page_number }}&news_page={{ news_page_obj.number }}">Prev</a>
+            {% endif %}
+
+            {% for num in products_page_obj.paginator.page_range %}
+                {% if num == products_page_obj.number %}
+                    <span class="pagination-link is-active">{{ num }}</span>
+                {% else %}
+                    <a class="pagination-link" href="?products_page={{ num }}&news_page={{ news_page_obj.number }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if products_page_obj.has_next %}
+                <a class="pagination-link" href="?products_page={{ products_page_obj.next_page_number }}&news_page={{ news_page_obj.number }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+
+<section class="section-block">
+    <div class="section-head">
+        <div>
+            <span class="section-kicker">Обновления</span>
+            <h2>Последние новости</h2>
         </div>
-    </section>
-    
-</div>
+        <a href="{% url 'news:news_list' %}" class="section-link">Все новости</a>
+    </div>
 
-<script>
-    // Плавное появление секций при скролле
-    const revealElements = document.querySelectorAll('.reveal');
-    const revealOnScroll = () => {
-        const windowHeight = window.innerHeight;
-        revealElements.forEach(el => {
-            const elementTop = el.getBoundingClientRect().top;
-            if(elementTop < windowHeight - 100){
-                el.classList.add('visible');
-            }
-        });
-    };
-    window.addEventListener('scroll', revealOnScroll);
-    window.addEventListener('load', revealOnScroll);
-</script>
+    <div class="cards-grid cards-grid--news">
+        {% for news_item in news_page_obj %}
+            <article class="card-modern news-card-modern">
+                <div class="card-modern__image-wrap news-card-modern__image-wrap">
+                    <img src="{% if news_item.image %}{{ news_item.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
+                         alt="{{ news_item.title }}"
+                         class="news-thumb">
+                </div>
 
+                <div class="card-modern__body">
+                    <p class="news-date-small">{{ news_item.published_at|date:"d.m.Y" }}</p>
+                    <h3>{{ news_item.title }}</h3>
+                    <p>{{ news_item.summary }}</p>
+                    <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn btn-accent-outline">
+                        Читать полностью
+                    </a>
+                </div>
+            </article>
+        {% empty %}
+            <p class="empty-state">Новости пока отсутствуют.</p>
+        {% endfor %}
+    </div>
+
+    {% if news_page_obj.paginator.num_pages > 1 %}
+        <nav class="section-pagination" aria-label="News pagination">
+            {% if news_page_obj.has_previous %}
+                <a class="pagination-link" href="?products_page={{ products_page_obj.number }}&news_page={{ news_page_obj.previous_page_number }}">Prev</a>
+            {% endif %}
+
+            {% for num in news_page_obj.paginator.page_range %}
+                {% if num == news_page_obj.number %}
+                    <span class="pagination-link is-active">{{ num }}</span>
+                {% else %}
+                    <a class="pagination-link" href="?products_page={{ products_page_obj.number }}&news_page={{ num }}">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+
+            {% if news_page_obj.has_next %}
+                <a class="pagination-link" href="?products_page={{ products_page_obj.number }}&news_page={{ news_page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+</section>
+
+<section class="section-block section-block--map">
+    <div class="section-head">
+        <div>
+            <span class="section-kicker">Где нас найти</span>
+            <h2>Контакты и расположение</h2>
+        </div>
+    </div>
+
+    <div class="map-shell">
+        <iframe src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
+                width="100%" height="380" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+    </div>
+</section>
 {% endblock %}
