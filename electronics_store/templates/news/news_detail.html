@@ -3,33 +3,46 @@
 
 {% block title %}{{ news.title }}{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/news.css' %}">
-{% endblock %}
-
 {% block content %}
-<section class="section-block news-detail-shell">
-    <div class="news-shell__bg"></div>
+<link rel="stylesheet" href="{% static 'css/news.css' %}">
 
-    <div class="section-head news-detail-shell__head">
-        <div>
-            <span class="section-kicker">Новость</span>
-            <h2>{{ news.title }}</h2>
-            <p class="news-date-small">{{ news.published_at|date:"d.m.Y" }}</p>
-        </div>
-        <a href="{% url 'news:news_list' %}" class="btn btn-accent-outline">К списку новостей</a>
-    </div>
+<div class="news-shell">
+    <section class="news-detail-hero">
+        <div class="news-detail-hero__overlay"></div>
+        <div class="news-detail-hero__content container">
+            <a href="{% url 'news:news_list' %}" class="news-back-link">← Назад к новостям</a>
 
-    <article class="news-detail-card">
-        {% if news.image %}
-            <div class="news-detail-card__image-wrap">
-                <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-detail-card__image">
+            <div class="news-detail-hero__meta">
+                <span>{{ news.published_at|date:"d.m.Y" }}</span>
+                {% if news.category %}
+                    <span>{{ news.category.name }}</span>
+                {% endif %}
             </div>
-        {% endif %}
 
-        <div class="news-detail-card__content">
-            {{ news.content|linebreaks }}
+            <h1>{{ news.title }}</h1>
+            <p>{{ news.summary }}</p>
         </div>
-    </article>
-</section>
+
+        <div class="news-hero__glow news-hero__glow--left"></div>
+        <div class="news-hero__glow news-hero__glow--right"></div>
+    </section>
+
+    <section class="news-detail container">
+        <article class="news-article">
+            {% if news.image %}
+                <div class="news-article__image-wrap">
+                    <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-article__image">
+                </div>
+            {% endif %}
+
+            <div class="news-article__content">
+                {{ news.content|linebreaks }}
+            </div>
+
+            <div class="news-article__footer">
+                <a href="{% url 'news:news_list' %}" class="news-btn news-btn--ghost">Все новости</a>
+            </div>
+        </article>
+    </section>
+</div>
 {% endblock %}

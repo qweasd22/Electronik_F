@@ -3,57 +3,83 @@
 
 {% block title %}Новости{% endblock %}
 
-{% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/news.css' %}">
-{% endblock %}
-
 {% block content %}
-<section class="section-block news-shell">
-    <div class="news-shell__bg"></div>
+<link rel="stylesheet" href="{% static 'css/news.css' %}">
 
-    <div class="section-head news-shell__head">
-        <div>
-            <span class="section-kicker">Обновления</span>
-            <h2>Новости</h2>
-            <p class="news-shell__subtitle">Следите за последними событиями и обновлениями магазина.</p>
+<div class="news-shell">
+    <section class="news-hero">
+        <div class="news-hero__overlay"></div>
+        <div class="news-hero__content container">
+            <span class="news-badge">Актуальные события • Обновления • Новинки</span>
+            <h1 style="margin-left: 15px;">Новости магазина</h1>
+            <p style="margin-left: 15px;">Следите за последними поступлениями, акциями и важными обновлениями нашего магазина электроники.</p>
         </div>
-        <a href="{% url 'home' %}" class="section-link">На главную</a>
-    </div>
+        <div class="news-hero__glow news-hero__glow--left"></div>
+        <div class="news-hero__glow news-hero__glow--right"></div>
+    </section>
 
-    <form method="get" action="{% url 'news:news_list' %}" class="news-filter">
-        <label for="news-category" class="news-filter__label">Категория</label>
-        <select id="news-category" name="category" class="news-filter__select">
-            <option value="">Все категории</option>
-            {% for category in categories %}
-                <option value="{{ category.name }}" {% if category.name == selected_category %}selected{% endif %}>
-                    {{ category.name }}
-                </option>
-            {% endfor %}
-        </select>
-        <button type="submit" class="btn btn-accent">Применить</button>
-    </form>
+    <section class="news-main container">
+        <form method="GET" action="{% url 'news:news_list' %}" class="news-filter">
+            <div class="news-filter__group">
+                <label for="category">Категория</label>
+                <select name="category" id="category">
+                    <option value="">Все категории</option>
+                    {% for category in categories %}
+                        <option value="{{ category.name }}" {% if category.name == selected_category %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
 
-    <div class="cards-grid cards-grid--news">
-        {% for news_item in news %}
-            <article class="card-modern news-card-modern news-list-card">
-                <div class="card-modern__image-wrap news-card-modern__image-wrap">
-                    <img src="{% if news_item.image %}{{ news_item.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
-                         alt="{{ news_item.title }}"
-                         class="news-thumb">
-                </div>
+            <button type="submit" class="news-btn news-btn--primary">Применить</button>
 
-                <div class="card-modern__body">
-                    <p class="news-date-small">{{ news_item.published_at|date:"d.m.Y" }}</p>
-                    <h3>{{ news_item.title }}</h3>
-                    <p>{{ news_item.summary }}</p>
-                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="btn btn-accent-outline">
-                        Читать полностью
+            {% if selected_category %}
+                <a href="{% url 'news:news_list' %}" class="news-btn news-btn--ghost">Сбросить</a>
+            {% endif %}
+        </form>
+
+        <div class="news-grid">
+            {% for news_item in news %}
+                <article class="news-card">
+                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-card__image-wrap">
+                        {% if news_item.image %}
+                            <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-card__image">
+                        {% else %}
+                            <div class="news-card__placeholder">Нет изображения</div>
+                        {% endif %}
                     </a>
+
+                    <div class="news-card__body">
+                        <div class="news-card__meta">
+                            <span class="news-card__date">{{ news_item.published_at|date:"d.m.Y" }}</span>
+                            {% if news_item.category %}
+                                <span class="news-card__category">{{ news_item.category.name }}</span>
+                            {% endif %}
+                        </div>
+
+                        <h2 class="news-card__title">
+                            <a href="{% url 'news:news_detail' pk=news_item.pk %}">
+                                {{ news_item.title }}
+                            </a>
+                        </h2>
+
+                        <p class="news-card__summary">{{ news_item.summary }}</p>
+
+                        <div class="news-card__footer">
+                            <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-btn news-btn--primary">
+                                Читать полностью
+                            </a>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="news-empty">
+                    <h3>Новостей пока нет</h3>
+                    <p>Когда появятся новые публикации, они будут отображаться здесь.</p>
                 </div>
-            </article>
-        {% empty %}
-            <p class="empty-state">Новостей пока нет.</p>
-        {% endfor %}
-    </div>
-</section>
+            {% endfor %}
+        </div>
+    </section>
+</div>
 {% endblock %}
