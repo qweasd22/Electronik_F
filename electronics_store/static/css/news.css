@@ -73,7 +73,8 @@
 .news-hero h1,
 .news-detail-hero h1 {
     max-width: 900px;
-    margin: 0 0 16px;
+    margin:15px;
+    
     font-size: clamp(2.2rem, 4vw, 4rem);
     line-height: 1.08;
     font-weight: 800;
@@ -82,7 +83,7 @@
 .news-hero p,
 .news-detail-hero p {
     max-width: 760px;
-    margin: 0;
+    margin: 15px;
     font-size: 1.08rem;
     line-height: 1.7;
     color: rgba(255, 255, 255, 0.88);
@@ -193,15 +194,36 @@
     background: linear-gradient(135deg, #dbeafe, #eff6ff);
 }
 
+.news-card__image-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--news-image-url);
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.08);
+    filter: blur(10px) saturate(1.05);
+    opacity: 0.55;
+}
+
+.news-card__image-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.20));
+}
+
 .news-card__image {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    position: relative;
+    z-index: 1;
     transition: transform 0.4s ease;
 }
 
 .news-card:hover .news-card__image {
-    transform: scale(1.05);
+    transform: scale(1.02);
 }
 
 .news-card__placeholder {
@@ -368,16 +390,38 @@
 }
 
 .news-article__image-wrap {
+    position: relative;
     overflow: hidden;
     margin-bottom: 28px;
     border-radius: 22px;
     background: linear-gradient(135deg, #dbeafe, #eff6ff);
 }
 
+.news-article__image-wrap::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--news-image-url);
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.1);
+    filter: blur(14px) saturate(1.04);
+    opacity: 0.45;
+}
+
+.news-article__image-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.18));
+}
+
 .news-article__image {
     width: 100%;
     max-height: 560px;
-    object-fit: cover;
+    object-fit: contain;
+    position: relative;
+    z-index: 1;
     display: block;
 }
 

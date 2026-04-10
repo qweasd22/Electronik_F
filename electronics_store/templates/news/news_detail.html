@@ -30,7 +30,7 @@
     <section class="news-detail container">
         <article class="news-article">
             {% if news.image %}
-                <div class="news-article__image-wrap">
+                <div class="news-article__image-wrap" style="--news-image-url: url('{{ news.image.url }}');">
                     <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-article__image">
                 </div>
             {% endif %}

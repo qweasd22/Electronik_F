@@ -42,7 +42,7 @@
         <div class="news-grid">
             {% for news_item in news %}
                 <article class="news-card">
-                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-card__image-wrap">
+                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-card__image-wrap" {% if news_item.image %}style="--news-image-url: url('{{ news_item.image.url }}');"{% endif %}>
                         {% if news_item.image %}
                             <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-card__image">
                         {% else %}
