@@ -1,31 +1,24 @@
 from django.db.models import Avg
 from django.db.models.functions import Coalesce
 from django.shortcuts import render
-from django.core.paginator import Paginator
 from products.models import Product
 from news.models import News
 
 def index(request):
-    popular_products_qs = (
+    popular_products = (
         Product.objects.annotate(
             avg_rating=Coalesce(Avg('ratings__stars'), 0.0)
         )
         .order_by('-avg_rating', '-id')
-    )
+    )[:24]
 
-    news_qs = News.objects.filter(
+    news = News.objects.filter(
         is_published=True
-    ).order_by('-published_at')
-
-    products_paginator = Paginator(popular_products_qs, 4)
-    news_paginator = Paginator(news_qs, 3)
-
-    products_page_obj = products_paginator.get_page(request.GET.get('products_page', 1))
-    news_page_obj = news_paginator.get_page(request.GET.get('news_page', 1))
+    ).order_by('-published_at')[:24]
 
     return render(request, 'index.html', {
-        'products_page_obj': products_page_obj,
-        'news_page_obj': news_page_obj,
+        'products': popular_products,
+        'news': news,
     })
 from django.core.mail import send_mail
 from django.conf import settings

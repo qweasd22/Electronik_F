@@ -95,8 +95,8 @@
         <a href="{% url 'products:product_list' %}" class="section-link">Все товары</a>
     </div>
 
-    <div class="cards-grid cards-grid--products">
-        {% for product in products_page_obj %}
+    <div class="cards-grid cards-grid--products js-slider" data-slider="products" data-per-page="4">
+        {% for product in products %}
             <article class="card-modern product-card-modern">
                 <div class="card-modern__image-wrap">
                     <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
@@ -118,26 +118,11 @@
             <p class="empty-state">Популярные товары пока отсутствуют.</p>
         {% endfor %}
     </div>
-
-    {% if products_page_obj.paginator.num_pages > 1 %}
-        <nav class="section-pagination" aria-label="Popular products pagination">
-            {% if products_page_obj.has_previous %}
-                <a class="pagination-link" href="?products_page={{ products_page_obj.previous_page_number }}&news_page={{ news_page_obj.number }}">Prev</a>
-            {% endif %}
-
-            {% for num in products_page_obj.paginator.page_range %}
-                {% if num == products_page_obj.number %}
-                    <span class="pagination-link is-active">{{ num }}</span>
-                {% else %}
-                    <a class="pagination-link" href="?products_page={{ num }}&news_page={{ news_page_obj.number }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if products_page_obj.has_next %}
-                <a class="pagination-link" href="?products_page={{ products_page_obj.next_page_number }}&news_page={{ news_page_obj.number }}">Next</a>
-            {% endif %}
-        </nav>
-    {% endif %}
+    <nav class="section-pagination js-slider-controls" data-slider-controls="products" aria-label="??????">
+        <button type="button" class="pagination-link" data-slider-prev="products">Назад</button>
+        <span class="pagination-link is-active js-slider-status" data-slider-status="products">1 / 1</span>
+        <button type="button" class="pagination-link" data-slider-next="products">Вперед</button>
+    </nav>
 </section>
 
 <section class="section-block">
@@ -149,8 +134,8 @@
         <a href="{% url 'news:news_list' %}" class="section-link">Все новости</a>
     </div>
 
-    <div class="cards-grid cards-grid--news">
-        {% for news_item in news_page_obj %}
+    <div class="cards-grid cards-grid--news js-slider" data-slider="news" data-per-page="3">
+        {% for news_item in news %}
             <article class="card-modern news-card-modern">
                 <div class="card-modern__image-wrap news-card-modern__image-wrap">
                     <img src="{% if news_item.image %}{{ news_item.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
@@ -171,26 +156,11 @@
             <p class="empty-state">Новости пока отсутствуют.</p>
         {% endfor %}
     </div>
-
-    {% if news_page_obj.paginator.num_pages > 1 %}
-        <nav class="section-pagination" aria-label="News pagination">
-            {% if news_page_obj.has_previous %}
-                <a class="pagination-link" href="?products_page={{ products_page_obj.number }}&news_page={{ news_page_obj.previous_page_number }}">Prev</a>
-            {% endif %}
-
-            {% for num in news_page_obj.paginator.page_range %}
-                {% if num == news_page_obj.number %}
-                    <span class="pagination-link is-active">{{ num }}</span>
-                {% else %}
-                    <a class="pagination-link" href="?products_page={{ products_page_obj.number }}&news_page={{ num }}">{{ num }}</a>
-                {% endif %}
-            {% endfor %}
-
-            {% if news_page_obj.has_next %}
-                <a class="pagination-link" href="?products_page={{ products_page_obj.number }}&news_page={{ news_page_obj.next_page_number }}">Next</a>
-            {% endif %}
-        </nav>
-    {% endif %}
+    <nav class="section-pagination js-slider-controls" data-slider-controls="news" aria-label="???????">
+        <button type="button" class="pagination-link" data-slider-prev="news">?????</button>
+        <span class="pagination-link is-active js-slider-status" data-slider-status="news">1 / 1</span>
+        <button type="button" class="pagination-link" data-slider-next="news">??????</button>
+    </nav>
 </section>
 
 <section class="section-block section-block--map">
@@ -207,3 +177,69 @@
     </div>
 </section>
 {% endblock %}
+
+{% block extra_js %}
+<script>
+    (function () {
+        function initSlider(sliderName) {
+            var container = document.querySelector('[data-slider="' + sliderName + '"]');
+            if (!container) return;
+
+            var items = Array.prototype.slice.call(container.querySelectorAll('.card-modern'));
+            var perPage = parseInt(container.dataset.perPage || '1', 10);
+            var controls = document.querySelector('[data-slider-controls="' + sliderName + '"]');
+            var prevBtn = document.querySelector('[data-slider-prev="' + sliderName + '"]');
+            var nextBtn = document.querySelector('[data-slider-next="' + sliderName + '"]');
+            var status = document.querySelector('[data-slider-status="' + sliderName + '"]');
+
+            if (!controls || !prevBtn || !nextBtn || !status) return;
+
+            if (!items.length) {
+                controls.style.display = 'none';
+                return;
+            }
+
+            var totalPages = Math.ceil(items.length / perPage);
+            var currentPage = 0;
+
+            function renderPage() {
+                var start = currentPage * perPage;
+                var end = start + perPage;
+
+                items.forEach(function (item, index) {
+                    item.style.display = index >= start && index < end ? '' : 'none';
+                });
+
+                status.textContent = (currentPage + 1) + ' / ' + totalPages;
+                prevBtn.disabled = currentPage === 0;
+                nextBtn.disabled = currentPage >= totalPages - 1;
+            }
+
+            prevBtn.addEventListener('click', function () {
+                if (currentPage > 0) {
+                    currentPage -= 1;
+                    renderPage();
+                }
+            });
+
+            nextBtn.addEventListener('click', function () {
+                if (currentPage < totalPages - 1) {
+                    currentPage += 1;
+                    renderPage();
+                }
+            });
+
+            if (totalPages <= 1) {
+                controls.style.display = 'none';
+                return;
+            }
+
+            renderPage();
+        }
+
+        initSlider('products');
+        initSlider('news');
+    })();
+</script>
+{% endblock %}
+
