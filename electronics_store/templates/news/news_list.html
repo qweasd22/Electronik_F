@@ -1,17 +1,28 @@
-{% extends 'base_generic.html' %}
+﻿{% extends 'base_generic.html' %}
 {% load static %}
-{% block content %}
-<link rel="stylesheet" href="{% static 'css/news.css' %}">
 
-<div class="news-page">
-    <div class="news-header">
-        <h1>Новости</h1>
-        <p>Следите за последними событиями и обновлениями</p>
-        <div class="header-decor"></div>
+{% block title %}Новости{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/news.css' %}">
+{% endblock %}
+
+{% block content %}
+<section class="section-block news-shell">
+    <div class="news-shell__bg"></div>
+
+    <div class="section-head news-shell__head">
+        <div>
+            <span class="section-kicker">Обновления</span>
+            <h2>Новости</h2>
+            <p class="news-shell__subtitle">Следите за последними событиями и обновлениями магазина.</p>
+        </div>
+        <a href="{% url 'home' %}" class="section-link">На главную</a>
     </div>
 
-    <form method="GET" action="{% url 'news:news_list' %}" class="news-filter">
-        <select name="category">
+    <form method="get" action="{% url 'news:news_list' %}" class="news-filter">
+        <label for="news-category" class="news-filter__label">Категория</label>
+        <select id="news-category" name="category" class="news-filter__select">
             <option value="">Все категории</option>
             {% for category in categories %}
                 <option value="{{ category.name }}" {% if category.name == selected_category %}selected{% endif %}>
@@ -19,39 +30,30 @@
                 </option>
             {% endfor %}
         </select>
-        <button type="submit">Фильтровать</button>
+        <button type="submit" class="btn btn-accent">Применить</button>
     </form>
 
-    <div class="news-list">
+    <div class="cards-grid cards-grid--news">
         {% for news_item in news %}
-            <article class="news-item">
-                {% if news_item.image %}
-                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-image-link">
-                        <img src="{{ news_item.image.url }}" alt="{{ news_item.title }}" class="news-image">
+            <article class="card-modern news-card-modern news-list-card">
+                <div class="card-modern__image-wrap news-card-modern__image-wrap">
+                    <img src="{% if news_item.image %}{{ news_item.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
+                         alt="{{ news_item.title }}"
+                         class="news-thumb">
+                </div>
+
+                <div class="card-modern__body">
+                    <p class="news-date-small">{{ news_item.published_at|date:"d.m.Y" }}</p>
+                    <h3>{{ news_item.title }}</h3>
+                    <p>{{ news_item.summary }}</p>
+                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="btn btn-accent-outline">
+                        Читать полностью
                     </a>
-                {% endif %}
-
-                <h2>
-                    <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="news-title-link">
-                        {{ news_item.title }}
-                    </a>
-                </h2>
-
-                <p>{{ news_item.summary }}</p>
-                <p class="news-date">
-                    <strong>Дата публикации:</strong> {{ news_item.published_at|date:"d.m.Y" }}
-                </p>
-
-                <a href="{% url 'news:news_detail' pk=news_item.pk %}" class="btn btn-primary">
-                    Читать полностью
-                </a>
+                </div>
             </article>
         {% empty %}
-            <p>Новостей пока нет.</p>
+            <p class="empty-state">Новостей пока нет.</p>
         {% endfor %}
     </div>
-
-    <div class="decor-left"></div>
-    <div class="decor-right"></div>
-</div>
+</section>
 {% endblock %}

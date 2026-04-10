@@ -1,21 +1,35 @@
-{% extends 'base_generic.html' %}
+﻿{% extends 'base_generic.html' %}
 {% load static %}
-{% block content %}
+
+{% block title %}{{ news.title }}{% endblock %}
+
+{% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/news.css' %}">
-<div class="news-page news-detail-page">
-    <h1 class="page-title">{{ news.title }}</h1>
-    <p class="news-date"><strong>Дата публикации:</strong> {{ news.published_at|date:"d M Y" }}</p>
+{% endblock %}
 
-    {% if news.image %}
-        <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-image">
-    {% endif %}
+{% block content %}
+<section class="section-block news-detail-shell">
+    <div class="news-shell__bg"></div>
 
-    <div class="news-content">
-        <p>{{ news.content }}</p>
+    <div class="section-head news-detail-shell__head">
+        <div>
+            <span class="section-kicker">Новость</span>
+            <h2>{{ news.title }}</h2>
+            <p class="news-date-small">{{ news.published_at|date:"d.m.Y" }}</p>
+        </div>
+        <a href="{% url 'news:news_list' %}" class="btn btn-accent-outline">К списку новостей</a>
     </div>
 
-    <!-- Декоративные фигуры по бокам -->
-    <div class="decor-left"></div>
-    <div class="decor-right"></div>
-</div>
+    <article class="news-detail-card">
+        {% if news.image %}
+            <div class="news-detail-card__image-wrap">
+                <img src="{{ news.image.url }}" alt="{{ news.title }}" class="news-detail-card__image">
+            </div>
+        {% endif %}
+
+        <div class="news-detail-card__content">
+            {{ news.content|linebreaks }}
+        </div>
+    </article>
+</section>
 {% endblock %}

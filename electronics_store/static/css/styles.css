@@ -31,7 +31,10 @@ html, body {
 
 body {
     background:
-        radial-gradient(circle at top left, rgba(47, 128, 237, 0.08), transparent 28%),
+        linear-gradient(180deg, rgba(245, 249, 255, 0.78) 0%, rgba(238, 247, 255, 0.88) 100%),
+        
+        url("/static/images/hero-bg-circuit.jpg") center bottom / cover no-repeat fixed,
+        radial-gradient(circle at top left, rgba(47, 128, 237, 0.08), transparent 15%),
         radial-gradient(circle at top right, rgba(0, 194, 168, 0.08), transparent 22%),
         linear-gradient(180deg, #F5F9FF 0%, #EEF7FF 100%);
     color: var(--text);
@@ -368,9 +371,45 @@ a {
     margin-top: 34px;
     padding: 28px;
     border-radius: var(--radius);
-    background: #FFFFFF;
+    background: rgba(255, 255, 255, 0.90);
     border: 1px solid #E1ECF8;
     box-shadow: 0 12px 30px rgba(47, 128, 237, 0.08);
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(2px);
+}
+
+.section-block > * {
+    position: relative;
+    z-index: 1;
+}
+
+.section-block--products::before,
+.section-block--news::before {
+    content: none;
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0;
+    filter: saturate(1.08) contrast(1.02);
+}
+
+.section-block--products::before {
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 255, 255, 0.64)),
+        url("/static/images/hero-bg-circuit.jpg");
+    background-position: center right;
+}
+
+.section-block--news::before {
+    background-image:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.66)),
+        url("/static/images/hero-bg-neon.jpg");
+    background-position: center left;
 }
 
 .section-head {
@@ -565,12 +604,14 @@ a {
 .site-footer {
     margin-top: 24px;
     border-top: 1px solid var(--line);
+    
     background: #FFFFFF;
 }
 
 .footer-text,
 .footer-links a {
     color: var(--muted);
+    margin-left: 1rem;
 }
 
 .footer-links a:hover {
@@ -590,6 +631,16 @@ a {
 }
 
 @media (max-width: 991px) {
+    body {
+        background:
+            linear-gradient(180deg, rgba(245, 249, 255, 0.82) 0%, rgba(238, 247, 255, 0.92) 100%),
+            url("/static/images/hero-bg-circuit.jpg") center top / cover no-repeat,
+            url("/static/images/hero-bg-neon.jpg") center bottom / cover no-repeat,
+            radial-gradient(circle at top left, rgba(47, 128, 237, 0.08), transparent 28%),
+            radial-gradient(circle at top right, rgba(0, 194, 168, 0.08), transparent 22%),
+            linear-gradient(180deg, #F5F9FF 0%, #EEF7FF 100%);
+    }
+
     .main-nav {
         gap: 2px;
         padding-top: 12px;
@@ -615,5 +666,11 @@ a {
     .section-head {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .section-block--products::before,
+    .section-block--news::before {
+        background-size: cover;
+        filter: saturate(1.02) contrast(1);
     }
 }

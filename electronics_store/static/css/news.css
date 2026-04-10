@@ -1,137 +1,106 @@
-/* Общий контейнер страницы новостей */
-.news-page {
+.news-shell,
+.news-detail-shell {
     position: relative;
-    padding: 50px 20px;
-    max-width: 1200px;
-    margin: auto;
-    background-color: #f9f9fb;
 }
 
-/* Заголовок страницы */
-.page-title {
-    text-align: center;
-    font-size: 2.5rem;
-    margin-bottom: 30px;
-    color: #222;
-    font-weight: 600;
+.news-shell__bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.80), rgba(255, 255, 255, 0.90)),
+        url("/static/images/hero-bg-neon.jpg") center / cover no-repeat;
+    opacity: 0.45;
 }
 
-/* Форма фильтра */
+.news-shell > *,
+.news-detail-shell > * {
+    position: relative;
+    z-index: 1;
+}
+
+.news-shell__head {
+    align-items: flex-start;
+}
+
+.news-shell__subtitle {
+    margin: 8px 0 0;
+    color: var(--muted);
+    max-width: 680px;
+}
+
 .news-filter {
     display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 40px;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
 }
 
-.news-filter select,
-.news-filter button {
-    padding: 8px 15px;
-    font-size: 1rem;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    background-color: #fff;
-    cursor: pointer;
-    transition: all 0.3s ease;
+.news-filter__label {
+    font-weight: 700;
+    color: var(--text);
 }
 
-.news-filter button:hover {
-    background-color: #e0e4ff;
-    border-color: #99aaff;
-}
-
-/* Сетка новостей */
-.news-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 25px;
-}
-
-/* Отдельный блок новости */
-.news-item {
-    background: #fff;
-    padding: 20px;
-    border-radius: 15px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.05);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.news-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.08);
-}
-
-/* Картинка новости */
-.news-image {
-    width: 100%;
-    height: auto;
+.news-filter__select {
+    min-width: 220px;
+    padding: 10px 14px;
     border-radius: 12px;
-    margin-bottom: 15px;
+    border: 1px solid #BFD8F8;
+    background: #fff;
+    color: var(--text);
 }
 
-/* Дата публикации */
-.news-date {
-    font-size: 0.9rem;
-    color: #666;
+.news-list-card .card-modern__body p {
+    overflow-wrap: anywhere;
 }
 
-/* Контент новости на детальной странице */
-.news-content {
+.news-detail-shell__head {
+    align-items: flex-start;
+}
+
+.news-detail-card {
+    border: 1px solid #E1ECF8;
+    border-radius: 20px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.news-detail-card__image-wrap {
+    max-height: 420px;
+    background: linear-gradient(180deg, #F8FBFF 0%, #EDF5FF 100%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+.news-detail-card__image {
+    max-width: 100%;
+    max-height: 380px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+}
+
+.news-detail-card__content {
+    padding: 22px;
+    color: var(--text);
     line-height: 1.7;
-    font-size: 1.1rem;
-    color: #333;
-    margin-top: 20px;
+    font-size: 1.04rem;
 }
 
-/* Декоративные фигуры */
-.decor-left,
-.decor-right {
-    position: absolute;
-    top: 50%;
-    width: 100px;
-    height: 100px;
-    background: rgba(200, 220, 255, 0.3);
-    border-radius: 50%;
-    z-index: -1;
+.news-detail-card__content p {
+    margin-bottom: 14px;
 }
 
-.decor-left {
-    left: -50px;
-    transform: translateY(-50%);
-}
+@media (max-width: 991px) {
+    .news-filter {
+        align-items: stretch;
+    }
 
-.decor-right {
-    right: -50px;
-    transform: translateY(-50%);
-}
-/* Хедер новостей */
-.news-header {
-    position: relative;
-    text-align: center;
-    padding: 60px 20px 40px;
-    background: linear-gradient(135deg, #6a8cff 0%, #b0c4ff 100%);
-    color: #fff;
-    border-radius: 0 0 30px 30px;
-    margin-bottom: 40px;
-}
-
-.news-header h1 {
-    font-size: 3rem;
-    margin-bottom: 10px;
-}
-
-.news-header p {
-    font-size: 1.2rem;
-    opacity: 0.9;
-}
-
-/* Декоративная фигура в хедере */
-.header-decor {
-    position: absolute;
-    bottom: -20px;
-    right: 20px;
-    width: 80px;
-    height: 80px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 50%;
+    .news-filter__select {
+        width: 100%;
+    }
 }
