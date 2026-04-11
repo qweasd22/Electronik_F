@@ -248,7 +248,51 @@
     font-weight: 600;
     transition: background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
 }
+.about-layout {
+    display: grid;
+    grid-template-columns: 1.35fr 0.95fr;
+    gap: 24px;
+    margin-bottom: 24px;
+    align-items: start;
+}
 
+.info-card--main {
+    min-height: 100%;
+}
+
+.info-card--form {
+    position: sticky;
+    top: 24px;
+}
+
+.info-card--main h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.about-divider {
+    width: 100%;
+    height: 1px;
+    margin: 22px 0 18px;
+    background: linear-gradient(90deg, rgba(13,110,253,0.18), rgba(13,110,253,0.04));
+}
+
+.info-card--map {
+    margin-top: 0;
+}
+
+@media (max-width: 991px) {
+    .about-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .info-card--form {
+        position: static;
+    }
+}
 .about-submit-btn:hover {
     background: #0b5ed7;
     transform: translateY(-1px);

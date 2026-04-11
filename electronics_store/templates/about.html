@@ -15,123 +15,111 @@
                 и понятным сервисом для каждого покупателя.
             </p>
         </div>
-        <div class="header-decor"></div>
+        
     </header>
+    
+    <div class="about-layout">
+    <div class="info-card info-card--main animated-card">
+        <h2>О компании</h2>
+        <p>
+            Мы предлагаем современную электронику для дома, работы и отдыха.
+            В каталоге собраны востребованные товары, а команда магазина
+            помогает подобрать подходящее решение под ваши задачи.
+        </p>
+        <p>
+            Наша цель — сделать покупку техники простой, понятной и безопасной:
+            от выбора товара до получения заказа.
+        </p>
 
-    <div class="about-grid">
-        <div class="info-card animated-card">
-            <h2>Кто мы</h2>
-            <p>
-                Мы предлагаем современную электронику для дома, работы и отдыха.
-                В каталоге собраны востребованные товары, а команда магазина
-                помогает подобрать подходящее решение под ваши задачи.
-            </p>
-            <p>
-                Наша цель — сделать покупку техники простой, понятной и безопасной:
-                от выбора товара до получения заказа.
-            </p>
+        <div class="about-divider"></div>
+
+        <h3>Реквизиты и контакты</h3>
+        <ul class="contact-list">
+            <li>
+                <i class="bi bi-geo-alt-fill"></i>
+                <span><strong>Адрес:</strong> ул. Запольная, 60, Курск, 305040</span>
+            </li>
+            <li>
+                <i class="bi bi-telephone-fill"></i>
+                <span><strong>Телефон:</strong> +7 (4712) 745-123</span>
+            </li>
+            <li>
+                <i class="bi bi-envelope-fill"></i>
+                <span><strong>Email:</strong> info@example.com</span>
+            </li>
+            <li>
+                <i class="bi bi-building"></i>
+                <span><strong>ИНН:</strong> 0000000000</span>
+            </li>
+            <li>
+                <i class="bi bi-file-earmark-text-fill"></i>
+                <span><strong>ОГРН:</strong> 0000000000000</span>
+            </li>
+        </ul>
+
+        <div class="social-inline">
+            <a href="https://vk.com/" class="social-inline__link" target="_blank" rel="noopener" aria-label="VK">
+                <span class="social-inline__icon">VK</span>
+            </a>
+            <a href="#" class="social-inline__link" target="_blank" rel="noopener" aria-label="MAX">
+                <span class="social-inline__icon">MAX</span>
+            </a>
         </div>
+    </div>
 
-        <div class="info-card animated-card">
-            <h2>Реквизиты и контакты</h2>
+    <div class="info-card info-card--form animated-card">
+        <h2>Обратная связь</h2>
 
-            <ul class="contact-list">
-                <li>
-                    <i class="bi bi-geo-alt-fill"></i>
-                    <span><strong>Адрес:</strong> ул. Запольная, 60, Курск, 305040</span>
-                </li>
-                <li>
-                    <i class="bi bi-telephone-fill"></i>
-                    <span><strong>Телефон:</strong> +7 (4712) 745-123</span>
-                </li>
-                <li>
-                    <i class="bi bi-envelope-fill"></i>
-                    <span><strong>Email:</strong> info@example.com</span>
-                </li>
-                <li>
-                    <i class="bi bi-clock-fill"></i>
-                    <span><strong>Режим работы:</strong> Пн–Вс, 09:00–21:00</span>
-                </li>
-                <li>
-                    <i class="bi bi-building"></i>
-                    <span><strong>ИНН:</strong> 0000000000</span>
-                </li>
-                <li>
-                    <i class="bi bi-file-earmark-text-fill"></i>
-                    <span><strong>ОГРН:</strong> 0000000000000</span>
-                </li>
-            </ul>
+        {% if form_sent %}
+            <div class="alert alert-success about-alert">
+                <p class="mb-0">Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.</p>
+            </div>
+        {% endif %}
 
-            <div class="social-inline">
-                <a href="https://vk.com/" class="social-inline__link" target="_blank" rel="noopener" aria-label="VK">
-                    <span class="social-inline__icon">VK</span>
-                </a>
-                <a href="#" class="social-inline__link" target="_blank" rel="noopener" aria-label="MAX">
-                    <span class="social-inline__icon">MAX</span>
-                </a>
+        <form method="post" class="about-form">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="id_name">Ваше имя</label>
+                {{ form.name }}
             </div>
 
-            <p class="org-note">
-                Здесь укажи реальные реквизиты и настоящие ссылки на соцсети.
-            </p>
-        </div>
+            <div class="form-group">
+                <label for="id_email">Ваш email</label>
+                {{ form.email }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_phone_number">Номер телефона</label>
+                {{ form.phone_number }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_message">Сообщение</label>
+                {{ form.message }}
+            </div>
+
+            <button type="submit" class="btn about-submit-btn">
+                Отправить сообщение
+            </button>
+        </form>
     </div>
+</div>
 
-    <div class="about-grid about-grid--single">
-        <div class="info-card animated-card">
-            <h2>Обратная связь</h2>
-
-            {% if form_sent %}
-                <div class="alert alert-success about-alert">
-                    <p class="mb-0">Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.</p>
-                </div>
-            {% endif %}
-
-            <form method="post" class="about-form">
-                {% csrf_token %}
-
-                <div class="form-group">
-                    <label for="id_name">Ваше имя</label>
-                    {{ form.name }}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_email">Ваш email</label>
-                    {{ form.email }}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_phone_number">Номер телефона</label>
-                    {{ form.phone_number }}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_message">Сообщение</label>
-                    {{ form.message }}
-                </div>
-
-                <button type="submit" class="btn about-submit-btn">
-                    Отправить сообщение
-                </button>
-            </form>
-        </div>
+<div class="info-card info-card--map animated-card">
+    <h2>Как нас найти</h2>
+    <div class="map-wrapper">
+        <iframe
+            src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
+            width="100%"
+            height="380"
+            style="border:0;"
+            allowfullscreen=""
+            loading="lazy">
+        </iframe>
     </div>
+</div>
 
-    <div class="info-card info-card--map animated-card">
-        <h2>Как нас найти</h2>
-        <div class="map-wrapper">
-            <iframe
-                src="https://yandex.ru/map-widget/v1/?um=constructor%3A74999e9817063e90b8be5d8a28f210c16a83206e68ee61bfe15e24587ba8483a&amp;source=constructor"
-                width="100%"
-                height="380"
-                style="border:0;"
-                allowfullscreen=""
-                loading="lazy">
-            </iframe>
-        </div>
-    </div>
-
-    <div class="decor-left"></div>
-    <div class="decor-right"></div>
+    
 </section>
 {% endblock %}
