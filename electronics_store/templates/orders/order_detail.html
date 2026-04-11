@@ -1,0 +1,134 @@
+{% extends 'base_generic.html' %}
+{% load static %}
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div>
+                <h1 class="h3 fw-bold mb-1">Заказ #{{ order.id }}</h1>
+                <p class="text-muted mb-0">Оформлен {{ order.created_at|date:"d.m.Y H:i" }}</p>
+            </div>
+            <a href="{% url 'accounts:profile' %}" class="btn btn-outline-secondary">Назад в кабинет</a>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Статус</div>
+                    <div class="fw-semibold">{{ order.get_status_display }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Оплата</div>
+                    <div class="fw-semibold">{{ order.get_payment_method_display }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Доставка</div>
+                    <div class="fw-semibold">{{ order.get_delivery_method_display }}</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Итог</div>
+                    <div class="fw-semibold">{{ order.total_price|floatformat:2 }} ₽</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Получатель</div>
+                    <div class="fw-semibold">{{ order.recipient_name }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Телефон</div>
+                    <div class="fw-semibold">{{ order.phone_number }}</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Курьер</div>
+                    <div class="fw-semibold">
+                        {% if order.courier %}
+                            {{ order.courier.get_full_name|default:order.courier.username }}
+                        {% else %}
+                            Не назначен
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="border rounded-4 p-3 h-100">
+                    <div class="text-muted small">Оплачен</div>
+                    <div class="fw-semibold">
+                        {% if order.is_paid %}Да{% else %}Нет{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-4">
+            <h3 class="h5 fw-bold">Адрес доставки</h3>
+            <div class="border rounded-4 p-3">{{ order.address }}</div>
+        </div>
+
+        {% if order.comment %}
+        <div class="mb-4">
+            <h3 class="h5 fw-bold">Комментарий к заказу</h3>
+            <div class="border rounded-4 p-3">{{ order.comment }}</div>
+        </div>
+        {% endif %}
+
+        <div class="mb-4">
+            <h3 class="h5 fw-bold">Состав заказа</h3>
+            <div class="row g-3">
+                {% for item in order.items.all %}
+                <div class="col-12">
+                    <div class="border rounded-4 p-3 d-flex gap-3 align-items-center">
+                        {% if item.product.image %}
+                            <img src="{{ item.product.image.url }}" alt="{{ item.product_name }}" style="width:80px;height:80px;object-fit:cover;border-radius:12px;">
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <div class="fw-semibold">{{ item.product_name }}</div>
+                            <div class="text-muted small">Количество: {{ item.quantity }}</div>
+                            <div class="text-muted small">Цена при покупке: {{ item.price_at_purchase }} ₽</div>
+                            {% if item.discount_applied %}
+                                <div class="text-success small">Скидка была применена</div>
+                            {% endif %}
+                        </div>
+                        <div class="fw-bold">{{ item.total_price|floatformat:2 }} ₽</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        {% if order.status_history.all %}
+        <div>
+            <h3 class="h5 fw-bold">История статусов</h3>
+            <div class="list-group">
+                {% for entry in order.status_history.all %}
+                <div class="list-group-item rounded-3 mb-2">
+                    <div class="d-flex justify-content-between flex-wrap gap-2">
+                        <strong>{{ entry.get_status_display }}</strong>
+                        <span class="text-muted">{{ entry.created_at|date:"d.m.Y H:i" }}</span>
+                    </div>
+                    {% if entry.note %}
+                        <div class="mt-1 text-muted">{{ entry.note }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -40,6 +40,8 @@ body {
     color: var(--text);
     font-family: "Inter", "Segoe UI", sans-serif;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 a {
@@ -146,6 +148,7 @@ a {
 
 .site-main {
     padding: 40px 0 70px;
+    flex: 1 0 auto;
 }
 
 /* HERO */
@@ -602,7 +605,7 @@ a {
 
 
 .site-footer {
-    margin-top: 24px;
+    margin-top: auto;
     border-top: 1px solid var(--line);
     
     background: #FFFFFF;

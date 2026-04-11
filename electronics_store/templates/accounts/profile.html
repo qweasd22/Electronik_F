@@ -1,75 +1,156 @@
 {% extends 'base_generic.html' %}
-{% block title %}Профиль{% endblock %}
+{% block title %}Личный кабинет{% endblock %}
 
 {% block content %}
 <div class="profile-container position-relative py-5">
-
-    <!-- Декоративные фигуры -->
-    <div class="decor-shape shape-top-left"></div>
-    <div class="decor-shape shape-bottom-right"></div>
+    
 
     <div class="row justify-content-center">
-        <div class="col-lg-8 col-md-10">
+        <div class="col-xl-10 col-lg-11">
 
-            <!-- Карточка профиля -->
-            <div class="card profile-card shadow-lg p-5 mb-5 border-0 rounded-4">
-                <h2 class="card-title text-center mb-4 fw-bold text-primary">Профиль пользователя</h2>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    {% for field in form %}
-                    <div class="form-floating mb-3">
-                        {{ field }}
-                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                        {% for error in field.errors %}
-                        <div class="text-danger small mt-1">{{ error }}</div>
-                        {% endfor %}
+            <div class="card shadow-lg p-4 mb-4 border-0 rounded-4">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                    <div>
+                        <h1 class="fw-bold text-primary mb-1">Личный кабинет</h1>
+                        <p class="mb-1"><strong>{{ request.user.get_full_name|default:request.user.username }}</strong></p>
+                        <p class="mb-0 text-muted">
+                            {{ request.user.email|default:"Email не указан" }}
+                            {% if request.user.phone_number %} • {{ request.user.phone_number }}{% endif %}
+                        </p>
                     </div>
-                    {% endfor %}
-                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">
-                        <i class="bi bi-save me-2"></i> Сохранить изменения
+
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="collapse" data-bs-target="#profileEditCollapse">
+                        <i class="bi bi-pencil-square me-2"></i>Изменить данные
                     </button>
-                </form>
+                </div>
             </div>
 
-            <!-- История заказов -->
-            <div class="card orders-card shadow-lg p-4 border-0 rounded-4">
-                <h3 class="card-title mb-3 fw-bold text-secondary">История заказов</h3>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3">
+                        <div class="text-muted">Всего заказов</div>
+                        <div class="fs-2 fw-bold text-primary">{{ stats.total }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3">
+                        <div class="text-muted">Текущие</div>
+                        <div class="fs-2 fw-bold text-primary">{{ stats.current }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3">
+                        <div class="text-muted">Доставлены</div>
+                        <div class="fs-2 fw-bold text-success">{{ stats.delivered }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border-0 shadow-sm rounded-4 p-3">
+                        <div class="text-muted">Отменены</div>
+                        <div class="fs-2 fw-bold text-danger">{{ stats.cancelled }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="collapse mb-4" id="profileEditCollapse">
+                <div class="card shadow-lg p-4 border-0 rounded-4">
+                    <h3 class="mb-3 fw-bold text-primary">Редактирование профиля</h3>
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="row">
+                            {% for field in form %}
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}</label>
+                                {{ field }}
+                                {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-2"></i>Сохранить изменения
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-lg p-4 border-0 rounded-4 mb-4">
+                <h3 class="mb-3 fw-bold text-primary">Текущие заказы</h3>
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle">
+                    <table class="table align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>ID заказа</th>
+                                <th>№</th>
                                 <th>Дата</th>
                                 <th>Сумма</th>
                                 <th>Статус</th>
-                                <th>Действия</th>
+                                <th>Подробнее</th>
+                                <th>Действие</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for order in orders %}
-                            <tr class="{% if order.status == 'cancelled' %}table-danger{% elif order.status == 'delivered' %}table-success{% endif %}">
-                                <td>{{ order.id }}</td>
-                                <td>{{ order.created_at|date:"d M Y, H:i" }}</td>
+                            {% for order in current_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
                                 <td>{{ order.total_price|floatformat:2 }} ₽</td>
                                 <td>{{ order.get_status_display }}</td>
                                 <td>
-                                    {% if order.status != 'cancelled' %}
-                                        {% if order.status != 'delivered' %}
-                                            <form method="post" action="{% url 'accounts:cancel_order' order.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-danger btn-sm">Отменить</button>
-                                            </form>
-                                        {% else %}
-                                            <span class="text-muted small">Доставлен</span>
-                                        {% endif %}
+                                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-primary btn-sm">
+                                        Открыть
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if order.status != 'delivered' and order.status != 'cancelled' %}
+                                    <form method="post" action="{% url 'accounts:cancel_order' order.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-danger btn-sm">Отменить</button>
+                                    </form>
                                     {% else %}
-                                        <span class="text-muted small">Отменен</span>
+                                    <span class="text-muted small">Недоступно</span>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="5" class="text-center">Заказы отсутствуют</td>
+                                <td colspan="6" class="text-center text-muted">Сейчас активных заказов нет.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card shadow-lg p-4 border-0 rounded-4">
+                <h3 class="mb-3 fw-bold text-secondary">История заказов</h3>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>№</th>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th>Статус</th>
+                                <th>Подробнее</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in order_history %}
+                            <tr class="{% if order.status == 'cancelled' %}table-danger{% elif order.status == 'delivered' %}table-success{% endif %}">
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ order.total_price|floatformat:2 }} ₽</td>
+                                <td>{{ order.get_status_display }}</td>
+                                <td>
+                                    <a href="{% url 'orders:order_detail' order.id %}" class="btn btn-outline-secondary btn-sm">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted">История заказов пока пуста.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -80,25 +161,35 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* --- Общий контейнер --- */
 .profile-container {
     position: relative;
     background-color: #f8f9fa;
 }
 
-/* --- Карточки --- */
-.profile-card, .orders-card {
-    background: #ffffff;
+.cabinet-hero,
+.profile-card,
+.orders-card,
+.stat-card {
+    background: #fff;
     border-radius: 1rem;
-    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.1);
 }
 
-/* --- Декоративные фигуры --- */
+.stat-label {
+    color: #6c757d;
+    font-size: .95rem;
+    margin-bottom: .35rem;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
 .decor-shape {
     position: absolute;
     border-radius: 50%;
@@ -122,21 +213,23 @@
     background: linear-gradient(135deg, #6f42c1, #d63384);
 }
 
-/* --- Форма --- */
-.form-floating input, .form-floating select {
-    height: 3.5rem;
+.form-label {
+    margin-bottom: .4rem;
+}
+
+.form-control,
+.form-select,
+textarea {
     border-radius: 0.75rem;
 }
 
-/* --- Кнопка --- */
-.btn-primary {
-    border-radius: 0.75rem;
+.status-badge {
+    padding: .55rem .75rem;
+    border-radius: 999px;
     font-weight: 600;
-}
-
-/* --- Таблица заказов --- */
-.table-hover tbody tr:hover {
-    background-color: rgba(0,123,255,0.05);
+    font-size: .85rem;
+    background: #eef2ff;
+    color: #3949ab;
 }
 
 .table-danger {

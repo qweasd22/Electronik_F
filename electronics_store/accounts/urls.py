@@ -15,4 +15,5 @@ urlpatterns = [
     path('order/<int:order_id>/cancel/', views.cancel_order, name='cancel_order'),  # Отмена заказа
     
     
+    
 ]
