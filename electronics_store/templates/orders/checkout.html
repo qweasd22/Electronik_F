@@ -1,62 +1,111 @@
 {% extends 'base_generic.html' %}
 {% load custom_filters %}
+{% load static %}
 
 {% block title %}Оформление заказа{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/checkout.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="checkout-container position-relative py-5">
+<div class="checkout-shell">
+    <section class="checkout-hero">
+        <div class="checkout-hero__overlay"></div>
+        <div class="checkout-hero__content container">
+            <span class="checkout-badge">Оформление • Доставка • Подтверждение</span>
+            <h1 style="margin-left: 15px;">Оформление заказа</h1>
+            <p style="margin-left: 15px;">Проверьте состав корзины, укажите адрес и выберите способ доставки.</p>
+        </div>
 
-    <!-- Декоративные фигуры -->
-    <div class="decor-shape shape-top-left"></div>
-    <div class="decor-shape shape-bottom-right"></div>
+        <div class="checkout-hero__glow checkout-hero__glow--left"></div>
+        <div class="checkout-hero__glow checkout-hero__glow--right"></div>
+    </section>
 
-    <div class="container">
-        <h2 class="text-center mb-4 fw-bold text-primary">Оформление заказа</h2>
-
-        <form method="post" id="checkout-form">
+    <section class="checkout-main container">
+        <form method="post" id="checkout-form" class="checkout-layout">
             {% csrf_token %}
-            <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <label for="address" class="form-label fw-semibold">Адрес доставки</label>
-                    <textarea id="address" name="address" class="form-control rounded-3 shadow-sm" placeholder="Введите ваш адрес" required></textarea>
-                </div>
-                <div class="col-md-6">
-                    <label for="delivery_method" class="form-label fw-semibold">Способ доставки</label>
-                    <select name="delivery_method" id="delivery_method" class="form-select rounded-3 shadow-sm" required>
-                        <option value="standard" {% if delivery_method == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
-                        <option value="express" {% if delivery_method == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
-                    </select>
-                </div>
-            </div>
 
-            <h4 class="fw-bold mb-3">Ваш заказ</h4>
-            <div class="order-items mb-4">
-                {% for item in cart_items %}
-                <div class="card order-item-card shadow-sm rounded-4 p-3 mb-3 d-flex justify-content-between align-items-center flex-wrap">
-                    <div>
-                        <h5 class="fw-bold mb-1">{{ item.product.name }} ({{ item.quantity }})</h5>
-                        <p class="mb-0 text-muted">Цена без скидки: {{ item.product.price }} ₽</p>
-                        {% if item.product.get_discounted_price != item.product.price %}
-                        <p class="mb-0 text-success">Цена со скидкой: {{ item.product.get_discounted_price }} ₽</p>
+            <div class="checkout-panel checkout-form-panel">
+                <div class="checkout-panel__head">
+                    <h2>Данные для заказа</h2>
+                    <p>Заполните поля ниже, чтобы мы могли доставить заказ.</p>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="checkout-alert checkout-alert--danger">
+                        {{ form.non_field_errors }}
+                    </div>
+                {% endif %}
+
+                <div class="checkout-form-grid">
+                    <div class="checkout-form-group checkout-form-group--full">
+                        <label for="address">Адрес доставки</label>
+                        <textarea id="address" name="address" class="checkout-input" placeholder="Введите ваш адрес" required>{% if form.address.value %}{{ form.address.value }}{% endif %}</textarea>
+                        {% if form.address.errors %}
+                            <div class="checkout-field-error">{{ form.address.errors|striptags }}</div>
                         {% endif %}
                     </div>
-                    <span class="badge bg-info text-dark fs-5">₽ {{ item.product.get_discounted_price|multiply:item.quantity }}</span>
+
+                    <div class="checkout-form-group">
+                        <label for="delivery_method">Способ доставки</label>
+                        <select name="delivery_method" id="delivery_method" class="checkout-input" required>
+                            <option value="standard" {% if delivery_method == 'standard' or form.delivery_method.value == 'standard' %}selected{% endif %}>Обычная доставка (200 ₽)</option>
+                            <option value="express" {% if delivery_method == 'express' or form.delivery_method.value == 'express' %}selected{% endif %}>Экспресс доставка (500 ₽)</option>
+                        </select>
+                        {% if form.delivery_method.errors %}
+                            <div class="checkout-field-error">{{ form.delivery_method.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
                 </div>
-                {% endfor %}
+
+                <div class="checkout-panel__head checkout-panel__head--sub">
+                    <h2>Ваш заказ</h2>
+                </div>
+
+                <div class="checkout-items">
+                    {% for item in cart_items %}
+                        <article class="checkout-item-card">
+                            <div>
+                                <h3>{{ item.product.name }} × {{ item.quantity }}</h3>
+                                <p>Цена без скидки: {{ item.product.price }} ₽</p>
+                                {% if item.product.get_discounted_price != item.product.price %}
+                                    <p class="checkout-item-card__discount">Цена со скидкой: {{ item.product.get_discounted_price }} ₽</p>
+                                {% endif %}
+                            </div>
+                            <div class="checkout-item-card__sum">{{ item.product.get_discounted_price|multiply:item.quantity }} ₽</div>
+                        </article>
+                    {% endfor %}
+                </div>
             </div>
 
-            <h4 class="fw-bold">Итого:</h4>
-            <div class="card summary-card shadow-sm rounded-4 p-4 mb-4">
-                <p class="mb-2">Доставка: <span id="delivery-cost" class="fw-semibold">{{ delivery_cost }} ₽</span></p>
-                <p class="mb-2">Итого без скидки: <span id="total-without-discount" class="fw-semibold">{{ total_without_discount }} ₽</span></p>
-                <p class="mb-0">Итого со скидкой: <span id="total-with-discount" class="fw-bold text-primary">{{ total_with_discount }} ₽</span></p>
-            </div>
+            <aside class="checkout-panel checkout-summary-panel">
+                <h2>Итого</h2>
 
-            <button type="submit" class="btn btn-primary btn-lg w-100">Оформить заказ</button>
+                <div class="checkout-summary-row">
+                    <span>Доставка</span>
+                    <strong id="delivery-cost">{{ delivery_cost }} ₽</strong>
+                </div>
+
+                <div class="checkout-summary-row">
+                    <span>Итого без скидки</span>
+                    <strong id="total-without-discount">{{ total_without_discount }} ₽</strong>
+                </div>
+
+                <div class="checkout-summary-row checkout-summary-row--total">
+                    <span>Итого со скидкой</span>
+                    <strong id="total-with-discount">{{ total_with_discount }} ₽</strong>
+                </div>
+
+                <button type="submit" class="checkout-btn checkout-btn--primary checkout-btn--block">Оформить заказ</button>
+                <a href="{% url 'orders:cart' %}" class="checkout-btn checkout-btn--ghost checkout-btn--block">Вернуться в корзину</a>
+            </aside>
         </form>
-    </div>
+    </section>
 </div>
+{% endblock %}
 
+{% block extra_js %}
 <script>
 document.getElementById('delivery_method').addEventListener('change', function() {
     var form = document.getElementById('checkout-form');
@@ -77,77 +126,4 @@ document.getElementById('delivery_method').addEventListener('change', function()
     .catch(error => console.log(error));
 });
 </script>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.checkout-container {
-    position: relative;
-    background-color: #f8f9fa;
-    min-height: 75vh;
-}
-
-/* --- Декоративные фигуры --- */
-.decor-shape {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.12;
-    z-index: 0;
-}
-.shape-top-left {
-    width: 120px;
-    height: 120px;
-    top: -20px;
-    left: -20px;
-    background: linear-gradient(135deg, #007bff, #00d4ff);
-}
-.shape-bottom-right {
-    width: 180px;
-    height: 180px;
-    bottom: -40px;
-    right: -40px;
-    background: linear-gradient(135deg, #6f42c1, #d63384);
-}
-
-/* --- Карточки товаров --- */
-.order-item-card {
-    background: linear-gradient(135deg, #ffffff, #f1f5f9);
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.order-item-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.12);
-}
-
-/* --- Сводка --- */
-.summary-card {
-    background: #ffffff;
-    border-radius: 1rem;
-    padding: 1rem 1.5rem;
-}
-
-/* --- Форма --- */
-textarea.form-control, select.form-select {
-    border-radius: 0.75rem;
-    box-shadow: 0 0.25rem 0.5rem rgba(0,0,0,0.05);
-}
-
-/* --- Кнопка --- */
-.btn-primary {
-    border-radius: 0.75rem;
-    font-weight: 600;
-    transition: background 0.2s, transform 0.2s;
-}
-.btn-primary:hover {
-    transform: translateY(-2px);
-}
-
-/* --- Адаптив --- */
-@media(max-width: 768px) {
-    .order-item-card {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-</style>
 {% endblock %}

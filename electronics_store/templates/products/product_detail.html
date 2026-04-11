@@ -2,137 +2,243 @@
 {% load static %}
 {% load widget_tweaks %}
 
+{% block title %}{{ product.name }}{% endblock %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/products.css' %}">
-<div class="products-page">
 
-    <!-- Хедер -->
-    <header class="news-header mb-5">
-        <h1>{{ product.name }}</h1>
-        <p>Подробная информация о продукте</p>
-        <div class="header-decor"></div>
-    </header>
+<div class="products-shell">
+    <section class="products-detail-hero">
+        <div class="products-detail-hero__overlay"></div>
+        <div class="products-detail-hero__content container">
+            <a href="{% url 'products:product_list' %}" class="products-back-link">← Назад к каталогу</a>
 
-    <div class="row g-4">
-
-        <!-- Галерея изображений -->
-        <div class="col-md-5">
-            {% if product.images.all %}
-            <div id="productCarousel" class="carousel slide mb-3" data-bs-ride="carousel">
-                <div class="carousel-inner">
-                    {% for img in product.images.all %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <img src="{{ img.image.url }}" class="d-block w-100 product-detail-img" alt="{{ product.name }}">
-                    </div>
-                    {% endfor %}
-                </div>
-
-                {% if product.images.count > 1 %}
-                <button class="carousel-control-prev" type="button" data-bs-target="#productCarousel" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Назад</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#productCarousel" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Вперед</span>
-                </button>
+            <div class="product-detail-hero__meta">
+                {% if product.category %}
+                    <span>{{ product.category.name }}</span>
+                {% endif %}
+                {% if product.brand %}
+                    <span>{{ product.brand.name }}</span>
                 {% endif %}
             </div>
 
-            {% if product.images.count > 1 %}
-            <!-- Мини-превью -->
-            <div class="d-flex gap-2 flex-wrap justify-content-center">
-                {% for img in product.images.all %}
-                <img src="{{ img.image.url }}" class="product-thumb" data-bs-target="#productCarousel" data-bs-slide-to="{{ forloop.counter0 }}">
-                {% endfor %}
-            </div>
-            {% endif %}
-
-            {% else %}
-            <img src="{% static 'media/no_image.jpeg' %}" class="product-detail-img" alt="Нет изображения">
-            {% endif %}
+            <h1>{{ product.name }}</h1>
+            <p>Подробная информация о товаре, рейтинг покупателей и быстрое оформление покупки.</p>
         </div>
 
-        <!-- Информация о товаре -->
-        <div class="col-md-7 d-flex flex-column">
-            <h2 class="product-detail-title">{{ product.name }}</h2>
-            <p class="product-price h4">{{ product.price }} ₽</p>
-            <p class="product-rating">⭐ {{ average_rating }}</p>
-            <p class="product-description">{{ product.description }}</p>
+        <div class="products-hero__glow products-hero__glow--left"></div>
+        <div class="products-hero__glow products-hero__glow--right"></div>
+    </section>
 
-            {% if product.additional_info %}
-            <div class="card mb-3 p-3 shadow-sm additional-info-card">
-                <h5>Дополнительная информация</h5>
-                <p>{{ product.additional_info|linebreaksbr }}</p>
-            </div>
-            {% endif %}
-
-            <!-- Корзина -->
-            {% if user.is_authenticated %}
-                <div class="mt-auto">
-                    {% if quantity_in_cart > 0 %}
-                        <div class="card p-3 mb-3 shadow-sm cart-card">
-                            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
-                                <span>В корзине: <strong>{{ quantity_in_cart }}</strong> шт.</span>
-                                <div class="btn-group" role="group">
-                                    <a href="{% url 'orders:decrease_cart' product.id %}" class="btn btn-outline-secondary">-</a>
-                                    <a href="{% url 'orders:add_to_cart' product.id %}" class="btn btn-outline-secondary">+</a>
-                                    <a href="{% url 'orders:remove_from_cart' product.id %}" class="btn btn-danger">Удалить</a>
+    <section class="products-detail container">
+        <div class="product-detail-grid">
+            <div class="product-detail-column product-detail-column--left">
+                <div class="product-detail-card product-detail-media-card">
+                    <div class="product-gallery">
+                        {% if product.images.exists %}
+                            {% with first_image=product.images.first %}
+                                <div
+                                    class="product-gallery__viewer"
+                                    id="product-gallery-viewer"
+                                    {% if first_image %}style="--product-image-url: url('{{ first_image.image.url }}');"{% endif %}
+                                >
+                                    {% if first_image %}
+                                        <img
+                                            src="{{ first_image.image.url }}"
+                                            class="product-gallery__main"
+                                            alt="{{ product.name }}"
+                                            id="product-gallery-main-image"
+                                        >
+                                    {% else %}
+                                        <div class="product-gallery__placeholder">Нет изображения</div>
+                                    {% endif %}
                                 </div>
-                                <a href="{% url 'orders:cart' %}" class="btn btn-outline-primary">Перейти в корзину</a>
+                            {% endwith %}
+
+                            {% if product.images.count > 1 %}
+                                <div class="product-thumbs" id="product-thumbs">
+                                    {% for img in product.images.all %}
+                                        <button
+                                            type="button"
+                                            class="product-thumb-btn {% if forloop.first %}is-active{% endif %}"
+                                            data-image="{{ img.image.url }}"
+                                            aria-label="Показать изображение {{ forloop.counter }}"
+                                        >
+                                            <img src="{{ img.image.url }}" alt="{{ product.name }}" class="product-thumb">
+                                        </button>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        {% elif product.image %}
+                            <div class="product-gallery__viewer" style="--product-image-url: url('{{ product.image.url }}');">
+                                <img src="{{ product.image.url }}" class="product-gallery__main" alt="{{ product.name }}">
                             </div>
-                        </div>
-                    {% else %}
-                        <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-add btn-lg w-100 mb-3">Добавить в корзину</button>
-                        </form>
-                    {% endif %}
+                        {% else %}
+                            <div class="product-gallery__viewer">
+                                <div class="product-gallery__placeholder">Нет изображения</div>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
-            {% else %}
-                <a href="{% url 'accounts:login' %}" class="btn btn-add btn-lg w-100 mb-3">Войдите, чтобы купить</a>
-            {% endif %}
 
-            <hr>
+                <div class="product-reviews-card">
+                    <h3>Отзывы</h3>
 
-            <!-- Отзывы -->
-            <h4>Отзывы</h4>
-            {% for review in reviews %}
-            <div class="card p-3 mb-3 shadow-sm review-card">
-                <p><strong>{{ review.user.username }}</strong> ({{ review.created_at|date:"d.m.Y H:i" }})</p>
-                <p>{{ review.text }}</p>
-                {% for r in review.user.ratings.all %}
-                    {% if r.product == product %}
-                        <p>Оценка: {{ r.stars }} ⭐</p>
-                    {% endif %}
-                {% endfor %}
+                    {% for review in reviews %}
+                        <div class="product-review">
+                            <div class="product-review__head">
+                                <span class="product-review__user">{{ review.user.username }}</span>
+                                <span class="product-review__date">{{ review.created_at|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            <p class="product-review__text">{{ review.text }}</p>
+                        </div>
+                    {% empty %}
+                        <p class="product-empty-note">Отзывов пока нет. Станьте первым, кто поделится впечатлением.</p>
+                    {% endfor %}
+                </div>
+
+                {% if user.is_authenticated %}
+                    <div class="product-review-form-card">
+                        <h3>Оставить отзыв</h3>
+                        <form method="post">
+                            {% csrf_token %}
+
+                            <div class="form-field">
+                                <label for="{{ review_form.text.id_for_label }}">Ваш отзыв</label>
+                                {{ review_form.text|add_class:"form-control" }}
+                            </div>
+
+                            <div class="form-field">
+                                <label for="{{ rating_form.stars.id_for_label }}">Ваша оценка</label>
+                                {{ rating_form.stars|add_class:"form-control" }}
+                            </div>
+
+                            <button type="submit" class="products-btn products-btn--primary">Отправить отзыв</button>
+                        </form>
+                    </div>
+                {% endif %}
             </div>
-            {% empty %}
-                <p>Отзывов пока нет.</p>
-            {% endfor %}
 
-            {% if user.is_authenticated %}
-                <hr>
-                <h5 class="mb-3">Оставить отзыв</h5>
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="form-floating mb-3">
-                        {{ review_form.text|add_class:"form-control" }}
-                        <label for="{{ review_form.text.id_for_label }}">Ваш отзыв</label>
+            <div class="product-detail-column product-detail-column--right">
+                <div class="product-purchase-card">
+                    <h2 class="product-detail-card__title">{{ product.name }}</h2>
+                    <p class="product-detail-card__price">{{ product.price }} ₽</p>
+                    <p class="product-detail-card__rating">⭐ {{ average_rating }}</p>
+
+                    <div class="product-purchase-card__status">
+                        Категория: <strong>{{ product.category.name }}</strong><br>
+                        Бренд: <strong>{{ product.brand.name }}</strong><br>
+                        {% if product.stock > 0 %}
+                            В наличии: <strong>{{ product.stock }} шт.</strong>
+                        {% else %}
+                            <span class="product-stock-status product-stock-status--danger">Нет в наличии</span>
+                        {% endif %}
                     </div>
-                    <div class="form-floating mb-3">
-                        {{ rating_form.stars|add_class:"form-control" }}
-                        <label for="{{ rating_form.stars.id_for_label }}">Ваша оценка</label>
+
+                    {% if product.description %}
+                        <div class="product-detail-card__description is-collapsed" id="product-description">
+                            {{ product.description|linebreaksbr }}
+                        </div>
+                        {% if product.description|length > 380 %}
+                            <button
+                                type="button"
+                                class="products-btn products-btn--ghost product-description-toggle"
+                                data-target="product-description"
+                                aria-expanded="false"
+                            >
+                                Подробнее
+                            </button>
+                        {% endif %}
+                    {% endif %}
+
+                    {% if product.additional_info %}
+                        <div class="product-detail-card__extra">
+                            <strong>Дополнительная информация</strong>
+                            <div class="mt-2">{{ product.additional_info|linebreaksbr }}</div>
+                        </div>
+                    {% endif %}
+
+                    <div class="product-cart-controls">
+                        {% if user.is_authenticated %}
+                            {% if product.stock <= 0 %}
+                                <button type="button" class="products-btn products-btn--ghost" disabled>Нет в наличии</button>
+                            {% elif quantity_in_cart > 0 %}
+                                <span class="product-cart-note">В корзине: {{ quantity_in_cart }} шт.</span>
+
+                                {% if quantity_in_cart < product.stock %}
+                                    <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
+                                        {% csrf_token %}
+                                        <button type="submit" class="products-btn products-btn--ghost">+1</button>
+                                    </form>
+                                {% else %}
+                                    <button type="button" class="products-btn products-btn--ghost" disabled>Лимит достигнут</button>
+                                {% endif %}
+
+                                <a href="{% url 'orders:decrease_cart' product.id %}" class="products-btn products-btn--ghost">-1</a>
+                                <a href="{% url 'orders:remove_from_cart' product.id %}" class="products-btn products-btn--danger">Удалить</a>
+                                <a href="{% url 'orders:cart' %}" class="products-btn products-btn--primary">Перейти в корзину</a>
+                            {% else %}
+                                <form action="{% url 'orders:add_to_cart' product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="products-btn products-btn--primary">Добавить в корзину</button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <a href="{% url 'accounts:login' %}" class="products-btn products-btn--primary">Войдите, чтобы купить</a>
+                        {% endif %}
                     </div>
-                    <button type="submit" class="btn btn-primary btn-lg w-100">Оставить отзыв</button>
-                </form>
-            {% endif %}
+                </div>
+            </div>
         </div>
-
-    </div>
-
-    <div class="decor-left"></div>
-    <div class="decor-right"></div>
+    </section>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var toggleBtn = document.querySelector('.product-description-toggle');
+    if (toggleBtn) {
+        var targetId = toggleBtn.getAttribute('data-target');
+        var desc = document.getElementById(targetId);
+
+        if (desc) {
+            toggleBtn.addEventListener('click', function () {
+                var expanded = toggleBtn.getAttribute('aria-expanded') === 'true';
+                toggleBtn.setAttribute('aria-expanded', (!expanded).toString());
+                desc.classList.toggle('is-collapsed', expanded);
+                toggleBtn.textContent = expanded ? 'Подробнее' : 'Свернуть';
+            });
+        }
+    }
+
+    var viewer = document.getElementById('product-gallery-viewer');
+    var mainImage = document.getElementById('product-gallery-main-image');
+    var thumbButtons = document.querySelectorAll('.product-thumb-btn');
+
+    if (viewer && mainImage && thumbButtons.length) {
+        thumbButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var imageUrl = btn.getAttribute('data-image');
+                if (!imageUrl) return;
+
+                mainImage.classList.add('is-loading');
+
+                var preload = new Image();
+                preload.onload = function () {
+                    mainImage.src = imageUrl;
+                    viewer.style.setProperty('--product-image-url', "url('" + imageUrl + "')");
+                    mainImage.classList.remove('is-loading');
+
+                    thumbButtons.forEach(function (item) {
+                        item.classList.remove('is-active');
+                    });
+                    btn.classList.add('is-active');
+                };
+                preload.src = imageUrl;
+            });
+        });
+    }
+});
+</script>
 {% endblock %}

@@ -1,136 +1,155 @@
 {% extends 'base_generic.html' %}
+{% load static %}
+
 {% block title %}Корзина{% endblock %}
 
 {% block content %}
-<div class="cart-container position-relative py-5">
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
 
-    <!-- Декоративные фигуры -->
-    <div class="decor-shape shape-top-left"></div>
-    <div class="decor-shape shape-bottom-right"></div>
+<div class="cart-shell">
+    <section class="cart-hero">
+        <div class="cart-hero__overlay"></div>
+        <div class="cart-hero__content container">
+            <span class="cart-badge">Корзина • Оформление • Доставка</span>
+            <h1 style="margin-left: 15px;">Ваша корзина</h1>
+            <p style="margin-left: 15px;">
+                Проверьте выбранные товары, скорректируйте количество и перейдите к оформлению заказа.
+            </p>
+        </div>
 
-    <div class="container">
-        <h2 class="mb-4 fw-bold text-primary text-center">Корзина</h2>
+        <div class="cart-hero__glow cart-hero__glow--left"></div>
+        <div class="cart-hero__glow cart-hero__glow--right"></div>
+    </section>
 
+    <section class="cart-main container">
         {% if cart_items %}
-        <div class="row g-4">
-
-            {% for item in cart_items %}
-            <div class="col-lg-12">
-                <div class="card cart-item-card shadow-sm rounded-4 p-4 d-flex justify-content-between flex-wrap align-items-center">
-                    
-                    <div class="product-details flex-grow-1 mb-3 mb-lg-0">
-                        <h5 class="fw-bold mb-2">{{ item.product.name }}</h5>
-                        <p class="mb-1 text-muted">Цена: {{ item.product.price }} ₽ за шт.</p>
+            <div class="cart-layout">
+                <div class="cart-items-panel">
+                    <div class="cart-items-panel__head">
+                        <h2>Товары в корзине</h2>
+                        <p>Управляйте количеством и следите за доступным остатком.</p>
                     </div>
 
-                    <div class="product-actions d-flex align-items-center flex-wrap">
-                        <form action="{% url 'orders:update_cart' item.id %}" method="post" class="d-flex align-items-center mb-2 mb-lg-0 me-3">
-                            {% csrf_token %}
-                            <button type="submit" name="action" value="decrease" class="btn btn-outline-secondary btn-sm me-1">-</button>
-                            <input type="text" value="{{ item.quantity }}" readonly class="form-control form-control-sm text-center me-1" style="width:50px;">
-                            <button type="submit" name="action" value="increase" class="btn btn-outline-secondary btn-sm me-2">+</button>
-                            <button type="submit" name="action" value="remove" class="btn btn-danger btn-sm">Удалить</button>
-                        </form>
-                        <span class="fw-bold fs-5">{{ item.total_price }} ₽</span>
+                    <div class="cart-list">
+                        {% for item in cart_items %}
+                            <article class="cart-item-card {% if item.is_out_of_stock or item.is_over_limit %}cart-item-card--danger{% endif %}">
+                                <div class="cart-item-card__image-wrap">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="cart-item-card__image">
+                                    {% else %}
+                                        <div class="cart-item-card__placeholder">Нет изображения</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="cart-item-card__body">
+                                    <div class="cart-item-card__top">
+                                        <div>
+                                            <h3 class="cart-item-card__title">{{ item.product.name }}</h3>
+                                            <p class="cart-item-card__meta">
+                                                Категория: {{ item.product.category.name }}{% if item.product.brand %} • {{ item.product.brand.name }}{% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="cart-item-card__price-block">
+                                            <div class="cart-item-card__price">{{ item.product.price }} ₽</div>
+                                            <div class="cart-item-card__sum">Сумма: {{ item.total_price }} ₽</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="cart-item-card__status-row">
+                                        <span class="cart-stock-pill {% if item.product.stock > 0 %}cart-stock-pill--ok{% else %}cart-stock-pill--danger{% endif %}">
+                                            На складе: {{ item.product.stock }} шт.
+                                        </span>
+
+                                        <span class="cart-qty-pill">
+                                            В корзине: {{ item.quantity }} шт.
+                                        </span>
+                                    </div>
+
+                                    {% if item.is_out_of_stock %}
+                                        <div class="cart-alert cart-alert--danger">
+                                            Этот товар сейчас отсутствует на складе. Оформление заказа невозможно, пока он находится в корзине.
+                                        </div>
+                                    {% elif item.is_over_limit %}
+                                        <div class="cart-alert cart-alert--danger">
+                                            В корзине {{ item.quantity }} шт., но доступно только {{ item.product.stock }} шт. Уменьшите количество.
+                                        </div>
+                                    {% elif item.quantity >= item.product.stock %}
+                                        <div class="cart-alert cart-alert--warning">
+                                            Достигнут максимум доступного количества для этого товара.
+                                        </div>
+                                    {% endif %}
+
+                                    <div class="cart-item-card__actions">
+                                        {% if item.product.stock > item.quantity %}
+                                            <form method="post" action="{% url 'orders:update_cart' item.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="action" value="increase">
+                                                <button type="submit" class="cart-btn cart-btn--ghost">+1</button>
+                                            </form>
+                                        {% else %}
+                                            <button type="button" class="cart-btn cart-btn--ghost" disabled>+1</button>
+                                        {% endif %}
+
+                                        <form method="post" action="{% url 'orders:update_cart' item.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="decrease">
+                                            <button type="submit" class="cart-btn cart-btn--ghost">-1</button>
+                                        </form>
+
+                                        <form method="post" action="{% url 'orders:update_cart' item.id %}">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="remove">
+                                            <button type="submit" class="cart-btn cart-btn--danger">Удалить</button>
+                                        </form>
+
+                                        <a href="{% url 'products:product_detail' item.product.id %}" class="cart-btn cart-btn--primary">
+                                            К товару
+                                        </a>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
                     </div>
                 </div>
+
+                <aside class="cart-summary-panel">
+                    <h2>Итого</h2>
+                    <div class="cart-summary-row">
+                        <span>Товаров</span>
+                        <strong>{{ cart_items|length }}</strong>
+                    </div>
+                    <div class="cart-summary-row">
+                        <span>Стоимость товаров</span>
+                        <strong>{{ total }} ₽</strong>
+                    </div>
+
+                    {% if cart_has_errors %}
+                        <div class="cart-alert cart-alert--danger cart-alert--summary">
+                            В корзине есть товары с недоступным количеством. Исправьте корзину перед оформлением.
+                        </div>
+                        <button type="button" class="cart-btn cart-btn--primary cart-btn--block" disabled>
+                            Оформить заказ
+                        </button>
+                    {% else %}
+                        <a href="{% url 'orders:checkout' %}" class="cart-btn cart-btn--primary cart-btn--block">
+                            Оформить заказ
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'products:product_list' %}" class="cart-btn cart-btn--ghost cart-btn--block">
+                        Продолжить покупки
+                    </a>
+                </aside>
             </div>
-            {% endfor %}
-
-        </div>
-
-        <div class="cart-summary mt-4 text-end">
-            <h4 class="fw-bold">Итого: {{ total }} ₽</h4>
-            <a href="{% url 'orders:checkout' %}" class="btn btn-primary btn-lg mt-2">Оформить заказ</a>
-        </div>
-
         {% else %}
-        <p class="text-center text-muted fs-5 mt-5">Ваша корзина пуста.</p>
+            <div class="cart-empty">
+                <h3>Корзина пуста</h3>
+                <p>Добавьте товары из каталога, чтобы продолжить оформление заказа.</p>
+                <a href="{% url 'products:product_list' %}" class="cart-btn cart-btn--primary">
+                    Перейти в каталог
+                </a>
+            </div>
         {% endif %}
-    </div>
+    </section>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-/* --- Общий контейнер --- */
-.cart-container {
-    position: relative;
-    background-color: #f8f9fa;
-    min-height: 70vh;
-}
-
-/* --- Карточки товаров --- */
-.cart-item-card {
-    background: linear-gradient(135deg, #ffffff, #f1f5f9);
-    border-radius: 1rem;
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08);
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    padding: 1rem 1.5rem;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.cart-item-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 0.75rem 1.5rem rgba(0,0,0,0.12);
-}
-
-/* --- Декоративные фигуры --- */
-.decor-shape {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.15;
-    z-index: 0;
-}
-
-.shape-top-left {
-    width: 120px;
-    height: 120px;
-    top: -20px;
-    left: -20px;
-    background: linear-gradient(135deg, #007bff, #00d4ff);
-}
-
-.shape-bottom-right {
-    width: 180px;
-    height: 180px;
-    bottom: -40px;
-    right: -40px;
-    background: linear-gradient(135deg, #6f42c1, #d63384);
-}
-
-/* --- Кнопки --- */
-.btn-outline-secondary {
-    border-radius: 0.5rem;
-    transition: background 0.2s, color 0.2s;
-}
-
-.btn-outline-secondary:hover {
-    background: #007bff;
-    color: #fff;
-}
-
-.btn-danger {
-    border-radius: 0.5rem;
-}
-
-/* --- Сумма заказа --- */
-.cart-summary h4 {
-    font-size: 1.5rem;
-}
-
-/* --- Адаптив --- */
-@media(max-width: 768px) {
-    .product-actions {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .product-actions span {
-        margin-left: 0;
-        margin-top: 0.5rem;
-    }
-}
-</style>
 {% endblock %}

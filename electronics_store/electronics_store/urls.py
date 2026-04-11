@@ -11,9 +11,10 @@ urlpatterns = [
     path('orders/', include('orders.urls', namespace='orders')),
     path('blog/', include('blog.urls', namespace='blog')),
     path('news/', include('news.urls', namespace='news')),
-    path('contact/', views.contact_view, name='contact'),
-    path('about/', views.about, name='about'),
+
     path('', views.index, name='home'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact_view, name='contact'),
 ]
 
 if settings.DEBUG:

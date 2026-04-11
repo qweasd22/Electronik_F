@@ -1,8 +1,15 @@
 from django.db.models import Avg
 from django.db.models.functions import Coalesce
-from django.shortcuts import render
+from django.core.mail import send_mail
+from django.conf import settings
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
 from products.models import Product
 from news.models import News
+from .forms import ContactForm
+
 
 def index(request):
     popular_products = (
@@ -20,44 +27,41 @@ def index(request):
         'products': popular_products,
         'news': news,
     })
-from django.core.mail import send_mail
-from django.conf import settings
-from django.shortcuts import render
-from django.contrib import messages
-from .forms import ContactForm
-from django.http import HttpResponseRedirect
 
-def contact_view(request):
+
+def about(request):
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
-            # Получаем данные из формы
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             message = form.cleaned_data['message']
             phone_number = form.cleaned_data['phone_number']
 
-            # Отправляем уведомление на email администратора
             subject = f"Новое сообщение от {name}"
-            body = f"Сообщение от: {name} ({email})\n\n{message},\n\nТелефон: {phone_number}"
+            body = (
+                f"Сообщение от: {name} ({email})\n\n"
+                f"{message}\n\n"
+                f"Телефон: {phone_number}"
+            )
+
             send_mail(
                 subject,
                 body,
-                email,  # email отправителя
-                [settings.ADMIN_EMAIL],  # email администратора из настроек
+                email,
+                [settings.ADMIN_EMAIL],
                 fail_silently=False,
             )
 
-            
-            messages.success(request, "Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.")
-
-            # Перенаправляем на ту же страницу, чтобы избежать повторной отправки формы при обновлении
-            return HttpResponseRedirect(request.path_info)
+            return redirect(f"{reverse('about')}?sent=1")
     else:
         form = ContactForm()
 
-    return render(request, 'contact.html', {'form': form})
+    return render(request, 'about.html', {
+        'form': form,
+        'form_sent': request.GET.get('sent') == '1',
+    })
 
 
-def about(request):
-    return render(request, 'about.html')    
+def contact_view(request):
+    return redirect('about')
