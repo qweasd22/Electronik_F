@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Панель управления{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+        <div class="dashboard-sidebar__brand">
+            <a href="{% url 'dashboard:home' %}">ElectroAdmin</a>
+        </div>
+
+        <nav class="dashboard-sidebar__nav">
+            <a href="{% url 'dashboard:home' %}" class="dashboard-link">Главная</a>
+            <a href="{% url 'dashboard:order_list' %}" class="dashboard-link">Заказы</a>
+            <a href="{% url 'dashboard:product_list' %}" class="dashboard-link">Товары</a>
+            <a href="#" class="dashboard-link">Пользователи</a>
+            <a href="#" class="dashboard-link">Новости</a>
+            <a href="#" class="dashboard-link">Акции</a>
+        </nav>
+    </aside>
+
+    <div class="dashboard-main">
+        <header class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">{% block page_title %}Панель управления{% endblock %}</h1>
+                <p class="dashboard-subtitle">Управление интернет-магазином</p>
+            </div>
+
+            <div class="dashboard-user">
+                <span>{{ request.user.username }}</span>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            {% if messages %}
+                <div class="dashboard-messages">
+                    {% for message in messages %}
+                        <div class="dashboard-alert dashboard-alert--{{ message.tags|default:'info' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+</body>
+</html>

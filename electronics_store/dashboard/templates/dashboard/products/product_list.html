@@ -1,0 +1,126 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Товары{% endblock %}
+{% block page_title %}Товары{% endblock %}
+
+{% block content %}
+<section class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head">
+        <h2>Поиск и фильтрация</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="get" class="dashboard-filters-form">
+            <div class="dashboard-form-grid">
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.q.id_for_label }}">Поиск</label>
+                    {{ filter_form.q }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.category.id_for_label }}">Категория</label>
+                    {{ filter_form.category }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.brand.id_for_label }}">Бренд</label>
+                    {{ filter_form.brand }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.stock_state.id_for_label }}">Остаток</label>
+                    {{ filter_form.stock_state }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Применить</button>
+                <a href="{% url 'dashboard:product_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+                <a href="{% url 'dashboard:product_create' %}" class="dashboard-btn dashboard-btn--primary">Добавить товар</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список товаров</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if products %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Изображение</th>
+                            <th>Название</th>
+                            <th>Категория</th>
+                            <th>Бренд</th>
+                            <th>Цена</th>
+                            <th>Цена со скидкой</th>
+                            <th>Остаток</th>
+                            <th>Рейтинг</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>#{{ product.id }}</td>
+                                <td>
+                                    {% if product.image %}
+                                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="dashboard-thumb">
+                                    {% else %}
+                                        <div class="dashboard-thumb dashboard-thumb--empty">Нет</div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.category.name }}</td>
+                                <td>{{ product.brand.name }}</td>
+                                <td>{{ product.price }}</td>
+                                <td>{{ product.get_discounted_price }}</td>
+                                <td>
+                                    {% if product.stock == 0 %}
+                                        <span class="status-badge status-badge--cancelled">Нет</span>
+                                    {% elif product.stock <= 5 %}
+                                        <span class="status-badge status-badge--processing">{{ product.stock }}</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--delivered">{{ product.stock }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ product.average_rating }}</td>
+                                <td>{{ product.created_at|date:"d.m.Y H:i" }}</td>
+                                <td class="dashboard-actions-cell">
+                                    <a href="{% url 'dashboard:product_update' product.id %}" class="dashboard-btn dashboard-btn--small">
+                                        Изменить
+                                    </a>
+                                    <a href="{% url 'dashboard:product_delete' product.id %}" class="dashboard-btn dashboard-btn--small dashboard-btn--danger">
+                                        Удалить
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="dashboard-pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                    {% endif %}
+
+                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Товары не найдены.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

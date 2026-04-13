@@ -110,15 +110,17 @@ def order_detail(request, order_id):
 from django.db import transaction
 
 @transaction.atomic
-def cancel_order(self):
-    if self.status == "delivered":
-        raise ValueError("Заказ уже доставлен и не может быть отменен.")
-    if self.status == "cancelled":
-        raise ValueError("Заказ уже отменен.")
+@login_required
+def cancel_order(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
 
-    for item in self.items.select_related("product"):
-        item.product.stock += item.quantity
-        item.product.save(update_fields=["stock"])
+    if order.status == 'delivered':
+        messages.error(request, f"Заказ {order.id} уже доставлен и не может быть отменен.")
+    else:
+        try:
+            order.cancel()
+            messages.success(request, f"Заказ {order.id} успешно отменен.")
+        except ValueError as e:
+            messages.error(request, str(e))
 
-    self.status = "cancelled"
-    self.save(update_fields=["status"])
+    return redirect('accounts:profile')

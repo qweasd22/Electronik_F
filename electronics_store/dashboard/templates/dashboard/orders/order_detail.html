@@ -1,0 +1,164 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Заказ #{{ order.id }}{% endblock %}
+{% block page_title %}Заказ #{{ order.id }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:order_list' %}" class="dashboard-btn dashboard-btn--ghost">← К списку заказов</a>
+</div>
+
+<div class="dashboard-grid">
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Основная информация</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            <div class="dashboard-detail-list">
+                <div><strong>ID:</strong> #{{ order.id }}</div>
+                <div><strong>Пользователь:</strong> {{ order.user.username }}</div>
+                <div><strong>Email:</strong> {{ order.user.email|default:"—" }}</div>
+                <div><strong>Получатель:</strong> {{ order.recipient_name|default:"—" }}</div>
+                <div><strong>Телефон:</strong> {{ order.phone_number|default:"—" }}</div>
+                <div><strong>Адрес:</strong> {{ order.address }}</div>
+                <div><strong>Способ доставки:</strong> {{ order.get_delivery_method_display }}</div>
+                <div><strong>Способ оплаты:</strong> {{ order.get_payment_method_display }}</div>
+                <div>
+                    <strong>Статус:</strong>
+                    <span class="status-badge status-badge--{{ order.status }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+                <div>
+                    <strong>Оплачен:</strong>
+                    {% if order.is_paid %}
+                        Да
+                    {% else %}
+                        Нет
+                    {% endif %}
+                </div>
+                <div><strong>Курьер:</strong> {{ order.courier|default:"Не назначен" }}</div>
+                <div><strong>Комментарий клиента:</strong> {{ order.comment|default:"—" }}</div>
+                <div><strong>Комментарий по статусу:</strong> {{ order.tracking_note|default:"—" }}</div>
+                <div><strong>Создан:</strong> {{ order.created_at|date:"d.m.Y H:i" }}</div>
+                <div><strong>Обновлён:</strong> {{ order.updated_at|date:"d.m.Y H:i" }}</div>
+                <div><strong>Дата оплаты:</strong> {{ order.paid_at|date:"d.m.Y H:i"|default:"—" }}</div>
+                <div><strong>Дата отправки:</strong> {{ order.shipped_at|date:"d.m.Y H:i"|default:"—" }}</div>
+                <div><strong>Дата доставки:</strong> {{ order.delivered_at|date:"d.m.Y H:i"|default:"—" }}</div>
+                <div><strong>Дата отмены:</strong> {{ order.cancelled_at|date:"d.m.Y H:i"|default:"—" }}</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Изменить статус</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            <form method="post" action="{% url 'dashboard:order_status_update' order.id %}" class="dashboard-status-form">
+                {% csrf_token %}
+
+                <div class="dashboard-form-group">
+                    <label for="{{ status_form.status.id_for_label }}">Статус</label>
+                    {{ status_form.status }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ status_form.note.id_for_label }}">Комментарий</label>
+                    {{ status_form.note }}
+                </div>
+
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">
+                    Сохранить статус
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Товары в заказе</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if order.items.all %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Количество</th>
+                            <th>Цена на момент покупки</th>
+                            <th>Скидка</th>
+                            <th>Сумма</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.product_name|default:item.product.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.price_at_purchase }}</td>
+                                <td>
+                                    {% if item.discount_applied %}
+                                        Да
+                                    {% else %}
+                                        Нет
+                                    {% endif %}
+                                </td>
+                                <td>{{ item.total_price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">Доставка</th>
+                            <th>{{ order.delivery_cost }}</th>
+                        </tr>
+                        <tr>
+                            <th colspan="4">Итого</th>
+                            <th>{{ order.total_price }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        {% else %}
+            <p>В заказе нет товаров.</p>
+        {% endif %}
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>История статусов</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if order.status_history.all %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Комментарий</th>
+                            <th>Кем изменено</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for history in order.status_history.all %}
+                            <tr>
+                                <td>{{ history.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>{{ history.get_status_display }}</td>
+                                <td>{{ history.note|default:"—" }}</td>
+                                <td>{{ history.changed_by|default:"Система" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>История статусов отсутствует.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

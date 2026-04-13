@@ -1,0 +1,113 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}
+    {% if object %}Редактирование товара{% else %}Создание товара{% endif %}
+{% endblock %}
+
+{% block page_title %}
+    {% if object %}Редактирование товара{% else %}Создание товара{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:product_list' %}" class="dashboard-btn dashboard-btn--ghost">← К списку товаров</a>
+</div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>
+            {% if object %}
+                Изменение товара
+            {% else %}
+                Новый товар
+            {% endif %}
+        </h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="post" enctype="multipart/form-data" class="dashboard-product-form">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="dashboard-alert dashboard-alert--error">
+                    Проверь поля формы. Есть ошибки.
+                </div>
+            {% endif %}
+
+            <div class="dashboard-form-grid dashboard-form-grid--2">
+                <div class="dashboard-form-group">
+                    <label for="{{ form.name.id_for_label }}">Название</label>
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.slug.id_for_label }}">Slug</label>
+                    {{ form.slug }}
+                    {{ form.slug.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.category.id_for_label }}">Категория</label>
+                    {{ form.category }}
+                    {{ form.category.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.brand.id_for_label }}">Бренд</label>
+                    {{ form.brand }}
+                    {{ form.brand.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.price.id_for_label }}">Цена</label>
+                    {{ form.price }}
+                    {{ form.price.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.stock.id_for_label }}">Остаток</label>
+                    {{ form.stock }}
+                    {{ form.stock.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label for="{{ form.description.id_for_label }}">Описание</label>
+                    {{ form.description }}
+                    {{ form.description.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label for="{{ form.additional_info.id_for_label }}">Дополнительная информация</label>
+                    {{ form.additional_info }}
+                    {{ form.additional_info.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label for="{{ form.image.id_for_label }}">Основное изображение</label>
+                    {{ form.image }}
+                    {{ form.image.errors }}
+
+                    {% if object and object.image %}
+                        <div class="dashboard-current-image">
+                            <img src="{{ object.image.url }}" alt="{{ object.name }}" class="dashboard-preview-image">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label>Скидки</label>
+                    <div class="dashboard-checkbox-group">
+                        {{ form.sales }}
+                    </div>
+                    {{ form.sales.errors }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Сохранить</button>
+                <a href="{% url 'dashboard:product_list' %}" class="dashboard-btn dashboard-btn--ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

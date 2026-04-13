@@ -1,0 +1,145 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Заказы{% endblock %}
+{% block page_title %}Заказы{% endblock %}
+
+{% block content %}
+<section class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head">
+        <h2>Фильтры и поиск</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="get" class="dashboard-filters-form">
+            <div class="dashboard-form-grid">
+                <div class="dashboard-form-group">
+                    <label for="id_q">Поиск</label>
+                    <input
+                        type="text"
+                        id="id_q"
+                        name="q"
+                        value="{{ current_q }}"
+                        class="dashboard-input"
+                        placeholder="ID, логин, email, телефон, адрес"
+                    >
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="id_status">Статус</label>
+                    <select name="status" id="id_status" class="dashboard-select">
+                        <option value="">Все</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="id_is_paid">Оплата</label>
+                    <select name="is_paid" id="id_is_paid" class="dashboard-select">
+                        <option value="">Все</option>
+                        <option value="yes" {% if current_is_paid == 'yes' %}selected{% endif %}>Оплачен</option>
+                        <option value="no" {% if current_is_paid == 'no' %}selected{% endif %}>Не оплачен</option>
+                    </select>
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="id_delivery_method">Доставка</label>
+                    <select name="delivery_method" id="id_delivery_method" class="dashboard-select">
+                        <option value="">Все</option>
+                        {% for value, label in delivery_choices %}
+                            <option value="{{ value }}" {% if current_delivery_method == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Применить</button>
+                <a href="{% url 'dashboard:order_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список заказов</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if orders %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Пользователь</th>
+                            <th>Получатель</th>
+                            <th>Телефон</th>
+                            <th>Статус</th>
+                            <th>Оплата</th>
+                            <th>Доставка</th>
+                            <th>Сумма</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.user.username }}</td>
+                                <td>{{ order.recipient_name|default:"—" }}</td>
+                                <td>{{ order.phone_number|default:"—" }}</td>
+                                <td>
+                                    <span class="status-badge status-badge--{{ order.status }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if order.is_paid %}
+                                        <span class="status-badge status-badge--paid">Да</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--unpaid">Нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.get_delivery_method_display }}</td>
+                                <td>{{ order.total_price }}</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">
+                                        Открыть
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="dashboard-pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&status={{ current_status }}&is_paid={{ current_is_paid }}&delivery_method={{ current_delivery_method }}">
+                            Назад
+                        </a>
+                    {% endif %}
+
+                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&status={{ current_status }}&is_paid={{ current_is_paid }}&delivery_method={{ current_delivery_method }}">
+                            Вперёд
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Заказы не найдены.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

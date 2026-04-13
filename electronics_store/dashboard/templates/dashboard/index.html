@@ -1,0 +1,180 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Панель управления{% endblock %}
+{% block page_title %}Главная{% endblock %}
+
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card__label">Всего заказов</div>
+        <div class="stat-card__value">{{ total_orders }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Завершённые заказы</div>
+        <div class="stat-card__value">{{ completed_orders }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Оплаченные заказы</div>
+        <div class="stat-card__value">{{ paid_orders }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Доставленные заказы</div>
+        <div class="stat-card__value">{{ delivered_orders }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Пользователи</div>
+        <div class="stat-card__value">{{ total_users }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Товары</div>
+        <div class="stat-card__value">{{ total_products }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Мало на складе</div>
+        <div class="stat-card__value">{{ low_stock_products }}</div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-card__label">Общая выручка</div>
+        <div class="stat-card__value">{{ total_revenue }}</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Последние заказы</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            {% if recent_orders %}
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Пользователь</th>
+                            <th>Статус</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in recent_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.user }}</td>
+                                <td>{{ order.get_status_display|default:order.status }}</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Заказов пока нет.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Новые пользователи</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            {% if recent_users %}
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Логин</th>
+                            <th>Email</th>
+                            <th>Дата регистрации</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in recent_users %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Пользователей пока нет.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="dashboard-grid">
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Товары с низким остатком</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            {% if low_stock_items %}
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Товар</th>
+                            <th>Остаток</th>
+                            <th>Цена</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in low_stock_items %}
+                            <tr>
+                                <td>{{ item.id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.stock }}</td>
+                                <td>{{ item.price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Все товары в норме.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Последние действия</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            {% if recent_sales %}
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Пользователь</th>
+                            <th>Действие</th>
+                            <th>Товар</th>
+                            <th>Дата</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in recent_sales %}
+                            <tr>
+                                <td>{{ event.user }}</td>
+                                <td>{{ event.action }}</td>
+                                <td>{{ event.product }}</td>
+                                <td>{{ event.timestamp|date:"d.m.Y H:i" }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>Событий пока нет.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
