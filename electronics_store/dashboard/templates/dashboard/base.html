@@ -15,7 +15,9 @@
         </div>
 
         <nav class="dashboard-sidebar__nav">
+             <a href="{% url 'home' %}" class="dashboard-link">Выйти из админ панели</a>
             <a href="{% url 'dashboard:home' %}" class="dashboard-link">Главная</a>
+           
             <a href="{% url 'dashboard:order_list' %}" class="dashboard-link">Заказы</a>
             <a href="{% url 'dashboard:product_list' %}" class="dashboard-link">Товары</a>
             <a href="{% url 'dashboard:user_list' %}" class="dashboard-link">Пользователи</a>
@@ -32,8 +34,12 @@
             </div>
 
             <div class="dashboard-user">
-                <span>{{ request.user.username }}</span>
+              
+                    <span>{{ request.user.username }}</span>
+                    
             </div>
+            
+            
         </header>
 
         <main class="dashboard-content">
