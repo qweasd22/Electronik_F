@@ -1,0 +1,94 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Редактирование пользователя{% endblock %}
+{% block page_title %}Редактирование пользователя{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:user_detail' profile_user.id %}" class="dashboard-btn dashboard-btn--ghost">← Назад</a>
+</div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Изменение пользователя</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="dashboard-alert dashboard-alert--error">
+                    Проверь поля формы. Есть ошибки.
+                </div>
+            {% endif %}
+
+            <div class="dashboard-form-grid dashboard-form-grid--2">
+                <div class="dashboard-form-group">
+                    <label for="{{ form.username.id_for_label }}">Логин</label>
+                    {{ form.username }}
+                    {{ form.username.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.first_name.id_for_label }}">Имя</label>
+                    {{ form.first_name }}
+                    {{ form.first_name.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+                    {{ form.last_name }}
+                    {{ form.last_name.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Телефон</label>
+                    {{ form.phone_number }}
+                    {{ form.phone_number.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.birth_date.id_for_label }}">Дата рождения</label>
+                    {{ form.birth_date }}
+                    {{ form.birth_date.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label for="{{ form.address.id_for_label }}">Адрес</label>
+                    {{ form.address }}
+                    {{ form.address.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.is_active.id_for_label }}">Активен</label>
+                    {{ form.is_active }}
+                    {{ form.is_active.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.is_staff.id_for_label }}">Staff</label>
+                    {{ form.is_staff }}
+                    {{ form.is_staff.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.is_superuser.id_for_label }}">Superuser</label>
+                    {{ form.is_superuser }}
+                    {{ form.is_superuser.errors }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Сохранить</button>
+                <a href="{% url 'dashboard:user_detail' profile_user.id %}" class="dashboard-btn dashboard-btn--ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Пользователи{% endblock %}
+{% block page_title %}Пользователи{% endblock %}
+
+{% block content %}
+<section class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head">
+        <h2>Поиск и фильтрация</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="get" class="dashboard-filters-form">
+            <div class="dashboard-form-grid">
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.q.id_for_label }}">Поиск</label>
+                    {{ filter_form.q }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.is_active.id_for_label }}">Активность</label>
+                    {{ filter_form.is_active }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.is_staff.id_for_label }}">Staff</label>
+                    {{ filter_form.is_staff }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.is_superuser.id_for_label }}">Superuser</label>
+                    {{ filter_form.is_superuser }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Применить</button>
+                <a href="{% url 'dashboard:user_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список пользователей</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if users %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Логин</th>
+                            <th>Имя</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Заказы</th>
+                            <th>Активен</th>
+                            <th>Staff</th>
+                            <th>Superuser</th>
+                            <th>Дата регистрации</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>#{{ user.id }}</td>
+                                <td>{{ user.username }}</td>
+                                <td>
+                                    {% if user.first_name or user.last_name %}
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.email|default:"—" }}</td>
+                                <td>{{ user.phone_number|default:"—" }}</td>
+                                <td>{{ user.order_count }}</td>
+                                <td>
+                                    {% if user.is_active %}
+                                        <span class="status-badge status-badge--delivered">Да</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--cancelled">Нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_staff %}
+                                        <span class="status-badge status-badge--paid">Да</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--unpaid">Нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_superuser %}
+                                        <span class="status-badge status-badge--processing">Да</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--unpaid">Нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <div class="dashboard-actions-cell__inner">
+                                        <a href="{% url 'dashboard:user_detail' user.id %}" class="dashboard-btn dashboard-btn--small">
+                                            Открыть
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="dashboard-pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                    {% endif %}
+
+                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p>Пользователи не найдены.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

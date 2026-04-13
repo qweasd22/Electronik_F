@@ -2,7 +2,7 @@ from decimal import Decimal
 from django.db import models
 from django.db.models import Avg
 from accounts.models import CustomUser
-
+from django.utils import timezone
 
 class Sale(models.Model):
     name = models.CharField("Название скидки", max_length=255)
@@ -14,9 +14,20 @@ class Sale(models.Model):
     class Meta:
         verbose_name = "Скидка"
         verbose_name_plural = "Скидки"
+        ordering = ["-start_date", "-id"]
 
     def __str__(self):
         return f"{self.name} - {self.discount_percentage}%"
+
+    def is_current(self):
+        now = timezone.now()
+        if not self.is_active:
+            return False
+        if self.start_date and self.start_date > now:
+            return False
+        if self.end_date and self.end_date < now:
+            return False
+        return True
 
 
 class Category(models.Model):
@@ -78,14 +89,29 @@ class Product(models.Model):
         avg = self.ratings.aggregate(avg=Avg("stars"))["avg"]
         return round(avg, 1) if avg else 0
 
+    def get_active_sales(self):
+        now = timezone.now()
+        return self.sales.filter(
+            is_active=True,
+            start_date__lte=now,
+        ).filter(
+            models.Q(end_date__isnull=True) | models.Q(end_date__gte=now)
+        )
+
+    def get_max_discount(self):
+        active_sales = self.get_active_sales().order_by("-discount_percentage")
+        top_sale = active_sales.first()
+        return top_sale.discount_percentage if top_sale else Decimal("0.00")
+
     def get_discounted_price(self):
         price = Decimal(self.price)
-        active_sales = self.sales.filter(is_active=True)
+        max_discount = self.get_max_discount()
 
-        for sale in active_sales:
-            price = price * (Decimal("1") - sale.discount_percentage / Decimal("100"))
+        if max_discount <= 0:
+            return price.quantize(Decimal("0.01"))
 
-        return price.quantize(Decimal("0.01"))
+        discounted = price * (Decimal("1") - max_discount / Decimal("100"))
+        return discounted.quantize(Decimal("0.01"))
 
 
 class ProductImage(models.Model):

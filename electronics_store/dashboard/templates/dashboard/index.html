@@ -1,180 +1,236 @@
-{% extends 'dashboard/base.html' %}
+{% extends "dashboard/base.html" %}
 
-{% block title %}Панель управления{% endblock %}
+{% block title %}Главная | Админ-панель{% endblock %}
 {% block page_title %}Главная{% endblock %}
 
 {% block content %}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-card__label">Всего заказов</div>
-        <div class="stat-card__value">{{ total_orders }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Завершённые заказы</div>
-        <div class="stat-card__value">{{ completed_orders }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Оплаченные заказы</div>
-        <div class="stat-card__value">{{ paid_orders }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Доставленные заказы</div>
-        <div class="stat-card__value">{{ delivered_orders }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Пользователи</div>
-        <div class="stat-card__value">{{ total_users }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Товары</div>
-        <div class="stat-card__value">{{ total_products }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Мало на складе</div>
-        <div class="stat-card__value">{{ low_stock_products }}</div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-card__label">Общая выручка</div>
-        <div class="stat-card__value">{{ total_revenue }}</div>
-    </div>
-</div>
-
-<div class="dashboard-grid">
-    <section class="dashboard-panel">
-        <div class="dashboard-panel__head">
-            <h2>Последние заказы</h2>
+<div class="dashboard-home">
+    <section class="dashboard-welcome">
+        <div class="dashboard-welcome__content">
+            <h2>Обзор состояния магазина</h2>
+            <p>
+                Здесь отображаются ключевые показатели магазина: заказы, выручка,
+                остатки товаров, новые пользователи и последние продажи.
+            </p>
         </div>
-        <div class="dashboard-panel__body">
-            {% if recent_orders %}
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Пользователь</th>
-                            <th>Статус</th>
-                            <th>Дата</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for order in recent_orders %}
-                            <tr>
-                                <td>#{{ order.id }}</td>
-                                <td>{{ order.user }}</td>
-                                <td>{{ order.get_status_display|default:order.status }}</td>
-                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Заказов пока нет.</p>
-            {% endif %}
+
+        <div class="dashboard-top-actions">
+            <a href="{% url 'dashboard:product_create' %}" class="dashboard-btn dashboard-btn--primary">Добавить товар</a>
+            <a href="{% url 'dashboard:news_create' %}" class="dashboard-btn dashboard-btn--ghost">Добавить новость</a>
+            <a href="{% url 'dashboard:sale_create' %}" class="dashboard-btn dashboard-btn--ghost">Создать акцию</a>
         </div>
     </section>
 
-    <section class="dashboard-panel">
-        <div class="dashboard-panel__head">
-            <h2>Новые пользователи</h2>
-        </div>
-        <div class="dashboard-panel__body">
-            {% if recent_users %}
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Логин</th>
-                            <th>Email</th>
-                            <th>Дата регистрации</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for user in recent_users %}
-                            <tr>
-                                <td>{{ user.id }}</td>
-                                <td>{{ user.username }}</td>
-                                <td>{{ user.email }}</td>
-                                <td>{{ user.date_joined|date:"d.m.Y H:i" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Пользователей пока нет.</p>
-            {% endif %}
-        </div>
-    </section>
-</div>
+    <section class="stats-grid stats-grid--dashboard-home">
+        <article class="stat-card stat-card--info">
+            <div class="stat-card__label">Всего заказов</div>
+            <div class="stat-card__value">{{ total_orders }}</div>
+            <div class="stat-card__hint">Общее количество заказов в системе</div>
+        </article>
 
-<div class="dashboard-grid">
-    <section class="dashboard-panel">
-        <div class="dashboard-panel__head">
-            <h2>Товары с низким остатком</h2>
-        </div>
-        <div class="dashboard-panel__body">
-            {% if low_stock_items %}
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Товар</th>
-                            <th>Остаток</th>
-                            <th>Цена</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for item in low_stock_items %}
-                            <tr>
-                                <td>{{ item.id }}</td>
-                                <td>{{ item.name }}</td>
-                                <td>{{ item.stock }}</td>
-                                <td>{{ item.price }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Все товары в норме.</p>
-            {% endif %}
-        </div>
+        <article class="stat-card stat-card--success">
+            <div class="stat-card__label">Доставленные заказы</div>
+            <div class="stat-card__value">{{ delivered_orders }}</div>
+            <div class="stat-card__hint">Заказы, которые успешно завершены</div>
+        </article>
+
+        <article class="stat-card stat-card--accent">
+            <div class="stat-card__label">Оплаченные заказы</div>
+            <div class="stat-card__value">{{ paid_orders }}</div>
+            <div class="stat-card__hint">Оплаченные и не отменённые заказы</div>
+        </article>
+
+        <article class="stat-card stat-card--revenue">
+            <div class="stat-card__label">Фактическая выручка</div>
+            <div class="stat-card__value">{{ delivered_revenue }} ₽</div>
+            <div class="stat-card__hint">Сумма только по доставленным заказам</div>
+        </article>
     </section>
 
-    <section class="dashboard-panel">
-        <div class="dashboard-panel__head">
-            <h2>Последние действия</h2>
-        </div>
-        <div class="dashboard-panel__body">
-            {% if recent_sales %}
-                <table class="dashboard-table">
-                    <thead>
-                        <tr>
-                            <th>Пользователь</th>
-                            <th>Действие</th>
-                            <th>Товар</th>
-                            <th>Дата</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for event in recent_sales %}
-                            <tr>
-                                <td>{{ event.user }}</td>
-                                <td>{{ event.action }}</td>
-                                <td>{{ event.product }}</td>
-                                <td>{{ event.timestamp|date:"d.m.Y H:i" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            {% else %}
-                <p>Событий пока нет.</p>
-            {% endif %}
-        </div>
+    <section class="stats-grid stats-grid--secondary">
+        <article class="stat-card">
+            <div class="stat-card__label">Пользователи</div>
+            <div class="stat-card__value">{{ total_users }}</div>
+            <div class="stat-card__hint">Всего зарегистрированных пользователей</div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-card__label">Товары</div>
+            <div class="stat-card__value">{{ total_products }}</div>
+            <div class="stat-card__hint">Всего товаров в каталоге</div>
+        </article>
+
+        <article class="stat-card {% if low_stock_products > 0 %}stat-card--warning{% endif %}">
+            <div class="stat-card__label">Товары с низким остатком</div>
+            <div class="stat-card__value">{{ low_stock_products }}</div>
+            <div class="stat-card__hint">Остаток 5 штук или меньше</div>
+        </article>
+
+        <article class="stat-card">
+            <div class="stat-card__label">Отменённые заказы</div>
+            <div class="stat-card__value">{{ cancelled_orders }}</div>
+            <div class="stat-card__hint">Количество заказов со статусом отмены</div>
+        </article>
     </section>
+
+    <section class="stats-grid stats-grid--secondary">
+        <article class="stat-card stat-card--accent">
+            <div class="stat-card__label">Ожидаемая выручка</div>
+            <div class="stat-card__value">{{ expected_revenue }} ₽</div>
+            <div class="stat-card__hint">Оплаченные заказы, которые ещё не отменены</div>
+        </article>
+
+        <article class="stat-card stat-card--warning">
+            <div class="stat-card__label">Потери из-за отмен</div>
+            <div class="stat-card__value">{{ cancelled_revenue }} ₽</div>
+            <div class="stat-card__hint">Сумма по отменённым заказам</div>
+        </article>
+    </section>
+
+    <div class="dashboard-grid dashboard-grid--home">
+        <section class="dashboard-panel">
+            <div class="dashboard-panel__head">
+                <h2>Последние заказы</h2>
+            </div>
+            <div class="dashboard-panel__body">
+                {% if recent_orders %}
+                    <div class="dashboard-table-wrap">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Заказ</th>
+                                    <th>Клиент</th>
+                                    <th>Статус</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for order in recent_orders %}
+                                    <tr>
+                                        <td>
+                                            <a href="{% url 'dashboard:order_detail' order.id %}" class="dashboard-table-link">
+                                                #{{ order.id }}
+                                            </a>
+                                        </td>
+                                        <td>
+                                            {% if order.user %}
+                                                {{ order.user.username }}
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ order.get_status_display|default:order.status }}</td>
+                                        <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="dashboard-empty-text">Заказов пока нет.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel__head">
+                <h2>Новые пользователи</h2>
+            </div>
+            <div class="dashboard-panel__body">
+                {% if recent_users %}
+                    <div class="dashboard-table-wrap">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Логин</th>
+                                    <th>Email</th>
+                                    <th>Дата регистрации</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user_item in recent_users %}
+                                    <tr>
+                                        <td>{{ user_item.username }}</td>
+                                        <td>{{ user_item.email|default:"—" }}</td>
+                                        <td>{{ user_item.date_joined|date:"d.m.Y H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="dashboard-empty-text">Пользователей пока нет.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+    <div class="dashboard-grid dashboard-grid--home">
+        <section class="dashboard-panel">
+            <div class="dashboard-panel__head">
+                <h2>Товары, требующие внимания</h2>
+            </div>
+            <div class="dashboard-panel__body">
+                {% if low_stock_items %}
+                    <div class="dashboard-table-wrap">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Остаток</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in low_stock_items %}
+                                    <tr>
+                                        <td>{{ product.name }}</td>
+                                        <td>
+                                            <span class="status-badge status-badge--processing">
+                                                {{ product.stock }} шт.
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="dashboard-empty-text">Все товары имеют достаточный остаток.</p>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="dashboard-panel">
+            <div class="dashboard-panel__head">
+                <h2>Последние продажи</h2>
+            </div>
+            <div class="dashboard-panel__body">
+                {% if recent_sales %}
+                    <div class="dashboard-table-wrap">
+                        <table class="dashboard-table">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Пользователь</th>
+                                    <th>Дата</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for sale_event in recent_sales %}
+                                    <tr>
+                                        <td>{{ sale_event.product.name|default:"—" }}</td>
+                                        <td>{{ sale_event.user.username|default:"—" }}</td>
+                                        <td>{{ sale_event.timestamp|date:"d.m.Y H:i" }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="dashboard-empty-text">Продаж пока нет.</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
 </div>
 {% endblock %}

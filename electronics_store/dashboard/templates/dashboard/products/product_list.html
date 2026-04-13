@@ -92,12 +92,14 @@
                                 <td>{{ product.average_rating }}</td>
                                 <td>{{ product.created_at|date:"d.m.Y H:i" }}</td>
                                 <td class="dashboard-actions-cell">
-                                    <a href="{% url 'dashboard:product_update' product.id %}" class="dashboard-btn dashboard-btn--small">
-                                        Изменить
-                                    </a>
-                                    <a href="{% url 'dashboard:product_delete' product.id %}" class="dashboard-btn dashboard-btn--small dashboard-btn--danger">
-                                        Удалить
-                                    </a>
+                                    <div class="dashboard-actions-cell__inner">
+                                        <a href="{% url 'dashboard:product_update' product.id %}" class="dashboard-btn dashboard-btn--small">
+                                            Изменить
+                                        </a>
+                                        <a href="{% url 'dashboard:product_delete' product.id %}" class="dashboard-btn dashboard-btn--small dashboard-btn--danger">
+                                            Удалить
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         {% endfor %}

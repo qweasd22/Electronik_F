@@ -1,0 +1,132 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Скидки | Админ-панель{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:sale_create' %}" class="dashboard-btn dashboard-btn--primary">
+        Добавить скидку
+    </a>
+</div>
+
+<div class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head">
+        <h2>Фильтрация скидок</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="get">
+            <div class="dashboard-form-grid dashboard-form-grid--sales-filters">
+                <div class="dashboard-form-group">
+                    {{ filter_form.q.label_tag }}
+                    {{ filter_form.q }}
+                </div>
+                <div class="dashboard-form-group">
+                    {{ filter_form.is_active.label_tag }}
+                    {{ filter_form.is_active }}
+                </div>
+                <div class="dashboard-form-group">
+                    {{ filter_form.current_state.label_tag }}
+                    {{ filter_form.current_state }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Фильтровать</button>
+                <a href="{% url 'dashboard:sale_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список скидок</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if sales %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Скидка</th>
+                            <th>Период</th>
+                            <th>Товаров</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sale in sales %}
+                            <tr>
+                                <td>#{{ sale.id }}</td>
+                                <td>{{ sale.name }}</td>
+                                <td>{{ sale.discount_percentage }}%</td>
+                                <td>
+                                    {{ sale.start_date|date:"d.m.Y H:i" }}<br>
+                                    <span class="dashboard-sale-period-end">
+                                        {% if sale.end_date %}
+                                            до {{ sale.end_date|date:"d.m.Y H:i" }}
+                                        {% else %}
+                                            без окончания
+                                        {% endif %}
+                                    </span>
+                                </td>
+                                <td>{{ sale.products.count }}</td>
+                                <td>
+                                    {% if sale.is_active %}
+                                        <span class="status-badge status-badge--delivered">Активна</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--cancelled">Выключена</span>
+                                    {% endif %}
+                                </td>
+                                <td class="dashboard-actions-cell">
+                                    <div class="dashboard-actions-cell__inner dashboard-actions-cell__inner--news">
+                                        <a href="{% url 'dashboard:sale_update' sale.id %}" class="dashboard-btn dashboard-btn--small">
+                                            Изменить
+                                        </a>
+
+                                        <form method="post" action="{% url 'dashboard:sale_toggle_active' sale.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dashboard-btn dashboard-btn--small dashboard-btn--ghost">
+                                                {% if sale.is_active %}Выключить{% else %}Включить{% endif %}
+                                            </button>
+                                        </form>
+
+                                        <a href="{% url 'dashboard:sale_delete' sale.id %}" class="dashboard-btn dashboard-btn--small dashboard-btn--danger">
+                                            Удалить
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="dashboard-pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">← Назад</a>
+                    {% endif %}
+
+                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Вперёд →</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="dashboard-news-empty">
+                <h3>Скидки не найдены</h3>
+                <p>Создай первую скидку или измени параметры фильтрации.</p>
+                <a href="{% url 'dashboard:sale_create' %}" class="dashboard-btn dashboard-btn--primary">
+                    Добавить скидку
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

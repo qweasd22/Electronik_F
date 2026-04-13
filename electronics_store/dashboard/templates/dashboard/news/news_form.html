@@ -1,0 +1,83 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    {% if news_item %}Редактирование новости{% else %}Создание новости{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:news_list' %}" class="dashboard-btn dashboard-btn--ghost">
+        Назад к списку
+    </a>
+</div>
+
+<div class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>
+            {% if news_item %}Редактирование новости{% else %}Создание новости{% endif %}
+        </h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="post" enctype="multipart/form-data" class="dashboard-news-form">
+            {% csrf_token %}
+
+            <div class="dashboard-form-grid dashboard-form-grid--2">
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    {{ form.title.label_tag }}
+                    {{ form.title }}
+                    {{ form.title.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    {{ form.summary.label_tag }}
+                    {{ form.summary }}
+                    {{ form.summary.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    {{ form.content.label_tag }}
+                    {{ form.content }}
+                    {{ form.content.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    {{ form.published_at.label_tag }}
+                    {{ form.published_at }}
+                    {{ form.published_at.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    {{ form.category.label_tag }}
+                    {{ form.category }}
+                    {{ form.category.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    {{ form.image.label_tag }}
+                    {{ form.image }}
+                    {{ form.image.errors }}
+
+                    {% if form.instance.image %}
+                        <div class="dashboard-current-image">
+                            <img src="{{ form.instance.image.url }}" alt="{{ form.instance.title }}" class="dashboard-preview-image">
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label class="dashboard-news-checkbox">
+                        {{ form.is_published }}
+                        <span>Опубликовать сразу</span>
+                    </label>
+                    {{ form.is_published.errors }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Сохранить</button>
+                <a href="{% url 'dashboard:news_list' %}" class="dashboard-btn dashboard-btn--ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

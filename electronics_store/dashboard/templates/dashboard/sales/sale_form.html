@@ -1,0 +1,73 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}
+    {% if sale %}Редактирование скидки{% else %}Создание скидки{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:sale_list' %}" class="dashboard-btn dashboard-btn--ghost">
+        Назад к списку
+    </a>
+</div>
+
+<div class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>
+            {% if sale %}Редактирование скидки{% else %}Создание скидки{% endif %}
+        </h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="post" class="dashboard-sale-form">
+            {% csrf_token %}
+
+            <div class="dashboard-form-grid dashboard-form-grid--2">
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    {{ form.name.label_tag }}
+                    {{ form.name }}
+                    {{ form.name.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    {{ form.discount_percentage.label_tag }}
+                    {{ form.discount_percentage }}
+                    {{ form.discount_percentage.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label class="dashboard-news-checkbox">
+                        {{ form.is_active }}
+                        <span>Скидка активна</span>
+                    </label>
+                    {{ form.is_active.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    {{ form.start_date.label_tag }}
+                    {{ form.start_date }}
+                    {{ form.start_date.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    {{ form.end_date.label_tag }}
+                    {{ form.end_date }}
+                    {{ form.end_date.errors }}
+                </div>
+
+                <div class="dashboard-form-group dashboard-form-group--full">
+                    <label>Товары со скидкой</label>
+                    <div class="dashboard-checkbox-group">
+                        {{ form.products }}
+                    </div>
+                    {{ form.products.errors }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Сохранить</button>
+                <a href="{% url 'dashboard:sale_list' %}" class="dashboard-btn dashboard-btn--ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -11,16 +11,16 @@
 <div class="dashboard-layout">
     <aside class="dashboard-sidebar">
         <div class="dashboard-sidebar__brand">
-            <a href="{% url 'dashboard:home' %}">ElectroAdmin</a>
+            <a href="{% url 'dashboard:home' %}">Панель управления</a>
         </div>
 
         <nav class="dashboard-sidebar__nav">
             <a href="{% url 'dashboard:home' %}" class="dashboard-link">Главная</a>
             <a href="{% url 'dashboard:order_list' %}" class="dashboard-link">Заказы</a>
             <a href="{% url 'dashboard:product_list' %}" class="dashboard-link">Товары</a>
-            <a href="#" class="dashboard-link">Пользователи</a>
-            <a href="#" class="dashboard-link">Новости</a>
-            <a href="#" class="dashboard-link">Акции</a>
+            <a href="{% url 'dashboard:user_list' %}" class="dashboard-link">Пользователи</a>
+            <a href="{% url 'dashboard:news_list' %}" class="dashboard-link">Новости</a>
+            <a href="{% url 'dashboard:sale_list' %}" class="dashboard-link">Акции</a>
         </nav>
     </aside>
 

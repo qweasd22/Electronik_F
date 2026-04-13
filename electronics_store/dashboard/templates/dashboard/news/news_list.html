@@ -1,0 +1,141 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Новости | Админ-панель{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:news_create' %}" class="dashboard-btn dashboard-btn--primary">
+        Добавить новость
+    </a>
+</div>
+
+<div class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head">
+        <h2>Фильтрация новостей</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="get">
+            <div class="dashboard-form-grid dashboard-form-grid--news-filters">
+                <div class="dashboard-form-group">
+                    {{ filter_form.q.label_tag }}
+                    {{ filter_form.q }}
+                </div>
+                <div class="dashboard-form-group">
+                    {{ filter_form.category.label_tag }}
+                    {{ filter_form.category }}
+                </div>
+                <div class="dashboard-form-group">
+                    {{ filter_form.is_published.label_tag }}
+                    {{ filter_form.is_published }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Фильтровать</button>
+                <a href="{% url 'dashboard:news_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список новостей</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if news_list %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table dashboard-news-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Новость</th>
+                            <th>Категория</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in news_list %}
+                            <tr>
+                                <td>#{{ item.id }}</td>
+                                <td>
+                                    <div class="dashboard-news-item">
+                                        {% if item.image %}
+                                            <img src="{{ item.image.url }}" alt="{{ item.title }}" class="dashboard-thumb dashboard-news-thumb">
+                                        {% else %}
+                                            <div class="dashboard-thumb dashboard-thumb--empty dashboard-news-thumb">
+                                                Нет фото
+                                            </div>
+                                        {% endif %}
+
+                                        <div class="dashboard-news-item__content">
+                                            <div class="dashboard-news-item__title">{{ item.title }}</div>
+                                            <div class="dashboard-news-item__summary">
+                                                {{ item.summary|truncatechars:110 }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ item.category|default:"Без категории" }}</td>
+                                <td>
+                                    {{ item.published_at|date:"d.m.Y" }}<br>
+                                    <span class="dashboard-news-meta-time">{{ item.published_at|date:"H:i" }}</span>
+                                </td>
+                                <td>
+                                    {% if item.is_published %}
+                                        <span class="status-badge status-badge--delivered">Опубликовано</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--processing">Черновик</span>
+                                    {% endif %}
+                                </td>
+                                <td class="dashboard-actions-cell">
+                                    <div class="dashboard-actions-cell__inner dashboard-actions-cell__inner--news">
+                                        <a href="{% url 'dashboard:news_update' item.id %}" class="dashboard-btn dashboard-btn--small">
+                                            Изменить
+                                        </a>
+
+                                        <form method="post" action="{% url 'dashboard:news_toggle_publish' item.id %}">
+                                            {% csrf_token %}
+                                            <button type="submit" class="dashboard-btn dashboard-btn--small dashboard-btn--ghost">
+                                                {% if item.is_published %}Снять{% else %}Опубликовать{% endif %}
+                                            </button>
+                                        </form>
+
+                                        <a href="{% url 'dashboard:news_delete' item.id %}" class="dashboard-btn dashboard-btn--small dashboard-btn--danger">
+                                            Удалить
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="dashboard-pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}">← Назад</a>
+                    {% endif %}
+
+                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}">Вперёд →</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="dashboard-news-empty">
+                <h3>Новости не найдены</h3>
+                <p>Создай первую публикацию или измени параметры фильтрации.</p>
+                <a href="{% url 'dashboard:news_create' %}" class="dashboard-btn dashboard-btn--primary">
+                    Добавить новость
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

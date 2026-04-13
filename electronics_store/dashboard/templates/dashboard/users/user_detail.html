@@ -1,0 +1,111 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Пользователь {{ profile_user.username }}{% endblock %}
+{% block page_title %}Пользователь {{ profile_user.username }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:user_list' %}" class="dashboard-btn dashboard-btn--ghost">← К списку пользователей</a>
+    <a href="{% url 'dashboard:user_update' profile_user.id %}" class="dashboard-btn dashboard-btn--primary">Редактировать</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-card__label">Всего заказов</div>
+        <div class="stat-card__value">{{ user_stats.total_orders }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__label">Текущие</div>
+        <div class="stat-card__value">{{ user_stats.current_orders }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__label">Доставленные</div>
+        <div class="stat-card__value">{{ user_stats.delivered_orders }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-card__label">Отменённые</div>
+        <div class="stat-card__value">{{ user_stats.cancelled_orders }}</div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head">
+            <h2>Данные пользователя</h2>
+        </div>
+        <div class="dashboard-panel__body">
+            <div class="dashboard-detail-list">
+                <div><strong>ID:</strong> {{ profile_user.id }}</div>
+                <div><strong>Логин:</strong> {{ profile_user.username }}</div>
+                <div><strong>Email:</strong> {{ profile_user.email|default:"—" }}</div>
+                <div><strong>Имя:</strong> {{ profile_user.first_name|default:"—" }}</div>
+                <div><strong>Фамилия:</strong> {{ profile_user.last_name|default:"—" }}</div>
+                <div><strong>Телефон:</strong> {{ profile_user.phone_number|default:"—" }}</div>
+                <div><strong>Дата рождения:</strong> {{ profile_user.birth_date|date:"d.m.Y"|default:"—" }}</div>
+                <div><strong>Адрес:</strong> {{ profile_user.address|default:"—" }}</div>
+                <div><strong>Активен:</strong> {% if profile_user.is_active %}Да{% else %}Нет{% endif %}</div>
+                <div><strong>Staff:</strong> {% if profile_user.is_staff %}Да{% else %}Нет{% endif %}</div>
+                <div><strong>Superuser:</strong> {% if profile_user.is_superuser %}Да{% else %}Нет{% endif %}</div>
+                <div><strong>Дата регистрации:</strong> {{ profile_user.date_joined|date:"d.m.Y H:i" }}</div>
+                <div><strong>Последний вход:</strong> {{ profile_user.last_login|date:"d.m.Y H:i"|default:"—" }}</div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Заказы пользователя</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if user_orders %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Статус</th>
+                            <th>Оплата</th>
+                            <th>Доставка</th>
+                            <th>Сумма</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in user_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>
+                                    <span class="status-badge status-badge--{{ order.status }}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if order.is_paid %}
+                                        <span class="status-badge status-badge--paid">Да</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--unpaid">Нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.get_delivery_method_display }}</td>
+                                <td>{{ order.total_price }}</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <div class="dashboard-actions-cell__inner">
+                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">
+                                            Заказ
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>У пользователя нет заказов.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

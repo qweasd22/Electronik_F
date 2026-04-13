@@ -1,0 +1,32 @@
+{% extends "dashboard/base.html" %}
+
+{% block title %}Удаление скидки{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:sale_list' %}" class="dashboard-btn dashboard-btn--ghost">
+        Назад к списку
+    </a>
+</div>
+
+<div class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Удаление скидки</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <div class="dashboard-news-delete">
+            <p class="dashboard-news-delete__text">
+                Вы действительно хотите удалить скидку
+                <strong>«{{ sale.name }}»</strong>?
+            </p>
+            <p class="dashboard-news-delete__hint">Это действие нельзя отменить.</p>
+
+            <form method="post" class="dashboard-form-actions">
+                {% csrf_token %}
+                <button type="submit" class="dashboard-btn dashboard-btn--danger">Удалить</button>
+                <a href="{% url 'dashboard:sale_list' %}" class="dashboard-btn dashboard-btn--ghost">Отмена</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
