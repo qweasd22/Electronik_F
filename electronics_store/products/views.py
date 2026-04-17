@@ -36,7 +36,7 @@ def product_list(request):
         user_cart = CartItem.objects.filter(user=request.user).select_related("product")
         cart_items = {item.product_id: item.quantity for item in user_cart}
 
-    paginator = Paginator(products, 20)
+    paginator = Paginator(products, 4)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
     products = list(page_obj.object_list)

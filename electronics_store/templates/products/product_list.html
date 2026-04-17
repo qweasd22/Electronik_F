@@ -174,25 +174,25 @@
         </div>
 
         {% if page_obj.has_other_pages %}
-            <nav class="products-pagination" aria-label="Пагинация товаров">
+            <nav class="section-pagination" aria-label="Пагинация товаров">
                 {% if page_obj.has_previous %}
-                    <a class="products-pagination__link" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
+                    <a class="pagination-link" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
                 {% else %}
-                    <span class="products-pagination__link products-pagination__link--disabled">Назад</span>
+                    <button type="button" class="pagination-link" disabled>Назад</button>
                 {% endif %}
 
                 {% for num in page_obj.paginator.page_range %}
                     {% if num == page_obj.number %}
-                        <span class="products-pagination__link products-pagination__link--active">{{ num }}</span>
+                        <span class="pagination-link is-active">{{ num }}</span>
                     {% else %}
-                        <a class="products-pagination__link" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ num }}">{{ num }}</a>
+                        <a class="pagination-link" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ num }}">{{ num }}</a>
                     {% endif %}
                 {% endfor %}
 
                 {% if page_obj.has_next %}
-                    <a class="products-pagination__link" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}">Вперед</a>
+                    <a class="pagination-link" href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}">Вперед</a>
                 {% else %}
-                    <span class="products-pagination__link products-pagination__link--disabled">Вперед</span>
+                    <button type="button" class="pagination-link" disabled>Вперед</button>
                 {% endif %}
             </nav>
         {% endif %}
