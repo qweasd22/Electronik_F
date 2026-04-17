@@ -167,7 +167,11 @@ def order_detail(request, order_id):
 @transaction.atomic
 def checkout(request):
     user = request.user
-    cart_items = CartItem.objects.select_related("product").filter(user=user)
+    cart_items = (
+        CartItem.objects.select_related("product")
+        .prefetch_related("product__images")
+        .filter(user=user)
+    )
 
     if not cart_items.exists():
         messages.warning(request, "Корзина пуста.")
@@ -177,6 +181,15 @@ def checkout(request):
     total_price_with_discount = Decimal("0.00")
 
     for item in cart_items:
+        extra_image = next(
+            (img for img in item.product.images.all() if getattr(img, "image", None)),
+            None,
+        )
+        item.display_image_url = (
+            extra_image.image.url
+            if extra_image
+            else (item.product.image.url if item.product.image else None)
+        )
         total_price_without_discount += item.product.price * item.quantity
         total_price_with_discount += item.product.get_discounted_price() * item.quantity
 

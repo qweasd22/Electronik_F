@@ -103,12 +103,22 @@
                 <div class="checkout-items">
                     {% for item in cart_items %}
                         <article class="checkout-item-card">
-                            <div>
-                                <h3>{{ item.product.name }} × {{ item.quantity }}</h3>
-                                <p>Цена без скидки: {{ item.product.price }} ₽</p>
-                                {% if item.product.get_discounted_price != item.product.price %}
-                                    <p class="checkout-item-card__discount">Цена со скидкой: {{ item.product.get_discounted_price }} ₽</p>
-                                {% endif %}
+                            <div class="checkout-item-card__main">
+                                <div class="checkout-item-card__image-wrap">
+                                    {% if item.display_image_url %}
+                                        <img src="{{ item.display_image_url }}" alt="{{ item.product.name }}" class="checkout-item-card__image">
+                                    {% else %}
+                                        <div class="checkout-item-card__placeholder">Нет фото</div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="checkout-item-card__text">
+                                    <h3>{{ item.product.name }} × {{ item.quantity }}</h3>
+                                    <p>Цена без скидки: {{ item.product.price }} ₽</p>
+                                    {% if item.product.get_discounted_price != item.product.price %}
+                                        <p class="checkout-item-card__discount">Цена со скидкой: {{ item.product.get_discounted_price }} ₽</p>
+                                    {% endif %}
+                                </div>
                             </div>
                             <div class="checkout-item-card__sum">{{ item.product.get_discounted_price|multiply:item.quantity }} ₽</div>
                         </article>
