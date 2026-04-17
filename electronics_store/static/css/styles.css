@@ -607,18 +607,7 @@ a {
 .site-footer {
     margin-top: auto;
     border-top: 1px solid var(--line);
-    
     background: #FFFFFF;
-}
-
-.footer-text,
-.footer-links a {
-    color: var(--muted);
-    margin-left: 1rem;
-}
-
-.footer-links a:hover {
-    color: var(--accent);
 }
 
 .footer-inner {
@@ -627,6 +616,50 @@ a {
     gap: 30px;
     padding: 28px 0;
     flex-wrap: wrap;
+}
+
+.footer-brand {
+    max-width: 360px;
+}
+
+.footer-brand__title {
+    display: inline-block;
+    margin-left: 1rem;
+    color: var(--text);
+}
+
+.footer-text {
+    color: var(--muted);
+    margin: 10px 0 0 1rem;
+}
+
+.footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+}
+
+.footer-links__group {
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.footer-links__group h3 {
+    margin: 0 0 2px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.footer-links a {
+    color: var(--muted);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: var(--accent);
 }
 
 .logout-form {
@@ -675,5 +708,18 @@ a {
     .section-block--news::before {
         background-size: cover;
         filter: saturate(1.02) contrast(1);
+    }
+
+    .footer-inner {
+        gap: 22px;
+    }
+
+    .footer-links {
+        width: 100%;
+        gap: 20px;
+    }
+
+    .footer-links__group {
+        min-width: 130px;
     }
 }
