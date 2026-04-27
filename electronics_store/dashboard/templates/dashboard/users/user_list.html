@@ -30,6 +30,11 @@
                     <label for="{{ filter_form.is_superuser.id_for_label }}">Superuser</label>
                     {{ filter_form.is_superuser }}
                 </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.is_courier.id_for_label }}">Курьер</label>
+                    {{ filter_form.is_courier }}
+                </div>
             </div>
 
             <div class="dashboard-form-actions">
@@ -59,6 +64,7 @@
                             <th>Активен</th>
                             <th>Staff</th>
                             <th>Superuser</th>
+                            <th>Курьер</th>
                             <th>Дата регистрации</th>
                             <th></th>
                         </tr>
@@ -95,6 +101,13 @@
                                 <td>
                                     {% if user.is_superuser %}
                                         <span class="status-badge status-badge--processing">Да</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--unpaid">Нет</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if user.is_courier %}
+                                        <span class="status-badge status-badge--shipped">Да</span>
                                     {% else %}
                                         <span class="status-badge status-badge--unpaid">Нет</span>
                                     {% endif %}

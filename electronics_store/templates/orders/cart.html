@@ -80,6 +80,22 @@
                                     {% endif %}
 
                                     <div class="cart-item-card__actions">
+                                        <form method="post" action="{% url 'orders:update_cart' item.id %}" class="cart-qty-editor">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="set_quantity">
+                                            <label for="cart-qty-{{ item.id }}" class="cart-qty-editor__label">Количество</label>
+                                            <input
+                                                id="cart-qty-{{ item.id }}"
+                                                name="quantity"
+                                                type="number"
+                                                min="1"
+                                                max="{{ item.product.stock|default:1 }}"
+                                                value="{{ item.quantity }}"
+                                                class="cart-qty-editor__input"
+                                            >
+                                            <button type="submit" class="cart-btn cart-btn--ghost">Обновить</button>
+                                        </form>
+
                                         {% if item.product.stock > item.quantity %}
                                             <form method="post" action="{% url 'orders:update_cart' item.id %}">
                                                 {% csrf_token %}

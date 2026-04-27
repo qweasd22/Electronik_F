@@ -1,7 +1,15 @@
 from django.urls import path
 
 from .views import (
+    DashboardCourierCreateView,
+    DashboardCourierListView,
     DashboardHomeView,
+    DashboardNewsCreateView,
+    DashboardNewsDeleteView,
+    DashboardNewsListView,
+    DashboardNewsTogglePublishView,
+    DashboardNewsUpdateView,
+    DashboardOrderAssignCourierView,
     DashboardOrderDetailView,
     DashboardOrderListView,
     DashboardOrderStatusUpdateView,
@@ -9,19 +17,14 @@ from .views import (
     DashboardProductDeleteView,
     DashboardProductListView,
     DashboardProductUpdateView,
+    DashboardSaleCreateView,
+    DashboardSaleDeleteView,
+    DashboardSaleListView,
+    DashboardSaleToggleActiveView,
+    DashboardSaleUpdateView,
     DashboardUserDetailView,
     DashboardUserListView,
     DashboardUserUpdateView,
-    DashboardNewsListView,
-    DashboardNewsCreateView,
-    DashboardNewsUpdateView,
-    DashboardNewsDeleteView,
-    DashboardNewsTogglePublishView,
-    DashboardSaleListView,
-    DashboardSaleCreateView,
-    DashboardSaleUpdateView,
-    DashboardSaleDeleteView,
-    DashboardSaleToggleActiveView,
 )
 
 app_name = 'dashboard'
@@ -32,6 +35,7 @@ urlpatterns = [
     path('orders/', DashboardOrderListView.as_view(), name='order_list'),
     path('orders/<int:order_id>/', DashboardOrderDetailView.as_view(), name='order_detail'),
     path('orders/<int:order_id>/status/', DashboardOrderStatusUpdateView.as_view(), name='order_status_update'),
+    path('orders/<int:order_id>/assign-courier/', DashboardOrderAssignCourierView.as_view(), name='order_assign_courier'),
 
     path('products/', DashboardProductListView.as_view(), name='product_list'),
     path('products/create/', DashboardProductCreateView.as_view(), name='product_create'),
@@ -41,6 +45,9 @@ urlpatterns = [
     path('users/', DashboardUserListView.as_view(), name='user_list'),
     path('users/<int:user_id>/', DashboardUserDetailView.as_view(), name='user_detail'),
     path('users/<int:user_id>/edit/', DashboardUserUpdateView.as_view(), name='user_update'),
+
+    path('couriers/', DashboardCourierListView.as_view(), name='courier_list'),
+    path('couriers/create/', DashboardCourierCreateView.as_view(), name='courier_create'),
 
     path('news/', DashboardNewsListView.as_view(), name='news_list'),
     path('news/create/', DashboardNewsCreateView.as_view(), name='news_create'),

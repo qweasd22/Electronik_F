@@ -15,7 +15,9 @@
         <div class="checkout-hero__content container">
             <span class="checkout-badge">Оформление • Доставка • Подтверждение</span>
             <h1 style="margin-left: 15px;">Оформление заказа</h1>
-            <p style="margin-left: 15px;">Проверьте состав корзины, укажите данные получателя и выберите условия доставки.</p>
+            <p style="margin-left: 15px;">
+                Проверьте состав корзины, укажите данные получателя и выберите условия доставки.
+            </p>
         </div>
 
         <div class="checkout-hero__glow checkout-hero__glow--left"></div>
@@ -79,14 +81,6 @@
                         {% endif %}
                     </div>
 
-                    <div class="checkout-form-group">
-                        <label for="{{ form.courier.id_for_label }}">Курьер</label>
-                        {{ form.courier }}
-                        {% if form.courier.errors %}
-                            <div class="checkout-field-error">{{ form.courier.errors|striptags }}</div>
-                        {% endif %}
-                    </div>
-
                     <div class="checkout-form-group checkout-form-group--full">
                         <label for="{{ form.comment.id_for_label }}">Комментарий к заказу</label>
                         {{ form.comment }}
@@ -116,7 +110,9 @@
                                     <h3>{{ item.product.name }} × {{ item.quantity }}</h3>
                                     <p>Цена без скидки: {{ item.product.price }} ₽</p>
                                     {% if item.product.get_discounted_price != item.product.price %}
-                                        <p class="checkout-item-card__discount">Цена со скидкой: {{ item.product.get_discounted_price }} ₽</p>
+                                        <p class="checkout-item-card__discount">
+                                            Цена со скидкой: {{ item.product.get_discounted_price }} ₽
+                                        </p>
                                     {% endif %}
                                 </div>
                             </div>
@@ -154,22 +150,25 @@
 
 {% block extra_js %}
 <script>
-document.getElementById('id_delivery_method').addEventListener('change', function() {
-    const form = document.getElementById('checkout-form');
-    const formData = new FormData(form);
+const deliveryMethodField = document.getElementById('id_delivery_method');
+if (deliveryMethodField) {
+    deliveryMethodField.addEventListener('change', function() {
+        const form = document.getElementById('checkout-form');
+        const formData = new FormData(form);
 
-    fetch("{% url 'orders:checkout' %}", {
-        method: 'POST',
-        body: formData,
-        headers: {'X-Requested-With': 'XMLHttpRequest'},
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('delivery-cost').textContent = `${data.delivery_cost} ₽`;
-        document.getElementById('total-without-discount').textContent = `${data.total_without_discount} ₽`;
-        document.getElementById('total-with-discount').textContent = `${data.total_with_discount} ₽`;
-    })
-    .catch(error => console.log(error));
-});
+        fetch("{% url 'orders:checkout' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('delivery-cost').textContent = `${data.delivery_cost} ₽`;
+                document.getElementById('total-without-discount').textContent = `${data.total_without_discount} ₽`;
+                document.getElementById('total-with-discount').textContent = `${data.total_with_discount} ₽`;
+            })
+            .catch(error => console.log(error));
+    });
+}
 </script>
 {% endblock %}

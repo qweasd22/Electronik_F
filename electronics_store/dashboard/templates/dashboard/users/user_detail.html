@@ -46,12 +46,91 @@
                 <div><strong>Активен:</strong> {% if profile_user.is_active %}Да{% else %}Нет{% endif %}</div>
                 <div><strong>Staff:</strong> {% if profile_user.is_staff %}Да{% else %}Нет{% endif %}</div>
                 <div><strong>Superuser:</strong> {% if profile_user.is_superuser %}Да{% else %}Нет{% endif %}</div>
+                <div><strong>Курьер:</strong> {% if profile_user.is_courier %}Да{% else %}Нет{% endif %}</div>
                 <div><strong>Дата регистрации:</strong> {{ profile_user.date_joined|date:"d.m.Y H:i" }}</div>
                 <div><strong>Последний вход:</strong> {{ profile_user.last_login|date:"d.m.Y H:i"|default:"—" }}</div>
             </div>
         </div>
     </section>
 </div>
+
+{% if courier_stats %}
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Статистика курьера</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-card__label">Назначенные заказы</div>
+                <div class="stat-card__value">{{ courier_stats.assigned_orders }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">В работе</div>
+                <div class="stat-card__value">{{ courier_stats.in_progress_orders }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">Доставлено</div>
+                <div class="stat-card__value">{{ courier_stats.delivered_orders }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card__label">Отменено</div>
+                <div class="stat-card__value">{{ courier_stats.cancelled_orders }}</div>
+            </div>
+        </div>
+
+        <div class="dashboard-grid" style="margin-top: 20px;">
+            <section class="dashboard-panel">
+                <div class="dashboard-panel__head">
+                    <h2>Выручка курьера</h2>
+                </div>
+                <div class="dashboard-panel__body">
+                    <div class="dashboard-detail-list">
+                        <div><strong>Общая выручка:</strong> {{ courier_stats.delivered_revenue }} ₽</div>
+                        <div><strong>За текущий месяц:</strong> {{ courier_stats.month_revenue }} ₽</div>
+                        <div><strong>Средний чек:</strong> {{ courier_stats.average_check }} ₽</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        {% if courier_assigned_orders %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Клиент</th>
+                            <th>Статус</th>
+                            <th>Сумма</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in courier_assigned_orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.user.username }}</td>
+                                <td>
+                                    <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
+                                </td>
+                                <td>{{ order.total_price }}</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    <a href="{% url 'dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">Заказ</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>У курьера пока нет назначенных заказов.</p>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
 
 <section class="dashboard-panel">
     <div class="dashboard-panel__head">
@@ -77,9 +156,7 @@
                             <tr>
                                 <td>#{{ order.id }}</td>
                                 <td>
-                                    <span class="status-badge status-badge--{{ order.status }}">
-                                        {{ order.get_status_display }}
-                                    </span>
+                                    <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
                                 </td>
                                 <td>
                                     {% if order.is_paid %}
@@ -93,9 +170,7 @@
                                 <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
                                 <td>
                                     <div class="dashboard-actions-cell__inner">
-                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">
-                                            Заказ
-                                        </a>
+                                        <a href="{% url 'dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">Заказ</a>
                                     </div>
                                 </td>
                             </tr>

@@ -1,0 +1,68 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Создание курьера{% endblock %}
+{% block page_title %}Создание курьера{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:courier_list' %}" class="dashboard-btn dashboard-btn--ghost">← К списку курьеров</a>
+</div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Новый курьер</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.errors %}
+                <div class="dashboard-alert dashboard-alert--error">Проверьте поля формы.</div>
+            {% endif %}
+
+            <div class="dashboard-form-grid dashboard-form-grid--2">
+                <div class="dashboard-form-group">
+                    <label for="{{ form.username.id_for_label }}">Логин</label>
+                    {{ form.username }}
+                    {{ form.username.errors }}
+                </div>
+                <div class="dashboard-form-group">
+                    <label for="{{ form.email.id_for_label }}">Email</label>
+                    {{ form.email }}
+                    {{ form.email.errors }}
+                </div>
+                <div class="dashboard-form-group">
+                    <label for="{{ form.first_name.id_for_label }}">Имя</label>
+                    {{ form.first_name }}
+                    {{ form.first_name.errors }}
+                </div>
+                <div class="dashboard-form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Фамилия</label>
+                    {{ form.last_name }}
+                    {{ form.last_name.errors }}
+                </div>
+                <div class="dashboard-form-group">
+                    <label for="{{ form.phone_number.id_for_label }}">Телефон</label>
+                    {{ form.phone_number }}
+                    {{ form.phone_number.errors }}
+                </div>
+                <div class="dashboard-form-group">
+                    <label for="{{ form.password1.id_for_label }}">Пароль</label>
+                    {{ form.password1 }}
+                    {{ form.password1.errors }}
+                </div>
+                <div class="dashboard-form-group">
+                    <label for="{{ form.password2.id_for_label }}">Повтор пароля</label>
+                    {{ form.password2 }}
+                    {{ form.password2.errors }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Создать курьера</button>
+                <a href="{% url 'dashboard:courier_list' %}" class="dashboard-btn dashboard-btn--ghost">Отмена</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

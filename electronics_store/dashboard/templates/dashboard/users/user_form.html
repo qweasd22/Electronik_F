@@ -18,7 +18,7 @@
 
             {% if form.errors %}
                 <div class="dashboard-alert dashboard-alert--error">
-                    Проверь поля формы. Есть ошибки.
+                    Проверьте поля формы. Есть ошибки.
                 </div>
             {% endif %}
 
@@ -81,6 +81,12 @@
                     <label for="{{ form.is_superuser.id_for_label }}">Superuser</label>
                     {{ form.is_superuser }}
                     {{ form.is_superuser.errors }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ form.is_courier.id_for_label }}">Курьер</label>
+                    {{ form.is_courier }}
+                    {{ form.is_courier.errors }}
                 </div>
             </div>
 

@@ -25,18 +25,9 @@
                 <div><strong>Способ оплаты:</strong> {{ order.get_payment_method_display }}</div>
                 <div>
                     <strong>Статус:</strong>
-                    <span class="status-badge status-badge--{{ order.status }}">
-                        {{ order.get_status_display }}
-                    </span>
+                    <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
                 </div>
-                <div>
-                    <strong>Оплачен:</strong>
-                    {% if order.is_paid %}
-                        Да
-                    {% else %}
-                        Нет
-                    {% endif %}
-                </div>
+                <div><strong>Оплачен:</strong> {% if order.is_paid %}Да{% else %}Нет{% endif %}</div>
                 <div><strong>Курьер:</strong> {{ order.courier|default:"Не назначен" }}</div>
                 <div><strong>Комментарий клиента:</strong> {{ order.comment|default:"—" }}</div>
                 <div><strong>Комментарий по статусу:</strong> {{ order.tracking_note|default:"—" }}</div>
@@ -52,7 +43,7 @@
 
     <section class="dashboard-panel">
         <div class="dashboard-panel__head">
-            <h2>Изменить статус</h2>
+            <h2>Управление заказом</h2>
         </div>
         <div class="dashboard-panel__body">
             <form method="post" action="{% url 'dashboard:order_status_update' order.id %}" class="dashboard-status-form">
@@ -68,13 +59,62 @@
                     {{ status_form.note }}
                 </div>
 
-                <button type="submit" class="dashboard-btn dashboard-btn--primary">
-                    Сохранить статус
-                </button>
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Сохранить статус</button>
+            </form>
+
+            <hr style="margin: 22px 0; border-color: var(--line);">
+
+            <form method="post" action="{% url 'dashboard:order_assign_courier' order.id %}" class="dashboard-status-form">
+                {% csrf_token %}
+
+                <div class="dashboard-form-group">
+                    <label for="{{ courier_form.courier.id_for_label }}">Назначить курьера</label>
+                    {{ courier_form.courier }}
+                </div>
+
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Сохранить курьера</button>
             </form>
         </div>
     </section>
 </div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Статистика курьеров</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if courier_stats_rows %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Курьер</th>
+                            <th>Активные</th>
+                            <th>Доставленные</th>
+                            <th>Отмененные</th>
+                            <th>Выручка</th>
+                            <th>За месяц</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in courier_stats_rows %}
+                            <tr>
+                                <td>{{ row.courier.get_full_name|default:row.courier.username }}</td>
+                                <td>{{ row.in_progress_orders }}</td>
+                                <td>{{ row.delivered_orders }}</td>
+                                <td>{{ row.cancelled_orders }}</td>
+                                <td>{{ row.delivered_revenue }} ₽</td>
+                                <td>{{ row.month_revenue }} ₽</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Курьеры пока не созданы.</p>
+        {% endif %}
+    </div>
+</section>
 
 <section class="dashboard-panel">
     <div class="dashboard-panel__head">
@@ -99,13 +139,7 @@
                                 <td>{{ item.product_name|default:item.product.name }}</td>
                                 <td>{{ item.quantity }}</td>
                                 <td>{{ item.price_at_purchase }}</td>
-                                <td>
-                                    {% if item.discount_applied %}
-                                        Да
-                                    {% else %}
-                                        Нет
-                                    {% endif %}
-                                </td>
+                                <td>{% if item.discount_applied %}Да{% else %}Нет{% endif %}</td>
                                 <td>{{ item.total_price }}</td>
                             </tr>
                         {% endfor %}

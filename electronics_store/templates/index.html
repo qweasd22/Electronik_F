@@ -81,7 +81,6 @@
             </div>
         </div>
     </div>
-
 </section>
 {% endblock %}
 
@@ -95,38 +94,42 @@
         <a href="{% url 'products:product_list' %}" class="section-link">Все товары</a>
     </div>
 
-    <div class="cards-grid cards-grid--products js-slider" data-slider="products" data-per-page="4">
-        {% for product in products %}
-            <article class="card-modern product-card-modern">
-                <div class="card-modern__image-wrap">
-                    <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
-                         alt="{{ product.name }}"
-                         class="card-modern__image">
-                </div>
+    {% if products %}
+        <div class="home-slider js-home-slider" data-desktop="4" data-tablet="2" data-mobile="1" aria-label="Слайдер популярных товаров">
+            <button type="button" class="home-slider__arrow" data-slider-prev aria-label="Предыдущие товары">&larr;</button>
 
-                <div class="card-modern__body">
-                    <h3>{{ product.name }}</h3>
-                    <p class="product-price">{{ product.price }} ₽</p>
-                    <p class="product-rating">Рейтинг: {{ product.avg_rating|floatformat:2 }} ★</p>
+            <div class="home-slider__viewport">
+                <div class="home-slider__track">
+                    {% for product in products %}
+                        <article class="card-modern product-card-modern home-slider__item">
+                            <div class="card-modern__image-wrap">
+                                <img src="{% if product.image %}{{ product.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
+                                     alt="{{ product.name }}"
+                                     class="card-modern__image">
+                            </div>
 
-                    <a href="{% url 'products:product_detail' product.id %}" class="btn btn-accent-outline w-100">
-                        Подробнее
-                    </a>
+                            <div class="card-modern__body">
+                                <h3>{{ product.name }}</h3>
+                                <p class="product-price">{{ product.price }} ₽</p>
+                                <p class="product-rating">Рейтинг: {{ product.avg_rating|floatformat:2 }} ★</p>
+
+                                <a href="{% url 'products:product_detail' product.id %}" class="btn btn-accent-outline w-100">
+                                    Подробнее
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
                 </div>
-            </article>
-        {% empty %}
-            <p class="empty-state">Популярные товары пока отсутствуют.</p>
-        {% endfor %}
-    </div>
-    <nav class="section-pagination js-slider-controls" data-slider-controls="products" aria-label="??????">
-        <button type="button" class="pagination-link" data-slider-prev="products">Назад</button>
-        <span class="pagination-link is-active js-slider-status" data-slider-status="products">1 / 1</span>
-        <button type="button" class="pagination-link" data-slider-next="products">Вперед</button>
-    </nav>
+            </div>
+
+            <button type="button" class="home-slider__arrow" data-slider-next aria-label="Следующие товары">&rarr;</button>
+        </div>
+    {% else %}
+        <p class="empty-state">Популярные товары пока отсутствуют.</p>
+    {% endif %}
 </section>
 
 <section class="section-block section-block--news">
-
     <div class="section-head">
         <div>
             <span class="section-kicker">Обновления</span>
@@ -135,33 +138,38 @@
         <a href="{% url 'news:news_list' %}" class="section-link">Все новости</a>
     </div>
 
-    <div class="cards-grid cards-grid--news js-slider" data-slider="news" data-per-page="3">
-        {% for news_item in news %}
-            <article class="card-modern news-card-modern">
-                <div class="card-modern__image-wrap news-card-modern__image-wrap">
-                    <img src="{% if news_item.image %}{{ news_item.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
-                         alt="{{ news_item.title }}"
-                         class="news-thumb">
-                </div>
+    {% if news %}
+        <div class="home-slider js-home-slider" data-desktop="3" data-tablet="2" data-mobile="1" aria-label="Слайдер последних новостей">
+            <button type="button" class="home-slider__arrow" data-slider-prev aria-label="Предыдущие новости">&larr;</button>
 
-                <div class="card-modern__body">
-                    <p class="news-date-small">{{ news_item.published_at|date:"d.m.Y" }}</p>
-                    <h3>{{ news_item.title }}</h3>
-                    <p>{{ news_item.summary }}</p>
-                    <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn btn-accent-outline">
-                        Читать полностью
-                    </a>
+            <div class="home-slider__viewport">
+                <div class="home-slider__track">
+                    {% for news_item in news %}
+                        <article class="card-modern news-card-modern home-slider__item">
+                            <div class="card-modern__image-wrap news-card-modern__image-wrap">
+                                <img src="{% if news_item.image %}{{ news_item.image.url }}{% else %}{% static 'media/no_image.jpeg' %}{% endif %}"
+                                     alt="{{ news_item.title }}"
+                                     class="news-thumb">
+                            </div>
+
+                            <div class="card-modern__body">
+                                <p class="news-date-small">{{ news_item.published_at|date:"d.m.Y" }}</p>
+                                <h3>{{ news_item.title }}</h3>
+                                <p>{{ news_item.summary }}</p>
+                                <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn btn-accent-outline">
+                                    Читать полностью
+                                </a>
+                            </div>
+                        </article>
+                    {% endfor %}
                 </div>
-            </article>
-        {% empty %}
-            <p class="empty-state">Новости пока отсутствуют.</p>
-        {% endfor %}
-    </div>
-    <nav class="section-pagination js-slider-controls" data-slider-controls="news" aria-label="???????">
-        <button type="button" class="pagination-link" data-slider-prev="news">?????</button>
-        <span class="pagination-link is-active js-slider-status" data-slider-status="news">1 / 1</span>
-        <button type="button" class="pagination-link" data-slider-next="news">??????</button>
-    </nav>
+            </div>
+
+            <button type="button" class="home-slider__arrow" data-slider-next aria-label="Следующие новости">&rarr;</button>
+        </div>
+    {% else %}
+        <p class="empty-state">Новости пока отсутствуют.</p>
+    {% endif %}
 </section>
 
 <section class="section-block section-block--map">
@@ -182,65 +190,75 @@
 {% block extra_js %}
 <script>
     (function () {
-        function initSlider(sliderName) {
-            var container = document.querySelector('[data-slider="' + sliderName + '"]');
-            if (!container) return;
+        function getVisibleCount(slider) {
+            var desktop = parseInt(slider.dataset.desktop || '4', 10);
+            var tablet = parseInt(slider.dataset.tablet || '2', 10);
+            var mobile = parseInt(slider.dataset.mobile || '1', 10);
+            var width = window.innerWidth;
 
-            var items = Array.prototype.slice.call(container.querySelectorAll('.card-modern'));
-            var perPage = parseInt(container.dataset.perPage || '1', 10);
-            var controls = document.querySelector('[data-slider-controls="' + sliderName + '"]');
-            var prevBtn = document.querySelector('[data-slider-prev="' + sliderName + '"]');
-            var nextBtn = document.querySelector('[data-slider-next="' + sliderName + '"]');
-            var status = document.querySelector('[data-slider-status="' + sliderName + '"]');
+            if (width <= 768) return mobile;
+            if (width <= 1100) return tablet;
+            return desktop;
+        }
 
-            if (!controls || !prevBtn || !nextBtn || !status) return;
+        function initHomeSlider(slider) {
+            var track = slider.querySelector('.home-slider__track');
+            var viewport = slider.querySelector('.home-slider__viewport');
+            var prevBtn = slider.querySelector('[data-slider-prev]');
+            var nextBtn = slider.querySelector('[data-slider-next]');
+            var items = Array.prototype.slice.call(slider.querySelectorAll('.home-slider__item'));
 
-            if (!items.length) {
-                controls.style.display = 'none';
+            if (!track || !viewport || !prevBtn || !nextBtn || !items.length) {
                 return;
             }
 
-            var totalPages = Math.ceil(items.length / perPage);
-            var currentPage = 0;
+            var currentIndex = 0;
+            var maxIndex = 0;
+            var itemWidth = 0;
 
-            function renderPage() {
-                var start = currentPage * perPage;
-                var end = start + perPage;
+            function render() {
+                track.style.transform = 'translateX(' + (-currentIndex * itemWidth) + 'px)';
+            }
 
-                items.forEach(function (item, index) {
-                    item.style.display = index >= start && index < end ? '' : 'none';
+            function recalc() {
+                var visibleCount = Math.max(1, getVisibleCount(slider));
+                itemWidth = viewport.clientWidth / visibleCount;
+
+                items.forEach(function (item) {
+                    item.style.flex = '0 0 ' + itemWidth + 'px';
+                    item.style.maxWidth = itemWidth + 'px';
                 });
 
-                status.textContent = (currentPage + 1) + ' / ' + totalPages;
-                prevBtn.disabled = currentPage === 0;
-                nextBtn.disabled = currentPage >= totalPages - 1;
+                maxIndex = Math.max(0, items.length - visibleCount);
+                if (currentIndex > maxIndex) {
+                    currentIndex = maxIndex;
+                }
+
+                var disabled = maxIndex === 0;
+                prevBtn.disabled = disabled;
+                nextBtn.disabled = disabled;
+
+                render();
             }
 
             prevBtn.addEventListener('click', function () {
-                if (currentPage > 0) {
-                    currentPage -= 1;
-                    renderPage();
-                }
+                if (maxIndex === 0) return;
+                currentIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
+                render();
             });
 
             nextBtn.addEventListener('click', function () {
-                if (currentPage < totalPages - 1) {
-                    currentPage += 1;
-                    renderPage();
-                }
+                if (maxIndex === 0) return;
+                currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
+                render();
             });
 
-            if (totalPages <= 1) {
-                controls.style.display = 'none';
-                return;
-            }
-
-            renderPage();
+            recalc();
+            window.addEventListener('resize', recalc);
         }
 
-        initSlider('products');
-        initSlider('news');
+        var sliders = document.querySelectorAll('.js-home-slider');
+        sliders.forEach(initHomeSlider);
     })();
 </script>
 {% endblock %}
-

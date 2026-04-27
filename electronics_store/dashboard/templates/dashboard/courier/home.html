@@ -1,0 +1,108 @@
+{% extends 'dashboard/courier/base.html' %}
+
+{% block title %}Главная курьера{% endblock %}
+{% block page_title %}Главная курьера{% endblock %}
+
+{% block content %}
+<div class="stats-grid stats-grid--dashboard-home">
+    <article class="stat-card stat-card--info">
+        <div class="stat-card__label">Назначено заказов</div>
+        <div class="stat-card__value">{{ stats.assigned_orders }}</div>
+    </article>
+    <article class="stat-card stat-card--accent">
+        <div class="stat-card__label">В работе</div>
+        <div class="stat-card__value">{{ stats.in_progress_orders }}</div>
+    </article>
+    <article class="stat-card stat-card--success">
+        <div class="stat-card__label">Доставлено</div>
+        <div class="stat-card__value">{{ stats.delivered_orders }}</div>
+    </article>
+    <article class="stat-card stat-card--warning">
+        <div class="stat-card__label">Отменено</div>
+        <div class="stat-card__value">{{ stats.cancelled_orders }}</div>
+    </article>
+</div>
+
+<div class="stats-grid stats-grid--secondary">
+    <article class="stat-card stat-card--revenue">
+        <div class="stat-card__label">Выручка по доставкам</div>
+        <div class="stat-card__value">{{ stats.delivered_revenue }} ₽</div>
+    </article>
+    <article class="stat-card stat-card--accent">
+        <div class="stat-card__label">Выручка за месяц</div>
+        <div class="stat-card__value">{{ stats.month_revenue }} ₽</div>
+    </article>
+    <article class="stat-card">
+        <div class="stat-card__label">Средний чек</div>
+        <div class="stat-card__value">{{ stats.average_check }} ₽</div>
+    </article>
+</div>
+
+<div class="dashboard-grid dashboard-grid--home">
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head"><h2>Заказы в работе</h2></div>
+        <div class="dashboard-panel__body">
+            {% if recent_assigned_orders %}
+                <div class="dashboard-table-wrap">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Клиент</th>
+                                <th>Статус</th>
+                                <th>Дата</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_assigned_orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.user.username }}</td>
+                                    <td><span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span></td>
+                                    <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                    <td><a href="{% url 'courier_dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">Открыть</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>Сейчас нет активных заказов.</p>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="dashboard-panel">
+        <div class="dashboard-panel__head"><h2>Последние доставленные</h2></div>
+        <div class="dashboard-panel__body">
+            {% if recent_delivered_orders %}
+                <div class="dashboard-table-wrap">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Клиент</th>
+                                <th>Сумма</th>
+                                <th>Доставлен</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in recent_delivered_orders %}
+                                <tr>
+                                    <td>#{{ order.id }}</td>
+                                    <td>{{ order.user.username }}</td>
+                                    <td>{{ order.total_price }} ₽</td>
+                                    <td>{{ order.delivered_at|date:"d.m.Y H:i"|default:'—' }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p>Доставленных заказов пока нет.</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

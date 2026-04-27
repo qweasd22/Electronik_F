@@ -16,6 +16,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('contact/', views.contact_view, name='contact'),
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),
+    path('courier/', include('dashboard.courier_urls', namespace='courier_dashboard')),
 ]
 
 if settings.DEBUG:

@@ -147,6 +147,29 @@ def update_cart(request, cart_item_id):
         cart_item.delete()
         messages.success(request, f'Товар "{product.name}" удалён из корзины.')
 
+    elif action == "set_quantity":
+        raw_quantity = (request.POST.get("quantity") or "").strip()
+
+        try:
+            new_quantity = int(raw_quantity)
+        except (TypeError, ValueError):
+            messages.error(request, "Укажите корректное целое количество.")
+            return redirect("orders:cart")
+
+        if new_quantity < 1:
+            cart_item.delete()
+            messages.success(request, f'Товар "{product.name}" удалён из корзины.')
+        elif product.stock <= 0:
+            messages.error(request, f'Товар "{product.name}" отсутствует на складе.')
+        elif new_quantity > product.stock:
+            messages.warning(request, f'Нельзя установить больше {product.stock} шт. товара "{product.name}".')
+        elif new_quantity == cart_item.quantity:
+            messages.info(request, f'Количество товара "{product.name}" не изменилось.')
+        else:
+            cart_item.quantity = new_quantity
+            cart_item.save(update_fields=["quantity"])
+            messages.success(request, f'Количество товара "{product.name}" обновлено.')
+
     else:
         messages.error(request, "Некорректное действие.")
 
@@ -200,24 +223,30 @@ def checkout(request):
     total_with_discount = total_price_with_discount + delivery_cost
 
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return JsonResponse({
-            "delivery_cost": str(delivery_cost),
-            "total_without_discount": str(total_without_discount),
-            "total_with_discount": str(total_with_discount),
-        })
+        return JsonResponse(
+            {
+                "delivery_cost": str(delivery_cost),
+                "total_without_discount": str(total_without_discount),
+                "total_with_discount": str(total_with_discount),
+            }
+        )
 
     if request.method == "POST":
         form = OrderForm(request.POST, user=user)
 
         if not form.is_valid():
-            return render(request, "orders/checkout.html", {
-                "form": form,
-                "cart_items": cart_items,
-                "delivery_method": delivery_method,
-                "delivery_cost": delivery_cost,
-                "total_without_discount": total_without_discount,
-                "total_with_discount": total_with_discount,
-            })
+            return render(
+                request,
+                "orders/checkout.html",
+                {
+                    "form": form,
+                    "cart_items": cart_items,
+                    "delivery_method": delivery_method,
+                    "delivery_cost": delivery_cost,
+                    "total_without_discount": total_without_discount,
+                    "total_with_discount": total_with_discount,
+                },
+            )
 
         locked_products = {}
         for item in cart_items:
@@ -279,14 +308,18 @@ def checkout(request):
 
     form = OrderForm(user=user)
 
-    return render(request, "orders/checkout.html", {
-        "form": form,
-        "cart_items": cart_items,
-        "delivery_method": delivery_method,
-        "delivery_cost": delivery_cost,
-        "total_without_discount": total_without_discount,
-        "total_with_discount": total_with_discount,
-    })
+    return render(
+        request,
+        "orders/checkout.html",
+        {
+            "form": form,
+            "cart_items": cart_items,
+            "delivery_method": delivery_method,
+            "delivery_cost": delivery_cost,
+            "total_without_discount": total_without_discount,
+            "total_with_discount": total_with_discount,
+        },
+    )
 
 
 @login_required

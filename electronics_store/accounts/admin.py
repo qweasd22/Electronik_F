@@ -12,11 +12,13 @@ class CustomUserAdmin(UserAdmin):
         'email',
         'first_name',
         'last_name',
+        'is_courier',
         'is_staff',
         'is_superuser',
         'is_active',
     )
     list_filter = (
+        'is_courier',
         'is_staff',
         'is_superuser',
         'is_active',

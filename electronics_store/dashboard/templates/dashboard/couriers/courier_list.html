@@ -1,0 +1,60 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Курьеры{% endblock %}
+{% block page_title %}Курьеры{% endblock %}
+
+{% block content %}
+<div class="dashboard-top-actions">
+    <a href="{% url 'dashboard:courier_create' %}" class="dashboard-btn dashboard-btn--primary">Создать курьера</a>
+</div>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список курьеров и статистика</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if courier_rows %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>Курьер</th>
+                            <th>Email</th>
+                            <th>Телефон</th>
+                            <th>Назначено</th>
+                            <th>В работе</th>
+                            <th>Доставлено</th>
+                            <th>Отменено</th>
+                            <th>Выручка</th>
+                            <th>За месяц</th>
+                            <th>Средний чек</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in courier_rows %}
+                            <tr>
+                                <td>{{ row.courier.get_full_name|default:row.courier.username }}</td>
+                                <td>{{ row.courier.email|default:'—' }}</td>
+                                <td>{{ row.courier.phone_number|default:'—' }}</td>
+                                <td>{{ row.assigned_orders }}</td>
+                                <td>{{ row.in_progress_orders }}</td>
+                                <td>{{ row.delivered_orders }}</td>
+                                <td>{{ row.cancelled_orders }}</td>
+                                <td>{{ row.delivered_revenue }} ₽</td>
+                                <td>{{ row.month_revenue }} ₽</td>
+                                <td>{{ row.average_check }} ₽</td>
+                                <td>
+                                    <a href="{% url 'dashboard:user_detail' row.courier.id %}" class="dashboard-btn dashboard-btn--small">Профиль</a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Курьеры не созданы.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

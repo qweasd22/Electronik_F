@@ -1,0 +1,52 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Панель курьера{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+        <div class="dashboard-sidebar__brand">
+            <a href="{% url 'courier_dashboard:home' %}">Панель курьера</a>
+        </div>
+
+        <nav class="dashboard-sidebar__nav">
+            <a href="{% url 'home' %}" class="dashboard-link">На сайт</a>
+            <a href="{% url 'courier_dashboard:home' %}" class="dashboard-link">Главная</a>
+            <a href="{% url 'courier_dashboard:order_list' %}" class="dashboard-link">Мои заказы</a>
+            {% if request.user.is_staff or request.user.is_superuser %}
+                <a href="{% url 'dashboard:home' %}" class="dashboard-link">Админ-панель</a>
+            {% endif %}
+        </nav>
+    </aside>
+
+    <div class="dashboard-main">
+        <header class="dashboard-header">
+            <div>
+                <h1 class="dashboard-title">{% block page_title %}Панель курьера{% endblock %}</h1>
+                <p class="dashboard-subtitle">Статистика доставок и список назначенных заказов</p>
+            </div>
+
+            <div class="dashboard-user">
+                <span>{{ request.user.username }}</span>
+            </div>
+        </header>
+
+        <main class="dashboard-content">
+            {% if messages %}
+                <div class="dashboard-messages">
+                    {% for message in messages %}
+                        <div class="dashboard-alert dashboard-alert--{{ message.tags|default:'info' }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+</body>
+</html>

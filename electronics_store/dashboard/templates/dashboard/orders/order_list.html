@@ -28,9 +28,7 @@
                     <select name="status" id="id_status" class="dashboard-select">
                         <option value="">Все</option>
                         {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
-                                {{ label }}
-                            </option>
+                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -49,8 +47,19 @@
                     <select name="delivery_method" id="id_delivery_method" class="dashboard-select">
                         <option value="">Все</option>
                         {% for value, label in delivery_choices %}
-                            <option value="{{ value }}" {% if current_delivery_method == value %}selected{% endif %}>
-                                {{ label }}
+                            <option value="{{ value }}" {% if current_delivery_method == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="id_courier">Курьер</label>
+                    <select name="courier" id="id_courier" class="dashboard-select">
+                        <option value="" {% if not current_courier %}selected{% endif %}>Все</option>
+                        <option value="none" {% if current_courier == 'none' %}selected{% endif %}>Без курьера</option>
+                        {% for courier in couriers %}
+                            <option value="{{ courier.id }}" {% if current_courier == courier.id|stringformat:'s' %}selected{% endif %}>
+                                {{ courier.get_full_name|default:courier.username }}
                             </option>
                         {% endfor %}
                     </select>
@@ -79,6 +88,7 @@
                             <th>Пользователь</th>
                             <th>Получатель</th>
                             <th>Телефон</th>
+                            <th>Курьер</th>
                             <th>Статус</th>
                             <th>Оплата</th>
                             <th>Доставка</th>
@@ -94,10 +104,9 @@
                                 <td>{{ order.user.username }}</td>
                                 <td>{{ order.recipient_name|default:"—" }}</td>
                                 <td>{{ order.phone_number|default:"—" }}</td>
+                                <td>{{ order.courier.username|default:"Не назначен" }}</td>
                                 <td>
-                                    <span class="status-badge status-badge--{{ order.status }}">
-                                        {{ order.get_status_display }}
-                                    </span>
+                                    <span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span>
                                 </td>
                                 <td>
                                     {% if order.is_paid %}
@@ -123,7 +132,7 @@
             {% if is_paginated %}
                 <div class="dashboard-pagination">
                     {% if page_obj.has_previous %}
-                        <a href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&status={{ current_status }}&is_paid={{ current_is_paid }}&delivery_method={{ current_delivery_method }}">
+                        <a href="?page={{ page_obj.previous_page_number }}&q={{ current_q }}&status={{ current_status }}&is_paid={{ current_is_paid }}&delivery_method={{ current_delivery_method }}&courier={{ current_courier }}">
                             Назад
                         </a>
                     {% endif %}
@@ -131,7 +140,7 @@
                     <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
 
                     {% if page_obj.has_next %}
-                        <a href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&status={{ current_status }}&is_paid={{ current_is_paid }}&delivery_method={{ current_delivery_method }}">
+                        <a href="?page={{ page_obj.next_page_number }}&q={{ current_q }}&status={{ current_status }}&is_paid={{ current_is_paid }}&delivery_method={{ current_delivery_method }}&courier={{ current_courier }}">
                             Вперёд
                         </a>
                     {% endif %}

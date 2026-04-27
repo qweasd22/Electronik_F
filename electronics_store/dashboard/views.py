@@ -1,37 +1,97 @@
 from decimal import Decimal
-from django.utils import timezone
-from products.models import Product, Sale
+
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.db.models import Q, Sum, F, DecimalField, Count
+from django.db.models import Case, Count, DecimalField, F, Q, Sum, Value, When
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views import View
 from django.views.generic import (
     CreateView,
     DeleteView,
     DetailView,
+    FormView,
     ListView,
     TemplateView,
     UpdateView,
 )
+
 from news.models import News
 from orders.models import Order, OrderItem, SaleEvent
-from products.models import Product
+from products.models import Product, Sale
 from .forms import (
+    DashboardCourierCreateForm,
+    DashboardNewsFilterForm,
+    DashboardNewsForm,
+    DashboardOrderCourierAssignForm,
     DashboardOrderStatusForm,
     DashboardProductFilterForm,
     DashboardProductForm,
+    DashboardSaleFilterForm,
+    DashboardSaleForm,
     DashboardUserFilterForm,
     DashboardUserUpdateForm,
-    DashboardNewsForm,
-    DashboardNewsFilterForm,
-    DashboardSaleForm,
-    DashboardSaleFilterForm,
 )
-from .mixins import DashboardAccessMixin
+from .mixins import CourierAccessMixin, DashboardAccessMixin
 
 User = get_user_model()
+
+DELIVERY_SUM_EXPRESSION = Case(
+    When(delivery_method='standard', then=Value(Decimal('200.00'))),
+    When(delivery_method='express', then=Value(Decimal('500.00'))),
+    default=Value(Decimal('0.00')),
+    output_field=DecimalField(max_digits=12, decimal_places=2),
+)
+
+
+def _calc_orders_revenue(order_queryset):
+    items_total = (
+        OrderItem.objects.filter(order__in=order_queryset)
+        .aggregate(
+            total=Sum(
+                F('quantity') * F('price_at_purchase'),
+                output_field=DecimalField(max_digits=12, decimal_places=2),
+            )
+        )
+        .get('total')
+        or Decimal('0.00')
+    )
+
+    delivery_total = (
+        order_queryset.aggregate(total=Sum(DELIVERY_SUM_EXPRESSION)).get('total')
+        or Decimal('0.00')
+    )
+
+    return items_total + delivery_total
+
+
+def _build_courier_stats(courier):
+    orders_qs = Order.objects.filter(courier=courier)
+    delivered_qs = orders_qs.filter(status='delivered')
+    in_progress_qs = orders_qs.filter(status__in=['processing', 'paid', 'shipped'])
+    cancelled_qs = orders_qs.filter(status='cancelled')
+
+    month_start = timezone.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    month_delivered_qs = delivered_qs.filter(delivered_at__gte=month_start)
+
+    delivered_revenue = _calc_orders_revenue(delivered_qs)
+    month_revenue = _calc_orders_revenue(month_delivered_qs)
+    delivered_count = delivered_qs.count()
+
+    average_check = Decimal('0.00')
+    if delivered_count:
+        average_check = delivered_revenue / delivered_count
+
+    return {
+        'assigned_orders': orders_qs.count(),
+        'in_progress_orders': in_progress_qs.count(),
+        'delivered_orders': delivered_count,
+        'cancelled_orders': cancelled_qs.count(),
+        'delivered_revenue': delivered_revenue,
+        'month_revenue': month_revenue,
+        'average_check': average_check.quantize(Decimal('0.01')),
+    }
 
 
 class DashboardHomeView(DashboardAccessMixin, TemplateView):
@@ -48,58 +108,40 @@ class DashboardHomeView(DashboardAccessMixin, TemplateView):
         total_users = User.objects.count()
         total_products = Product.objects.count()
         low_stock_products = Product.objects.filter(stock__lte=5).count()
+        total_couriers = User.objects.filter(is_courier=True).count()
 
-        delivered_revenue = OrderItem.objects.filter(
-            order__status='delivered'
-        ).aggregate(
-            total=Sum(
-                F('quantity') * F('price_at_purchase'),
-                output_field=DecimalField(max_digits=12, decimal_places=2)
-            )
-        )['total'] or Decimal('0.00')
-
-        expected_revenue = OrderItem.objects.filter(
-            order__is_paid=True
-        ).exclude(
-            order__status='cancelled'
-        ).aggregate(
-            total=Sum(
-                F('quantity') * F('price_at_purchase'),
-                output_field=DecimalField(max_digits=12, decimal_places=2)
-            )
-        )['total'] or Decimal('0.00')
-
-        cancelled_revenue = OrderItem.objects.filter(
-            order__status='cancelled'
-        ).aggregate(
-            total=Sum(
-                F('quantity') * F('price_at_purchase'),
-                output_field=DecimalField(max_digits=12, decimal_places=2)
-            )
-        )['total'] or Decimal('0.00')
+        delivered_revenue = _calc_orders_revenue(Order.objects.filter(status='delivered'))
+        expected_revenue = _calc_orders_revenue(
+            Order.objects.filter(is_paid=True).exclude(status='cancelled')
+        )
+        cancelled_revenue = _calc_orders_revenue(Order.objects.filter(status='cancelled'))
 
         recent_orders = Order.objects.select_related('user', 'courier').order_by('-created_at')[:5]
         recent_users = User.objects.order_by('-date_joined')[:5]
         low_stock_items = Product.objects.filter(stock__lte=5).order_by('stock')[:5]
         recent_sales = SaleEvent.objects.select_related('user', 'product', 'order').order_by('-timestamp')[:5]
 
-        context.update({
-            'total_orders': total_orders,
-            'delivered_orders': delivered_orders,
-            'paid_orders': paid_orders,
-            'cancelled_orders': cancelled_orders,
-            'total_users': total_users,
-            'total_products': total_products,
-            'low_stock_products': low_stock_products,
-            'delivered_revenue': delivered_revenue,
-            'expected_revenue': expected_revenue,
-            'cancelled_revenue': cancelled_revenue,
-            'recent_orders': recent_orders,
-            'recent_users': recent_users,
-            'low_stock_items': low_stock_items,
-            'recent_sales': recent_sales,
-        })
+        context.update(
+            {
+                'total_orders': total_orders,
+                'delivered_orders': delivered_orders,
+                'paid_orders': paid_orders,
+                'cancelled_orders': cancelled_orders,
+                'total_users': total_users,
+                'total_products': total_products,
+                'low_stock_products': low_stock_products,
+                'total_couriers': total_couriers,
+                'delivered_revenue': delivered_revenue,
+                'expected_revenue': expected_revenue,
+                'cancelled_revenue': cancelled_revenue,
+                'recent_orders': recent_orders,
+                'recent_users': recent_users,
+                'low_stock_items': low_stock_items,
+                'recent_sales': recent_sales,
+            }
+        )
         return context
+
 
 class DashboardOrderListView(DashboardAccessMixin, ListView):
     model = Order
@@ -109,31 +151,26 @@ class DashboardOrderListView(DashboardAccessMixin, ListView):
 
     def get_queryset(self):
         queryset = (
-            Order.objects
-            .select_related('user', 'courier')
-            .prefetch_related('items')
-            .order_by('-created_at')
+            Order.objects.select_related('user', 'courier').prefetch_related('items').order_by('-created_at')
         )
 
         search_query = self.request.GET.get('q', '').strip()
         status = self.request.GET.get('status', '').strip()
         is_paid = self.request.GET.get('is_paid', '').strip()
         delivery_method = self.request.GET.get('delivery_method', '').strip()
+        courier_id = self.request.GET.get('courier', '').strip()
 
         if search_query:
             if search_query.isdigit():
-                queryset = queryset.filter(
-                    Q(id=int(search_query)) |
-                    Q(phone_number__icontains=search_query)
-                )
+                queryset = queryset.filter(Q(id=int(search_query)) | Q(phone_number__icontains=search_query))
             else:
                 queryset = queryset.filter(
-                    Q(user__username__icontains=search_query) |
-                    Q(user__email__icontains=search_query) |
-                    Q(recipient_name__icontains=search_query) |
-                    Q(phone_number__icontains=search_query) |
-                    Q(address__icontains=search_query) |
-                    Q(tracking_note__icontains=search_query)
+                    Q(user__username__icontains=search_query)
+                    | Q(user__email__icontains=search_query)
+                    | Q(recipient_name__icontains=search_query)
+                    | Q(phone_number__icontains=search_query)
+                    | Q(address__icontains=search_query)
+                    | Q(tracking_note__icontains=search_query)
                 )
 
         if status:
@@ -147,16 +184,24 @@ class DashboardOrderListView(DashboardAccessMixin, ListView):
         if delivery_method:
             queryset = queryset.filter(delivery_method=delivery_method)
 
+        if courier_id:
+            if courier_id == 'none':
+                queryset = queryset.filter(courier__isnull=True)
+            elif courier_id.isdigit():
+                queryset = queryset.filter(courier_id=int(courier_id))
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['status_choices'] = Order.STATUS_CHOICES
         context['delivery_choices'] = Order.DELIVERY_CHOICES
+        context['couriers'] = User.objects.filter(is_active=True, is_courier=True).order_by('username')
         context['current_q'] = self.request.GET.get('q', '').strip()
         context['current_status'] = self.request.GET.get('status', '').strip()
         context['current_is_paid'] = self.request.GET.get('is_paid', '').strip()
         context['current_delivery_method'] = self.request.GET.get('delivery_method', '').strip()
+        context['current_courier'] = self.request.GET.get('courier', '').strip()
         return context
 
 
@@ -168,14 +213,18 @@ class DashboardOrderDetailView(DashboardAccessMixin, DetailView):
 
     def get_queryset(self):
         return (
-            Order.objects
-            .select_related('user', 'courier')
-            .prefetch_related('items__product', 'status_history__changed_by')
+            Order.objects.select_related('user', 'courier').prefetch_related('items__product', 'status_history__changed_by')
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['status_form'] = DashboardOrderStatusForm(initial={'status': self.object.status})
+        context['courier_form'] = DashboardOrderCourierAssignForm(initial={'courier': self.object.courier})
+
+        couriers = User.objects.filter(is_active=True, is_courier=True).order_by('username')
+        context['courier_stats_rows'] = [
+            {'courier': courier, **_build_courier_stats(courier)} for courier in couriers
+        ]
         return context
 
 
@@ -185,7 +234,7 @@ class DashboardOrderStatusUpdateView(DashboardAccessMixin, View):
         form = DashboardOrderStatusForm(request.POST)
 
         if not form.is_valid():
-            messages.error(request, "Форма изменения статуса заполнена некорректно.")
+            messages.error(request, 'Форма изменения статуса заполнена некорректно.')
             return redirect('dashboard:order_detail', order_id=order.id)
 
         new_status = form.cleaned_data['status']
@@ -200,6 +249,27 @@ class DashboardOrderStatusUpdateView(DashboardAccessMixin, View):
         return redirect('dashboard:order_detail', order_id=order.id)
 
 
+class DashboardOrderAssignCourierView(DashboardAccessMixin, View):
+    def post(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        form = DashboardOrderCourierAssignForm(request.POST)
+
+        if not form.is_valid():
+            messages.error(request, 'Не удалось назначить курьера: проверьте данные формы.')
+            return redirect('dashboard:order_detail', order_id=order.id)
+
+        courier = form.cleaned_data['courier']
+        order.courier = courier
+        order.save(update_fields=['courier', 'updated_at'])
+
+        if courier is None:
+            messages.success(request, f'Курьер для заказа #{order.id} снят.')
+        else:
+            messages.success(request, f'Заказ #{order.id} назначен курьеру {courier.username}.')
+
+        return redirect('dashboard:order_detail', order_id=order.id)
+
+
 class DashboardProductListView(DashboardAccessMixin, ListView):
     model = Product
     template_name = 'dashboard/products/product_list.html'
@@ -207,12 +277,7 @@ class DashboardProductListView(DashboardAccessMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        queryset = (
-            Product.objects
-            .select_related('category', 'brand')
-            .prefetch_related('sales')
-            .order_by('-created_at')
-        )
+        queryset = Product.objects.select_related('category', 'brand').prefetch_related('sales').order_by('-created_at')
 
         self.filter_form = DashboardProductFilterForm(self.request.GET or None)
 
@@ -224,10 +289,10 @@ class DashboardProductListView(DashboardAccessMixin, ListView):
 
             if q:
                 queryset = queryset.filter(
-                    Q(name__icontains=q) |
-                    Q(slug__icontains=q) |
-                    Q(description__icontains=q) |
-                    Q(additional_info__icontains=q)
+                    Q(name__icontains=q)
+                    | Q(slug__icontains=q)
+                    | Q(description__icontains=q)
+                    | Q(additional_info__icontains=q)
                 )
 
             if category:
@@ -294,11 +359,7 @@ class DashboardUserListView(DashboardAccessMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        queryset = (
-            User.objects
-            .annotate(order_count=Count('orders'))
-            .order_by('-date_joined')
-        )
+        queryset = User.objects.annotate(order_count=Count('orders')).order_by('-date_joined')
 
         self.filter_form = DashboardUserFilterForm(self.request.GET or None)
 
@@ -307,14 +368,15 @@ class DashboardUserListView(DashboardAccessMixin, ListView):
             is_active = self.filter_form.cleaned_data.get('is_active')
             is_staff = self.filter_form.cleaned_data.get('is_staff')
             is_superuser = self.filter_form.cleaned_data.get('is_superuser')
+            is_courier = self.filter_form.cleaned_data.get('is_courier')
 
             if q:
                 queryset = queryset.filter(
-                    Q(username__icontains=q) |
-                    Q(email__icontains=q) |
-                    Q(first_name__icontains=q) |
-                    Q(last_name__icontains=q) |
-                    Q(phone_number__icontains=q)
+                    Q(username__icontains=q)
+                    | Q(email__icontains=q)
+                    | Q(first_name__icontains=q)
+                    | Q(last_name__icontains=q)
+                    | Q(phone_number__icontains=q)
                 )
 
             if is_active == 'yes':
@@ -331,6 +393,11 @@ class DashboardUserListView(DashboardAccessMixin, ListView):
                 queryset = queryset.filter(is_superuser=True)
             elif is_superuser == 'no':
                 queryset = queryset.filter(is_superuser=False)
+
+            if is_courier == 'yes':
+                queryset = queryset.filter(is_courier=True)
+            elif is_courier == 'no':
+                queryset = queryset.filter(is_courier=False)
 
         return queryset
 
@@ -354,8 +421,7 @@ class DashboardUserDetailView(DashboardAccessMixin, DetailView):
         profile_user = self.object
 
         user_orders = (
-            Order.objects
-            .filter(user=profile_user)
+            Order.objects.filter(user=profile_user)
             .select_related('courier')
             .prefetch_related('items__product')
             .order_by('-created_at')
@@ -369,6 +435,16 @@ class DashboardUserDetailView(DashboardAccessMixin, DetailView):
             'cancelled_orders': user_orders.filter(status='cancelled').count(),
             'current_orders': user_orders.filter(status__in=['processing', 'paid', 'shipped']).count(),
         }
+
+        if profile_user.is_courier:
+            context['courier_stats'] = _build_courier_stats(profile_user)
+            context['courier_assigned_orders'] = (
+                Order.objects.filter(courier=profile_user)
+                .select_related('user')
+                .prefetch_related('items__product')
+                .order_by('-created_at')[:15]
+            )
+
         return context
 
 
@@ -386,6 +462,35 @@ class DashboardUserUpdateView(DashboardAccessMixin, UpdateView):
         messages.success(self.request, 'Данные пользователя обновлены.')
         return super().form_valid(form)
 
+
+class DashboardCourierListView(DashboardAccessMixin, ListView):
+    model = User
+    template_name = 'dashboard/couriers/courier_list.html'
+    context_object_name = 'couriers'
+
+    def get_queryset(self):
+        return User.objects.filter(is_courier=True).order_by('username')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['courier_rows'] = [
+            {'courier': courier, **_build_courier_stats(courier)}
+            for courier in context['couriers']
+        ]
+        return context
+
+
+class DashboardCourierCreateView(DashboardAccessMixin, FormView):
+    template_name = 'dashboard/couriers/courier_form.html'
+    form_class = DashboardCourierCreateForm
+    success_url = reverse_lazy('dashboard:courier_list')
+
+    def form_valid(self, form):
+        courier = form.save()
+        messages.success(self.request, f'Курьер {courier.username} успешно создан.')
+        return super().form_valid(form)
+
+
 class DashboardNewsListView(DashboardAccessMixin, ListView):
     model = News
     template_name = 'dashboard/news/news_list.html'
@@ -393,11 +498,7 @@ class DashboardNewsListView(DashboardAccessMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        queryset = (
-            News.objects
-            .select_related('category')
-            .order_by('-published_at', '-id')
-        )
+        queryset = News.objects.select_related('category').order_by('-published_at', '-id')
 
         self.filter_form = DashboardNewsFilterForm(self.request.GET or None)
 
@@ -408,9 +509,7 @@ class DashboardNewsListView(DashboardAccessMixin, ListView):
 
             if q:
                 queryset = queryset.filter(
-                    Q(title__icontains=q) |
-                    Q(summary__icontains=q) |
-                    Q(content__icontains=q)
+                    Q(title__icontains=q) | Q(summary__icontains=q) | Q(content__icontains=q)
                 )
 
             if category:
@@ -478,6 +577,7 @@ class DashboardNewsTogglePublishView(DashboardAccessMixin, View):
 
         return redirect('dashboard:news_list')
 
+
 class DashboardSaleListView(DashboardAccessMixin, ListView):
     model = Sale
     template_name = 'dashboard/sales/sale_list.html'
@@ -485,11 +585,7 @@ class DashboardSaleListView(DashboardAccessMixin, ListView):
     paginate_by = 15
 
     def get_queryset(self):
-        queryset = (
-            Sale.objects
-            .prefetch_related('products')
-            .order_by('-start_date', '-id')
-        )
+        queryset = Sale.objects.prefetch_related('products').order_by('-start_date', '-id')
 
         self.filter_form = DashboardSaleFilterForm(self.request.GET or None)
 
@@ -508,10 +604,7 @@ class DashboardSaleListView(DashboardAccessMixin, ListView):
                 queryset = queryset.filter(is_active=False)
 
             if current_state == 'current':
-                queryset = queryset.filter(
-                    is_active=True,
-                    start_date__lte=now,
-                ).filter(
+                queryset = queryset.filter(is_active=True, start_date__lte=now).filter(
                     Q(end_date__isnull=True) | Q(end_date__gte=now)
                 )
             elif current_state == 'upcoming':
@@ -578,3 +671,94 @@ class DashboardSaleToggleActiveView(DashboardAccessMixin, View):
             messages.success(request, f'Скидка «{sale.name}» деактивирована.')
 
         return redirect('dashboard:sale_list')
+
+
+class CourierDashboardHomeView(CourierAccessMixin, TemplateView):
+    template_name = 'dashboard/courier/home.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        courier_orders = (
+            Order.objects.filter(courier=self.request.user)
+            .select_related('user')
+            .prefetch_related('items__product')
+            .order_by('-created_at')
+        )
+
+        delivered_orders = courier_orders.filter(status='delivered')
+        in_progress_orders = courier_orders.filter(status__in=['processing', 'paid', 'shipped'])
+
+        context['stats'] = _build_courier_stats(self.request.user)
+        context['recent_assigned_orders'] = in_progress_orders[:10]
+        context['recent_delivered_orders'] = delivered_orders[:10]
+        return context
+
+
+class CourierOrderListView(CourierAccessMixin, ListView):
+    model = Order
+    template_name = 'dashboard/courier/order_list.html'
+    context_object_name = 'orders'
+    paginate_by = 20
+
+    def get_queryset(self):
+        queryset = (
+            Order.objects.filter(courier=self.request.user)
+            .select_related('user')
+            .prefetch_related('items__product')
+            .order_by('-created_at')
+        )
+
+        status = self.request.GET.get('status', '').strip()
+        if status:
+            queryset = queryset.filter(status=status)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['status_choices'] = Order.STATUS_CHOICES
+        context['current_status'] = self.request.GET.get('status', '').strip()
+        return context
+
+
+class CourierOrderDetailView(CourierAccessMixin, DetailView):
+    model = Order
+    template_name = 'dashboard/courier/order_detail.html'
+    context_object_name = 'order'
+    pk_url_kwarg = 'order_id'
+
+    def get_queryset(self):
+        return (
+            Order.objects.filter(courier=self.request.user)
+            .select_related('user', 'courier')
+            .prefetch_related('items__product', 'status_history__changed_by')
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        status_form = DashboardOrderStatusForm(initial={'status': self.object.status})
+        status_form.fields['note'].widget.attrs['placeholder'] = 'Комментарий к смене статуса'
+        context['status_form'] = status_form
+        return context
+
+
+class CourierOrderStatusUpdateView(CourierAccessMixin, View):
+    def post(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id, courier=request.user)
+        form = DashboardOrderStatusForm(request.POST)
+
+        if not form.is_valid():
+            messages.error(request, 'Проверьте данные формы изменения статуса.')
+            return redirect('courier_dashboard:order_detail', order_id=order.id)
+
+        new_status = form.cleaned_data['status']
+        note = form.cleaned_data['note']
+
+        try:
+            order.set_status(new_status, note=note, changed_by=request.user)
+            messages.success(request, f'Статус заказа #{order.id} обновлён.')
+        except Exception as exc:
+            messages.error(request, f'Не удалось обновить статус заказа: {exc}')
+
+        return redirect('courier_dashboard:order_detail', order_id=order.id)

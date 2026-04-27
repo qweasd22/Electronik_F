@@ -1,18 +1,9 @@
 from django import forms
 
-from accounts.models import CustomUser
 from .models import Order
 
 
 class OrderForm(forms.ModelForm):
-    courier = forms.ModelChoiceField(
-        queryset=CustomUser.objects.filter(is_active=True, is_staff=True, is_superuser=False),
-        required=False,
-        label="Курьер",
-        empty_label="Выберите курьера",
-        widget=forms.Select(attrs={"class": "checkout-input"}),
-    )
-
     class Meta:
         model = Order
         fields = [
@@ -21,7 +12,6 @@ class OrderForm(forms.ModelForm):
             "address",
             "delivery_method",
             "payment_method",
-            "courier",
             "comment",
         ]
         widgets = {

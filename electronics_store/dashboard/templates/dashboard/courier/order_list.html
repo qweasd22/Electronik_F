@@ -1,0 +1,69 @@
+{% extends 'dashboard/courier/base.html' %}
+
+{% block title %}Мои заказы{% endblock %}
+{% block page_title %}Мои заказы{% endblock %}
+
+{% block content %}
+<section class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head"><h2>Фильтр</h2></div>
+    <div class="dashboard-panel__body">
+        <form method="get" class="dashboard-filters-form">
+            <div class="dashboard-form-grid dashboard-form-grid--2">
+                <div class="dashboard-form-group">
+                    <label for="id_status">Статус</label>
+                    <select name="status" id="id_status" class="dashboard-select">
+                        <option value="">Все</option>
+                        {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Применить</button>
+                <a href="{% url 'courier_dashboard:order_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head"><h2>Назначенные заказы</h2></div>
+    <div class="dashboard-panel__body">
+        {% if orders %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Клиент</th>
+                            <th>Телефон</th>
+                            <th>Адрес</th>
+                            <th>Статус</th>
+                            <th>Сумма</th>
+                            <th>Дата</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.id }}</td>
+                                <td>{{ order.user.username }}</td>
+                                <td>{{ order.phone_number|default:'—' }}</td>
+                                <td>{{ order.address }}</td>
+                                <td><span class="status-badge status-badge--{{ order.status }}">{{ order.get_status_display }}</span></td>
+                                <td>{{ order.total_price }} ₽</td>
+                                <td>{{ order.created_at|date:"d.m.Y H:i" }}</td>
+                                <td><a href="{% url 'courier_dashboard:order_detail' order.id %}" class="dashboard-btn dashboard-btn--small">Открыть</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>Заказы не найдены.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

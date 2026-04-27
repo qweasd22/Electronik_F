@@ -1,126 +1,9 @@
 from django import forms
-
-from orders.models import Order
-
-
-class DashboardOrderStatusForm(forms.Form):
-    status = forms.ChoiceField(
-        label="Новый статус",
-        choices=Order.STATUS_CHOICES,
-        widget=forms.Select(attrs={"class": "dashboard-select"}),
-    )
-    note = forms.CharField(
-        label="Комментарий",
-        required=False,
-        widget=forms.Textarea(
-            attrs={
-                "class": "dashboard-textarea",
-                "rows": 4,
-                "placeholder": "Комментарий к изменению статуса",
-            }
-        ),
-    )
-
-from django import forms
-
-from orders.models import Order
-from products.models import Product, Category, Brand, Sale
-
-
-class DashboardOrderStatusForm(forms.Form):
-    status = forms.ChoiceField(
-        label="Новый статус",
-        choices=Order.STATUS_CHOICES,
-        widget=forms.Select(attrs={"class": "dashboard-select"}),
-    )
-    note = forms.CharField(
-        label="Комментарий",
-        required=False,
-        widget=forms.Textarea(
-            attrs={
-                "class": "dashboard-textarea",
-                "rows": 4,
-                "placeholder": "Комментарий к изменению статуса",
-            }
-        ),
-    )
-
-
-class DashboardProductForm(forms.ModelForm):
-    sales = forms.ModelMultipleChoiceField(
-        label="Скидки",
-        queryset=Sale.objects.all(),
-        required=False,
-        widget=forms.CheckboxSelectMultiple,
-    )
-
-    class Meta:
-        model = Product
-        fields = [
-            "name",
-            "slug",
-            "category",
-            "brand",
-            "description",
-            "price",
-            "stock",
-            "image",
-            "sales",
-            "additional_info",
-        ]
-        widgets = {
-            "name": forms.TextInput(attrs={"class": "dashboard-input"}),
-            "slug": forms.TextInput(attrs={"class": "dashboard-input"}),
-            "category": forms.Select(attrs={"class": "dashboard-select"}),
-            "brand": forms.Select(attrs={"class": "dashboard-select"}),
-            "description": forms.Textarea(attrs={"class": "dashboard-textarea", "rows": 5}),
-            "price": forms.NumberInput(attrs={"class": "dashboard-input", "step": "0.01"}),
-            "stock": forms.NumberInput(attrs={"class": "dashboard-input", "min": "0"}),
-            "image": forms.ClearableFileInput(attrs={"class": "dashboard-input"}),
-            "additional_info": forms.Textarea(attrs={"class": "dashboard-textarea", "rows": 5}),
-        }
-
-
-class DashboardProductFilterForm(forms.Form):
-    q = forms.CharField(
-        required=False,
-        label="Поиск",
-        widget=forms.TextInput(
-            attrs={
-                "class": "dashboard-input",
-                "placeholder": "Название, slug, описание",
-            }
-        ),
-    )
-    category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
-        required=False,
-        empty_label="Все категории",
-        widget=forms.Select(attrs={"class": "dashboard-select"}),
-    )
-    brand = forms.ModelChoiceField(
-        queryset=Brand.objects.all(),
-        required=False,
-        empty_label="Все бренды",
-        widget=forms.Select(attrs={"class": "dashboard-select"}),
-    )
-    stock_state = forms.ChoiceField(
-        required=False,
-        label="Остаток",
-        choices=[
-            ("", "Все"),
-            ("in_stock", "В наличии"),
-            ("low_stock", "Мало на складе"),
-            ("out_of_stock", "Нет в наличии"),
-        ],
-        widget=forms.Select(attrs={"class": "dashboard-select"}),
-    )
-
-from django import forms
 from django.contrib.auth import get_user_model
 
+from news.models import News, Category as NewsCategory
 from orders.models import Order
-from products.models import Product, Category, Brand, Sale
+from products.models import Brand, Category, Product, Sale
 
 User = get_user_model()
 
@@ -144,10 +27,20 @@ class DashboardOrderStatusForm(forms.Form):
     )
 
 
+class DashboardOrderCourierAssignForm(forms.Form):
+    courier = forms.ModelChoiceField(
+        queryset=User.objects.filter(is_active=True, is_courier=True).order_by("username"),
+        required=False,
+        empty_label="Не назначен",
+        label="Курьер",
+        widget=forms.Select(attrs={"class": "dashboard-select"}),
+    )
+
+
 class DashboardProductForm(forms.ModelForm):
     sales = forms.ModelMultipleChoiceField(
         label="Скидки",
-        queryset=Sale.objects.all(),
+        queryset=Sale.objects.all().order_by("-start_date", "name"),
         required=False,
         widget=forms.CheckboxSelectMultiple,
     )
@@ -191,13 +84,13 @@ class DashboardProductFilterForm(forms.Form):
         ),
     )
     category = forms.ModelChoiceField(
-        queryset=Category.objects.all(),
+        queryset=Category.objects.all().order_by("name"),
         required=False,
         empty_label="Все категории",
         widget=forms.Select(attrs={"class": "dashboard-select"}),
     )
     brand = forms.ModelChoiceField(
-        queryset=Brand.objects.all(),
+        queryset=Brand.objects.all().order_by("name"),
         required=False,
         empty_label="Все бренды",
         widget=forms.Select(attrs={"class": "dashboard-select"}),
@@ -229,31 +122,25 @@ class DashboardUserFilterForm(forms.Form):
     is_active = forms.ChoiceField(
         required=False,
         label="Активность",
-        choices=[
-            ("", "Все"),
-            ("yes", "Активные"),
-            ("no", "Неактивные"),
-        ],
+        choices=[("", "Все"), ("yes", "Активные"), ("no", "Неактивные")],
         widget=forms.Select(attrs={"class": "dashboard-select"}),
     )
     is_staff = forms.ChoiceField(
         required=False,
         label="Staff",
-        choices=[
-            ("", "Все"),
-            ("yes", "Да"),
-            ("no", "Нет"),
-        ],
+        choices=[("", "Все"), ("yes", "Да"), ("no", "Нет")],
         widget=forms.Select(attrs={"class": "dashboard-select"}),
     )
     is_superuser = forms.ChoiceField(
         required=False,
         label="Superuser",
-        choices=[
-            ("", "Все"),
-            ("yes", "Да"),
-            ("no", "Нет"),
-        ],
+        choices=[("", "Все"), ("yes", "Да"), ("no", "Нет")],
+        widget=forms.Select(attrs={"class": "dashboard-select"}),
+    )
+    is_courier = forms.ChoiceField(
+        required=False,
+        label="Курьер",
+        choices=[("", "Все"), ("yes", "Да"), ("no", "Нет")],
         widget=forms.Select(attrs={"class": "dashboard-select"}),
     )
 
@@ -272,6 +159,7 @@ class DashboardUserUpdateForm(forms.ModelForm):
             "is_active",
             "is_staff",
             "is_superuser",
+            "is_courier",
         ]
         widgets = {
             "username": forms.TextInput(attrs={"class": "dashboard-input"}),
@@ -283,7 +171,57 @@ class DashboardUserUpdateForm(forms.ModelForm):
             "address": forms.Textarea(attrs={"class": "dashboard-textarea", "rows": 4}),
         }
 
-from news.models import News, Category as NewsCategory
+
+class DashboardCourierCreateForm(forms.ModelForm):
+    password1 = forms.CharField(
+        label="Пароль",
+        widget=forms.PasswordInput(attrs={"class": "dashboard-input"}),
+    )
+    password2 = forms.CharField(
+        label="Повтор пароля",
+        widget=forms.PasswordInput(attrs={"class": "dashboard-input"}),
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "phone_number",
+        ]
+        widgets = {
+            "username": forms.TextInput(attrs={"class": "dashboard-input"}),
+            "email": forms.EmailInput(attrs={"class": "dashboard-input"}),
+            "first_name": forms.TextInput(attrs={"class": "dashboard-input"}),
+            "last_name": forms.TextInput(attrs={"class": "dashboard-input"}),
+            "phone_number": forms.TextInput(attrs={"class": "dashboard-input"}),
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get("password1")
+        password2 = cleaned_data.get("password2")
+
+        if password1 and password2 and password1 != password2:
+            self.add_error("password2", "Пароли не совпадают.")
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        courier = super().save(commit=False)
+        courier.is_courier = True
+        courier.is_staff = False
+        courier.is_superuser = False
+        courier.set_password(self.cleaned_data["password1"])
+
+        if commit:
+            courier.save()
+
+        return courier
+
+
 class DashboardNewsForm(forms.ModelForm):
     class Meta:
         model = News
@@ -337,13 +275,10 @@ class DashboardNewsFilterForm(forms.Form):
     is_published = forms.ChoiceField(
         required=False,
         label="Статус",
-        choices=[
-            ("", "Все"),
-            ("yes", "Опубликовано"),
-            ("no", "Черновики"),
-        ],
+        choices=[("", "Все"), ("yes", "Опубликовано"), ("no", "Черновики")],
         widget=forms.Select(attrs={"class": "dashboard-select"}),
     )
+
 
 class DashboardSaleForm(forms.ModelForm):
     products = forms.ModelMultipleChoiceField(
@@ -435,11 +370,7 @@ class DashboardSaleFilterForm(forms.Form):
     is_active = forms.ChoiceField(
         required=False,
         label="Активность",
-        choices=[
-            ("", "Все"),
-            ("yes", "Активные"),
-            ("no", "Неактивные"),
-        ],
+        choices=[("", "Все"), ("yes", "Активные"), ("no", "Неактивные")],
         widget=forms.Select(attrs={"class": "dashboard-select"}),
     )
     current_state = forms.ChoiceField(

@@ -304,6 +304,36 @@
     gap: 10px;
 }
 
+.cart-qty-editor {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.cart-qty-editor__label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--cart-muted);
+}
+
+.cart-qty-editor__input {
+    width: 88px;
+    min-height: 44px;
+    padding: 8px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    background: #fff;
+    color: var(--cart-text);
+    font-weight: 700;
+}
+
+.cart-qty-editor__input:focus {
+    outline: none;
+    border-color: var(--cart-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
 .cart-btn {
     display: inline-flex;
     align-items: center;
