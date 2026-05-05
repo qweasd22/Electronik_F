@@ -151,6 +151,47 @@ a {
     flex: 1 0 auto;
 }
 
+.site-messages {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 22px;
+}
+
+.site-alert {
+    padding: 14px 18px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    background: #fff;
+    color: var(--text);
+    box-shadow: 0 10px 24px rgba(31, 42, 68, 0.06);
+    font-weight: 600;
+}
+
+.site-alert--success {
+    border-color: rgba(52, 199, 89, 0.28);
+    background: #F4FFF7;
+    color: #1f7f3d;
+}
+
+.site-alert--error,
+.site-alert--danger {
+    border-color: rgba(255, 90, 95, 0.28);
+    background: #FFF6F6;
+    color: #b63d42;
+}
+
+.site-alert--warning {
+    border-color: rgba(255, 138, 61, 0.32);
+    background: #FFF8F1;
+    color: #a95717;
+}
+
+.site-alert--info {
+    border-color: rgba(47, 128, 237, 0.24);
+    background: #F4F9FF;
+    color: var(--accent-hover);
+}
+
 /* HERO */
 .hero-modern {
     position: relative;
