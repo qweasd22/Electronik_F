@@ -137,18 +137,24 @@
     </div>
 </footer>
 
-<div class="qa-widget" data-qa-widget>
-    <button type="button" class="qa-widget__toggle" data-qa-toggle aria-label="Открыть вопросы и ответы">
-        ?
-    </button>
+<style>
+    .qa-widget[open] .qa-widget__panel {
+        display: flex !important;
+    }
+</style>
+
+<details class="qa-widget" data-qa-widget>
+    <summary class="qa-widget__toggle" data-qa-toggle aria-label="Открыть вопросы и ответы">
+        QA
+    </summary>
 
     <section class="qa-widget__panel" data-qa-panel aria-live="polite">
         <div class="qa-widget__head">
             <div>
                 <h2>Вопрос по магазину</h2>
-                <p>Ответы строятся по данным каталога, заказов, акций и новостей.</p>
+                <p>Подскажу по каталогу, заказам, скидкам и новостям.</p>
             </div>
-            <button type="button" class="qa-widget__close" data-qa-close aria-label="Закрыть">×</button>
+            <button type="button" class="qa-widget__close" data-qa-close aria-label="Закрыть" onclick="return window.qaWidgetClose ? window.qaWidgetClose(this) : false;">×</button>
         </div>
 
         <div class="qa-widget__messages" data-qa-messages>
@@ -157,7 +163,16 @@
             </div>
         </div>
 
-        <form class="qa-widget__form" data-qa-form action="{% url 'qna_ask' %}" method="post">
+        <div class="qa-widget__suggestions" data-qa-suggestions>
+            <button type="button" data-qa-suggestion onclick="return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;">Какие есть скидки?</button>
+            <button type="button" data-qa-suggestion onclick="return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;">Есть ли Samsung в наличии?</button>
+            <button type="button" data-qa-suggestion onclick="return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;">Сколько стоит iPhone?</button>
+            <button type="button" data-qa-suggestion onclick="return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;">Ноутбук MSI есть?</button>
+            <button type="button" data-qa-suggestion onclick="return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;">Мой последний заказ</button>
+            <button type="button" data-qa-suggestion onclick="return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;">Что у меня в корзине?</button>
+        </div>
+
+        <form class="qa-widget__form" data-qa-form action="{% url 'qna_ask' %}" method="post" onsubmit="return window.qaWidgetSubmit ? window.qaWidgetSubmit(this) : false;">
             {% csrf_token %}
             <input
                 type="text"
@@ -172,48 +187,103 @@
             <button type="submit" class="qa-widget__send">Спросить</button>
         </form>
     </section>
-</div>
+</details>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    var widget = document.querySelector('[data-qa-widget]');
-    if (!widget) return;
+(function () {
+    function closest(element, selector) {
+        if (element && element.nodeType !== 1) {
+            element = element.parentElement;
+        }
 
-    var toggle = widget.querySelector('[data-qa-toggle]');
-    var close = widget.querySelector('[data-qa-close]');
-    var form = widget.querySelector('[data-qa-form]');
-    var input = widget.querySelector('[data-qa-input]');
-    var messages = widget.querySelector('[data-qa-messages]');
-    var submit = form.querySelector('button[type="submit"]');
+        while (element && element.nodeType === 1) {
+            if (element.matches(selector)) return element;
+            element = element.parentElement;
+        }
+        return null;
+    }
 
-    function setOpen(isOpen) {
+    function getWidget(element) {
+        return closest(element, '[data-qa-widget]');
+    }
+
+    function setOpen(widget, isOpen) {
+        if (!widget) return;
+        widget.open = isOpen;
         widget.classList.toggle('is-open', isOpen);
-        if (isOpen) {
-            window.setTimeout(function () {
+
+        var input = widget.querySelector('[data-qa-input]');
+        if (isOpen && input) {
+            setTimeout(function () {
                 input.focus();
-            }, 80);
+            }, 50);
         }
     }
 
-    function addMessage(text, type) {
+    function addMessage(widget, text, type, links) {
+        var messages = widget.querySelector('[data-qa-messages]');
+        if (!messages) return;
+
         var item = document.createElement('div');
         item.className = 'qa-widget__message qa-widget__message--' + type;
-        item.textContent = text;
+
+        var textNode = document.createElement('div');
+        textNode.className = 'qa-widget__message-text';
+        textNode.textContent = text;
+        item.appendChild(textNode);
+
+        if (links && links.length) {
+            var linksWrap = document.createElement('div');
+            linksWrap.className = 'qa-widget__links';
+
+            links.forEach(function (link) {
+                if (!link.url || !link.title) return;
+
+                var anchor = document.createElement('a');
+                anchor.className = 'qa-widget__link-card';
+                anchor.href = link.url;
+
+                var title = document.createElement('strong');
+                title.textContent = link.title;
+                anchor.appendChild(title);
+
+                if (link.description) {
+                    var description = document.createElement('span');
+                    description.textContent = link.description;
+                    anchor.appendChild(description);
+                }
+
+                linksWrap.appendChild(anchor);
+            });
+
+            item.appendChild(linksWrap);
+        }
+
         messages.appendChild(item);
         messages.scrollTop = messages.scrollHeight;
     }
 
-    toggle.addEventListener('click', function () {
-        setOpen(!widget.classList.contains('is-open'));
-    });
+    function renderSuggestions(widget, items) {
+        var suggestions = widget.querySelector('[data-qa-suggestions]');
+        if (!suggestions || !items || !items.length) return;
 
-    close.addEventListener('click', function () {
-        setOpen(false);
-    });
+        suggestions.innerHTML = '';
+        items.slice(0, 6).forEach(function (question) {
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.setAttribute('data-qa-suggestion', '');
+            button.setAttribute('onclick', 'return window.qaWidgetUseSuggestion ? window.qaWidgetUseSuggestion(this) : false;');
+            button.textContent = question;
+            suggestions.appendChild(button);
+        });
+    }
 
-    form.addEventListener('submit', function (event) {
-        event.preventDefault();
+    function askQuestion(form) {
+        var widget = getWidget(form);
+        var input = widget ? widget.querySelector('[data-qa-input]') : null;
+        var submit = form.querySelector('button[type="submit"]');
+
+        if (!widget || !input || !submit) return;
 
         var question = input.value.trim();
         if (!question) return;
@@ -221,7 +291,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var formData = new FormData(form);
         formData.set('question', question);
 
-        addMessage(question, 'question');
+        addMessage(widget, question, 'question');
         input.value = '';
         submit.disabled = true;
         submit.textContent = '...';
@@ -234,25 +304,76 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         })
             .then(function (response) {
-                if (!response.ok) {
-                    throw new Error('Request failed');
-                }
+                if (!response.ok) throw new Error('Request failed');
                 return response.json();
             })
             .then(function (data) {
-                addMessage(data.answer || 'Ответ не найден.', 'answer');
+                addMessage(widget, data.answer || 'Ответ не найден.', 'answer', data.links || []);
+                renderSuggestions(widget, data.suggestions || []);
             })
             .catch(function () {
-                addMessage('Не удалось получить ответ. Попробуйте ещё раз.', 'answer');
+                addMessage(widget, 'Не удалось получить ответ. Попробуйте ещё раз.', 'answer');
             })
             .finally(function () {
                 submit.disabled = false;
                 submit.textContent = 'Спросить';
                 input.focus();
             });
+    }
+
+    window.qaWidgetClose = function (button) {
+        setOpen(getWidget(button), false);
+        return false;
+    };
+
+    window.qaWidgetUseSuggestion = function (button) {
+        var widget = getWidget(button);
+        var input = widget ? widget.querySelector('[data-qa-input]') : null;
+
+        setOpen(widget, true);
+        if (input) {
+            input.value = button.textContent.trim();
+            input.focus();
+            input.select();
+        }
+
+        return false;
+    };
+
+    window.qaWidgetSubmit = function (form) {
+        askQuestion(form);
+        return false;
+    };
+
+    document.addEventListener('toggle', function (event) {
+        if (!event.target.matches('[data-qa-widget]')) return;
+        event.target.classList.toggle('is-open', event.target.open);
+    }, true);
+
+    document.addEventListener('click', function (event) {
+        var closeButton = closest(event.target, '[data-qa-close]');
+        if (closeButton) {
+            window.qaWidgetClose(closeButton);
+            return;
+        }
+
+        var suggestionButton = closest(event.target, '[data-qa-suggestion]');
+        if (suggestionButton) {
+            window.qaWidgetUseSuggestion(suggestionButton);
+        }
     });
-});
+
+    document.addEventListener('submit', function (event) {
+        var form = closest(event.target, '[data-qa-form]');
+        if (!form) return;
+        if (event.defaultPrevented) return;
+
+        event.preventDefault();
+        window.qaWidgetSubmit(form);
+    });
+})();
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
