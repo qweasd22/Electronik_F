@@ -807,3 +807,266 @@ a {
         min-width: 130px;
     }
 }
+  /* =====================================================
+   HOME PAGE CARDS FIX
+   Карточки товаров и новостей на главной всегда ровные
+   ===================================================== */
+
+.section-block--products .home-slider,
+.section-block--news .home-slider {
+    --home-slider-gap: 20px;
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr) 42px;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+}
+
+.section-block--products .home-slider__viewport,
+.section-block--news .home-slider__viewport {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    order: initial;
+}
+
+.section-block--products .home-slider__track,
+.section-block--news .home-slider__track {
+    display: flex;
+    align-items: stretch;
+    gap: var(--home-slider-gap);
+    transition: transform 0.32s ease;
+    will-change: transform;
+}
+
+.section-block--products .home-slider__item,
+.section-block--news .home-slider__item {
+    min-width: 0;
+    align-self: stretch;
+    display: flex;
+    flex-direction: column;
+    height: auto;
+}
+
+.section-block--products .card-modern,
+.section-block--news .card-modern {
+    height: auto;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Убираем визуальный прыжок карточки при наведении */
+.section-block--products .card-modern:hover,
+.section-block--news .card-modern:hover {
+    transform: none;
+}
+
+.section-block--products .card-modern__image-wrap,
+.section-block--news .card-modern__image-wrap {
+    width: 100%;
+    flex: 0 0 auto;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(180deg, #F8FBFF 0%, #EDF5FF 100%);
+}
+
+.section-block--products .card-modern__image-wrap {
+    height: 230px;
+    padding: 18px;
+}
+
+.section-block--news .news-card-modern__image-wrap {
+    height: 220px;
+    padding: 0;
+}
+
+.section-block--products .card-modern__image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.section-block--news .news-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.section-block--products .card-modern__body,
+.section-block--news .card-modern__body {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 18px;
+}
+
+.section-block--products .card-modern__body h3,
+.section-block--news .card-modern__body h3 {
+    margin: 0 0 10px;
+    line-height: 1.3;
+    height: 58px;
+    overflow: hidden;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.section-block--products .product-price {
+    margin: 0 0 8px !important;
+    min-height: 34px;
+    line-height: 1.2;
+}
+
+.section-block--products .product-rating {
+    margin: 0 0 16px !important;
+    min-height: 22px;
+    line-height: 1.4;
+}
+
+.section-block--news .news-date-small {
+    margin: 0 0 8px !important;
+    min-height: 20px;
+    line-height: 1.3;
+}
+
+.section-block--news .news-summary {
+    margin: 0 0 16px !important;
+    line-height: 1.45;
+    height: 66px;
+    overflow: hidden;
+
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.section-block--products .card-modern__body .btn,
+.section-block--news .card-modern__body .btn {
+    margin-top: auto;
+    width: 100%;
+    min-height: 44px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.section-block--products .home-slider__arrow,
+.section-block--news .home-slider__arrow {
+    width: 42px;
+    min-width: 42px;
+    height: 42px;
+    padding: 0;
+    border-radius: 999px;
+}
+
+/* Перебиваем твой старый @media (max-width: 991px), который ломал сетку слайдера */
+@media (max-width: 991px) {
+    .section-block--products .home-slider,
+    .section-block--news .home-slider {
+        grid-template-columns: 40px minmax(0, 1fr) 40px;
+        gap: 10px;
+    }
+
+    .section-block--products .home-slider__viewport,
+    .section-block--news .home-slider__viewport {
+        order: initial;
+    }
+
+    .section-block--products .home-slider__arrow,
+    .section-block--news .home-slider__arrow {
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        border-radius: 999px;
+    }
+
+    .section-block--products .home-slider__arrow[data-slider-prev],
+    .section-block--products .home-slider__arrow[data-slider-next],
+    .section-block--news .home-slider__arrow[data-slider-prev],
+    .section-block--news .home-slider__arrow[data-slider-next] {
+        order: initial;
+    }
+}
+
+@media (max-width: 768px) {
+    .section-block--products .home-slider,
+    .section-block--news .home-slider {
+        --home-slider-gap: 16px;
+        grid-template-columns: 1fr;
+    }
+
+    .section-block--products .home-slider__viewport,
+    .section-block--news .home-slider__viewport {
+        order: 1;
+    }
+
+    .section-block--products .home-slider__arrow,
+    .section-block--news .home-slider__arrow {
+        width: 100%;
+        min-width: 0;
+        height: 40px;
+        border-radius: 14px;
+    }
+
+    .section-block--products .home-slider__arrow[data-slider-prev],
+    .section-block--news .home-slider__arrow[data-slider-prev] {
+        order: 2;
+    }
+
+    .section-block--products .home-slider__arrow[data-slider-next],
+    .section-block--news .home-slider__arrow[data-slider-next] {
+        order: 3;
+    }
+
+    .section-block--products .card-modern__image-wrap {
+        height: 220px;
+    }
+
+    .section-block--news .news-card-modern__image-wrap {
+        height: 205px;
+    }
+}
+/* =====================================================
+   FINAL FIX: изображения новостей всегда вписываются в карточку
+   ===================================================== */
+
+.section-block--news .news-card-modern {
+    overflow: hidden !important;
+}
+
+.section-block--news .news-card-modern__image-wrap {
+    width: 100% !important;
+    height: 220px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: hidden !important;
+    border-radius: 20px 20px 0 0 !important;
+    background: linear-gradient(180deg, #F8FBFF 0%, #EDF5FF 100%) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.section-block--news .news-thumb {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    display: block !important;
+    object-fit: contain !important;
+    object-position: center center !important;
+    border-radius: 0 !important;
+}
+
+@media (max-width: 768px) {
+    .section-block--news .news-card-modern__image-wrap {
+        height: 205px !important;
+    }
+}

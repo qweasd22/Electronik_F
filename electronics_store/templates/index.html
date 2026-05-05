@@ -155,7 +155,7 @@
                             <div class="card-modern__body">
                                 <p class="news-date-small">{{ news_item.published_at|date:"d.m.Y" }}</p>
                                 <h3>{{ news_item.title }}</h3>
-                                <p>{{ news_item.summary }}</p>
+                                <p class="news-summary">{{ news_item.summary }}</p>
                                 <a href="{% url 'news:news_detail' pk=news_item.id %}" class="btn btn-accent-outline">
                                     Читать полностью
                                 </a>
@@ -186,7 +186,6 @@
     </div>
 </section>
 {% endblock %}
-
 {% block extra_js %}
 <script>
     (function () {
@@ -199,6 +198,11 @@
             if (width <= 768) return mobile;
             if (width <= 1100) return tablet;
             return desktop;
+        }
+
+        function getTrackGap(track) {
+            var styles = window.getComputedStyle(track);
+            return parseFloat(styles.columnGap || styles.gap || '0') || 0;
         }
 
         function initHomeSlider(slider) {
@@ -215,40 +219,47 @@
             var currentIndex = 0;
             var maxIndex = 0;
             var itemWidth = 0;
+            var itemStep = 0;
 
             function render() {
-                track.style.transform = 'translateX(' + (-currentIndex * itemWidth) + 'px)';
+                track.style.transform = 'translateX(' + (-currentIndex * itemStep) + 'px)';
             }
 
             function recalc() {
                 var visibleCount = Math.max(1, getVisibleCount(slider));
-                itemWidth = viewport.clientWidth / visibleCount;
+                var gap = getTrackGap(track);
+
+                itemWidth = (viewport.clientWidth - gap * (visibleCount - 1)) / visibleCount;
+                itemStep = itemWidth + gap;
 
                 items.forEach(function (item) {
                     item.style.flex = '0 0 ' + itemWidth + 'px';
+                    item.style.width = itemWidth + 'px';
                     item.style.maxWidth = itemWidth + 'px';
                 });
 
                 maxIndex = Math.max(0, items.length - visibleCount);
+
                 if (currentIndex > maxIndex) {
                     currentIndex = maxIndex;
                 }
 
-                var disabled = maxIndex === 0;
-                prevBtn.disabled = disabled;
-                nextBtn.disabled = disabled;
+                prevBtn.disabled = maxIndex === 0;
+                nextBtn.disabled = maxIndex === 0;
 
                 render();
             }
 
             prevBtn.addEventListener('click', function () {
                 if (maxIndex === 0) return;
+
                 currentIndex = currentIndex > 0 ? currentIndex - 1 : maxIndex;
                 render();
             });
 
             nextBtn.addEventListener('click', function () {
                 if (maxIndex === 0) return;
+
                 currentIndex = currentIndex < maxIndex ? currentIndex + 1 : 0;
                 render();
             });
@@ -257,8 +268,7 @@
             window.addEventListener('resize', recalc);
         }
 
-        var sliders = document.querySelectorAll('.js-home-slider');
-        sliders.forEach(initHomeSlider);
+        document.querySelectorAll('.js-home-slider').forEach(initHomeSlider);
     })();
 </script>
 {% endblock %}
