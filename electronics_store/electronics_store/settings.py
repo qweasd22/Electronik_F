@@ -139,7 +139,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Для ра�
 
 # Настройки allauth
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Проверка email обязательна
-ACCOUNT_EMAIL_REQUIRED = True  # Требуется email
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 ACCOUNT_AUTHENTICATED_REDIRECT_URL = '/'  # Куда отправлять после входа
 ACCOUNT_LOGOUT_REDIRECT_URL = '/'  # Куда отправлять после выхода
 

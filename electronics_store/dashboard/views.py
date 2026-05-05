@@ -19,7 +19,7 @@ from django.views.generic import (
 
 from news.models import News
 from orders.models import Order, OrderItem, SaleEvent
-from products.models import Product, Sale
+from products.models import Product, Review, Sale
 from .forms import (
     DashboardCourierCreateForm,
     DashboardNewsFilterForm,
@@ -28,6 +28,7 @@ from .forms import (
     DashboardOrderStatusForm,
     DashboardProductFilterForm,
     DashboardProductForm,
+    DashboardReviewFilterForm,
     DashboardSaleFilterForm,
     DashboardSaleForm,
     DashboardUserFilterForm,
@@ -109,6 +110,7 @@ class DashboardHomeView(DashboardAccessMixin, TemplateView):
         total_products = Product.objects.count()
         low_stock_products = Product.objects.filter(stock__lte=5).count()
         total_couriers = User.objects.filter(is_courier=True).count()
+        pending_reviews = Review.objects.filter(is_approved=False).count()
 
         delivered_revenue = _calc_orders_revenue(Order.objects.filter(status='delivered'))
         expected_revenue = _calc_orders_revenue(
@@ -131,6 +133,7 @@ class DashboardHomeView(DashboardAccessMixin, TemplateView):
                 'total_products': total_products,
                 'low_stock_products': low_stock_products,
                 'total_couriers': total_couriers,
+                'pending_reviews': pending_reviews,
                 'delivered_revenue': delivered_revenue,
                 'expected_revenue': expected_revenue,
                 'cancelled_revenue': cancelled_revenue,
@@ -350,6 +353,77 @@ class DashboardProductDeleteView(DashboardAccessMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Товар успешно удалён.')
         return super().form_valid(form)
+
+
+class DashboardReviewListView(DashboardAccessMixin, ListView):
+    model = Review
+    template_name = 'dashboard/reviews/review_list.html'
+    context_object_name = 'reviews'
+    paginate_by = 5
+
+    def get_queryset(self):
+        queryset = Review.objects.select_related('product', 'user').order_by('is_approved', '-created_at')
+
+        self.filter_form = DashboardReviewFilterForm(self.request.GET or None)
+
+        if self.filter_form.is_valid():
+            q = self.filter_form.cleaned_data.get('q')
+            product = self.filter_form.cleaned_data.get('product')
+            is_approved = self.filter_form.cleaned_data.get('is_approved')
+
+            if q:
+                queryset = queryset.filter(
+                    Q(product__name__icontains=q)
+                    | Q(user__username__icontains=q)
+                    | Q(user__email__icontains=q)
+                    | Q(text__icontains=q)
+                )
+
+            if product:
+                queryset = queryset.filter(product=product)
+
+            if is_approved == 'yes':
+                queryset = queryset.filter(is_approved=True)
+            elif is_approved == 'no':
+                queryset = queryset.filter(is_approved=False)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query_params = self.request.GET.copy()
+        query_params.pop('page', None)
+
+        context['filter_form'] = self.filter_form
+        context['pagination_query'] = query_params.urlencode()
+        context['pending_reviews_count'] = Review.objects.filter(is_approved=False).count()
+        context['approved_reviews_count'] = Review.objects.filter(is_approved=True).count()
+        return context
+
+
+class DashboardReviewStatusUpdateView(DashboardAccessMixin, View):
+    def post(self, request, review_id):
+        review = get_object_or_404(Review.objects.select_related('product'), id=review_id)
+        action = request.POST.get('action')
+
+        if action == 'approve':
+            review.is_approved = True
+            message = f'Отзыв к товару "{review.product.name}" одобрен.'
+        elif action == 'unapprove':
+            review.is_approved = False
+            message = f'Отзыв к товару "{review.product.name}" снят с публикации.'
+        else:
+            messages.error(request, 'Неизвестное действие для отзыва.')
+            return redirect('dashboard:review_list')
+
+        review.save(update_fields=['is_approved'])
+        messages.success(request, message)
+
+        next_url = request.POST.get('next')
+        if next_url:
+            return redirect(next_url)
+
+        return redirect('dashboard:review_list')
 
 
 class DashboardUserListView(DashboardAccessMixin, ListView):

@@ -19,6 +19,7 @@
             <a href="{% url 'dashboard:product_create' %}" class="dashboard-btn dashboard-btn--primary">Добавить товар</a>
             <a href="{% url 'dashboard:news_create' %}" class="dashboard-btn dashboard-btn--ghost">Добавить новость</a>
             <a href="{% url 'dashboard:courier_create' %}" class="dashboard-btn dashboard-btn--ghost">Создать курьера</a>
+            <a href="{% url 'dashboard:review_list' %}?is_approved=no" class="dashboard-btn dashboard-btn--ghost">Отзывы: {{ pending_reviews }}</a>
         </div>
     </section>
 

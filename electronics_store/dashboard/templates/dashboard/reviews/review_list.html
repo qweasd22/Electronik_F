@@ -1,0 +1,147 @@
+{% extends 'dashboard/base.html' %}
+
+{% block title %}Отзывы{% endblock %}
+{% block page_title %}Отзывы{% endblock %}
+
+{% block content %}
+<section class="dashboard-panel dashboard-panel--filters">
+    <div class="dashboard-panel__head">
+        <h2>Поиск и фильтрация</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        <form method="get" class="dashboard-filters-form">
+            <div class="dashboard-form-grid dashboard-form-grid--reviews-filters">
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.q.id_for_label }}">Поиск</label>
+                    {{ filter_form.q }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.product.id_for_label }}">Товар</label>
+                    {{ filter_form.product }}
+                </div>
+
+                <div class="dashboard-form-group">
+                    <label for="{{ filter_form.is_approved.id_for_label }}">Статус</label>
+                    {{ filter_form.is_approved }}
+                </div>
+            </div>
+
+            <div class="dashboard-form-actions">
+                <button type="submit" class="dashboard-btn dashboard-btn--primary">Применить</button>
+                <a href="{% url 'dashboard:review_list' %}" class="dashboard-btn dashboard-btn--ghost">Сбросить</a>
+            </div>
+        </form>
+    </div>
+</section>
+
+<section class="stats-grid stats-grid--secondary">
+    <article class="stat-card {% if pending_reviews_count > 0 %}stat-card--warning{% endif %}">
+        <div class="stat-card__label">На модерации</div>
+        <div class="stat-card__value">{{ pending_reviews_count }}</div>
+        <div class="stat-card__hint">Отзывы, которые пока не выводятся у товара</div>
+    </article>
+
+    <article class="stat-card stat-card--success">
+        <div class="stat-card__label">Одобрено</div>
+        <div class="stat-card__value">{{ approved_reviews_count }}</div>
+        <div class="stat-card__hint">Отзывы, видимые на страницах товаров</div>
+    </article>
+</section>
+
+<section class="dashboard-panel">
+    <div class="dashboard-panel__head">
+        <h2>Список отзывов</h2>
+    </div>
+    <div class="dashboard-panel__body">
+        {% if reviews %}
+            <div class="dashboard-table-wrap">
+                <table class="dashboard-table dashboard-reviews-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Товар</th>
+                            <th>Пользователь</th>
+                            <th>Отзыв</th>
+                            <th>Дата</th>
+                            <th>Статус</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in reviews %}
+                            <tr>
+                                <td>#{{ review.id }}</td>
+                                <td>
+                                    <a href="{% url 'products:product_detail' review.product.id %}" class="dashboard-table-link">
+                                        {{ review.product.name }}
+                                    </a>
+                                </td>
+                                <td>
+                                    {{ review.user.username }}<br>
+                                    <span class="dashboard-muted-text">{{ review.user.email|default:"Email не указан" }}</span>
+                                </td>
+                                <td class="dashboard-review-cell">
+                                    {% if review.text|length > 220 %}
+                                        <details class="dashboard-review-text">
+                                            <summary>{{ review.text|truncatechars:220 }}</summary>
+                                            <div class="dashboard-review-text__full">
+                                                {{ review.text|linebreaksbr }}
+                                            </div>
+                                        </details>
+                                    {% else %}
+                                        <div class="dashboard-review-text">
+                                            {{ review.text|linebreaksbr }}
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td>{{ review.created_at|date:"d.m.Y H:i" }}</td>
+                                <td>
+                                    {% if review.is_approved %}
+                                        <span class="status-badge status-badge--delivered">Одобрен</span>
+                                    {% else %}
+                                        <span class="status-badge status-badge--processing">На модерации</span>
+                                    {% endif %}
+                                </td>
+                                <td class="dashboard-actions-cell">
+                                    <form method="post" action="{% url 'dashboard:review_status_update' review.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                        {% if review.is_approved %}
+                                            <input type="hidden" name="action" value="unapprove">
+                                            <button type="submit" class="dashboard-btn dashboard-btn--small dashboard-btn--ghost">
+                                                Скрыть
+                                            </button>
+                                        {% else %}
+                                            <input type="hidden" name="action" value="approve">
+                                            <button type="submit" class="dashboard-btn dashboard-btn--small dashboard-btn--primary">
+                                                Одобрить
+                                            </button>
+                                        {% endif %}
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="dashboard-pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.previous_page_number }}">Назад</a>
+                    {% endif %}
+
+                    <span>Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+
+                    {% if page_obj.has_next %}
+                        <a href="?{% if pagination_query %}{{ pagination_query }}&{% endif %}page={{ page_obj.next_page_number }}">Вперёд</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <p class="dashboard-empty-text">Отзывы не найдены.</p>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -108,6 +108,31 @@ class DashboardProductFilterForm(forms.Form):
     )
 
 
+class DashboardReviewFilterForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label="Поиск",
+        widget=forms.TextInput(
+            attrs={
+                "class": "dashboard-input",
+                "placeholder": "Товар, пользователь, текст отзыва",
+            }
+        ),
+    )
+    product = forms.ModelChoiceField(
+        queryset=Product.objects.all().order_by("name"),
+        required=False,
+        empty_label="Все товары",
+        widget=forms.Select(attrs={"class": "dashboard-select"}),
+    )
+    is_approved = forms.ChoiceField(
+        required=False,
+        label="Статус",
+        choices=[("", "Все"), ("yes", "Одобренные"), ("no", "На модерации")],
+        widget=forms.Select(attrs={"class": "dashboard-select"}),
+    )
+
+
 class DashboardUserFilterForm(forms.Form):
     q = forms.CharField(
         required=False,

@@ -909,6 +909,18 @@ a {
 .section-block--news .card-modern__body h3 {
     margin: 0 0 10px;
     line-height: 1.3;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.section-block--products .card-modern__body h3 {
+    min-height: 58px;
+    height: auto;
+    overflow: visible;
+    display: block;
+}
+
+.section-block--news .card-modern__body h3 {
     height: 58px;
     overflow: hidden;
 

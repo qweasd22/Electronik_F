@@ -17,6 +17,8 @@ from .views import (
     DashboardProductDeleteView,
     DashboardProductListView,
     DashboardProductUpdateView,
+    DashboardReviewListView,
+    DashboardReviewStatusUpdateView,
     DashboardSaleCreateView,
     DashboardSaleDeleteView,
     DashboardSaleListView,
@@ -41,6 +43,9 @@ urlpatterns = [
     path('products/create/', DashboardProductCreateView.as_view(), name='product_create'),
     path('products/<int:product_id>/edit/', DashboardProductUpdateView.as_view(), name='product_update'),
     path('products/<int:product_id>/delete/', DashboardProductDeleteView.as_view(), name='product_delete'),
+
+    path('reviews/', DashboardReviewListView.as_view(), name='review_list'),
+    path('reviews/<int:review_id>/status/', DashboardReviewStatusUpdateView.as_view(), name='review_status_update'),
 
     path('users/', DashboardUserListView.as_view(), name='user_list'),
     path('users/<int:user_id>/', DashboardUserDetailView.as_view(), name='user_detail'),
