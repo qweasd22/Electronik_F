@@ -15,6 +15,7 @@ urlpatterns = [
     path('', views.index, name='home'),
     path('about/', views.about, name='about'),
     path('contact/', views.contact_view, name='contact'),
+    path('qa/ask/', views.qna_ask, name='qna_ask'),
     path('dashboard/', include('dashboard.urls', namespace='dashboard')),
     path('courier/', include('dashboard.courier_urls', namespace='courier_dashboard')),
 ]

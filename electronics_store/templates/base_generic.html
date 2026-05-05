@@ -137,7 +137,122 @@
     </div>
 </footer>
 
+<div class="qa-widget" data-qa-widget>
+    <button type="button" class="qa-widget__toggle" data-qa-toggle aria-label="Открыть вопросы и ответы">
+        ?
+    </button>
+
+    <section class="qa-widget__panel" data-qa-panel aria-live="polite">
+        <div class="qa-widget__head">
+            <div>
+                <h2>Вопрос по магазину</h2>
+                <p>Ответы строятся по данным каталога, заказов, акций и новостей.</p>
+            </div>
+            <button type="button" class="qa-widget__close" data-qa-close aria-label="Закрыть">×</button>
+        </div>
+
+        <div class="qa-widget__messages" data-qa-messages>
+            <div class="qa-widget__message qa-widget__message--answer">
+                Задайте вопрос о товаре, наличии, доставке, заказе, корзине, скидках или новостях.
+            </div>
+        </div>
+
+        <form class="qa-widget__form" data-qa-form action="{% url 'qna_ask' %}" method="post">
+            {% csrf_token %}
+            <input
+                type="text"
+                name="question"
+                class="qa-widget__input"
+                data-qa-input
+                maxlength="300"
+                autocomplete="off"
+                placeholder="Например: какие есть скидки?"
+                required
+            >
+            <button type="submit" class="qa-widget__send">Спросить</button>
+        </form>
+    </section>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var widget = document.querySelector('[data-qa-widget]');
+    if (!widget) return;
+
+    var toggle = widget.querySelector('[data-qa-toggle]');
+    var close = widget.querySelector('[data-qa-close]');
+    var form = widget.querySelector('[data-qa-form]');
+    var input = widget.querySelector('[data-qa-input]');
+    var messages = widget.querySelector('[data-qa-messages]');
+    var submit = form.querySelector('button[type="submit"]');
+
+    function setOpen(isOpen) {
+        widget.classList.toggle('is-open', isOpen);
+        if (isOpen) {
+            window.setTimeout(function () {
+                input.focus();
+            }, 80);
+        }
+    }
+
+    function addMessage(text, type) {
+        var item = document.createElement('div');
+        item.className = 'qa-widget__message qa-widget__message--' + type;
+        item.textContent = text;
+        messages.appendChild(item);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    toggle.addEventListener('click', function () {
+        setOpen(!widget.classList.contains('is-open'));
+    });
+
+    close.addEventListener('click', function () {
+        setOpen(false);
+    });
+
+    form.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        var question = input.value.trim();
+        if (!question) return;
+
+        var formData = new FormData(form);
+        formData.set('question', question);
+
+        addMessage(question, 'question');
+        input.value = '';
+        submit.disabled = true;
+        submit.textContent = '...';
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                if (!response.ok) {
+                    throw new Error('Request failed');
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                addMessage(data.answer || 'Ответ не найден.', 'answer');
+            })
+            .catch(function () {
+                addMessage('Не удалось получить ответ. Попробуйте ещё раз.', 'answer');
+            })
+            .finally(function () {
+                submit.disabled = false;
+                submit.textContent = 'Спросить';
+                input.focus();
+            });
+    });
+});
+</script>
 {% block extra_js %}{% endblock %}
 </body>
 </html>
