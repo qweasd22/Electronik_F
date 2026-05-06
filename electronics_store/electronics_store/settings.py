@@ -2,12 +2,20 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv(BASE_DIR / ".env")
+
+
+def env_bool(name, default=False):
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 SECRET_KEY = os.environ.get("SECRET_KEY", "dev-secret-key")
-DEBUG = "True"
+DEBUG = env_bool("DEBUG", True)
 
 ALLOWED_HOSTS = os.environ.get(
     "ALLOWED_HOSTS",
@@ -51,7 +59,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'electronics_store.urls'
-import os
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -134,8 +141,7 @@ USE_TZ = True
 # Указываем модель пользователя
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
-# Настройки для работы с email
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Для разработки
+
 
 # Настройки allauth
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'  # Проверка email обязательна
@@ -152,11 +158,17 @@ CRISPY_TEMPLATE_PACK = 'bootstrap5'
 LOGIN_REDIRECT_URL = '/accounts/profile/'  # куда пользователь идет после успешного входа
 LOGOUT_REDIRECT_URL = '/'  # куда пользователь идет после выхода
 
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_SSL = False
 EMAIL_USE_TLS = True
+
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+SERVER_EMAIL = EMAIL_HOST_USER
 ADMIN_EMAIL = os.environ.get('ADMIN_EMAIL', EMAIL_HOST_USER)

@@ -4,7 +4,10 @@ from functools import lru_cache
 
 from django.db.models import Avg, Count
 from django.db.models.functions import Coalesce
-from django.core.mail import send_mail
+import logging
+from smtplib import SMTPException
+
+from django.core.mail import EmailMessage, BadHeaderError
 from django.conf import settings
 from django.contrib import messages
 from django.http import JsonResponse
@@ -16,7 +19,7 @@ from orders.models import CartItem, Order
 from products.models import Brand, Category, Product, Review, Sale
 from news.models import News
 from .forms import ContactForm
-
+logger = logging.getLogger(__name__)
 
 DEFAULT_QNA_TRAINING = {
     "suggestions": [
@@ -789,36 +792,65 @@ def index(request):
 
 
 def about(request):
+    form_sent = request.GET.get('sent') == '1'
+    mail_error = None
+
     if request.method == 'POST':
         form = ContactForm(request.POST)
+
         if form.is_valid():
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             message = form.cleaned_data['message']
             phone_number = form.cleaned_data['phone_number']
 
-            subject = f"Новое сообщение от {name}"
-            body = (
-                f"Сообщение от: {name} ({email})\n\n"
-                f"{message}\n\n"
-                f"Телефон: {phone_number}"
-            )
+            admin_email = getattr(settings, 'ADMIN_EMAIL', None)
+            from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', None) or getattr(settings, 'EMAIL_HOST_USER', None)
 
-            send_mail(
-                subject,
-                body,
-                email,
-                [settings.ADMIN_EMAIL],
-                fail_silently=False,
-            )
+            if not admin_email:
+                mail_error = 'Ошибка настройки: не указан ADMIN_EMAIL.'
+            elif not from_email:
+                mail_error = 'Ошибка настройки: не указан DEFAULT_FROM_EMAIL или EMAIL_HOST_USER.'
+            else:
+                subject = f'Новое сообщение с сайта от {name}'
+                body = (
+                    f'Имя: {name}\n'
+                    f'Email: {email}\n'
+                    f'Телефон: {phone_number}\n\n'
+                    f'Сообщение:\n{message}'
+                )
 
-            return redirect(f"{reverse('about')}?sent=1")
+                try:
+                    email_message = EmailMessage(
+                        subject=subject,
+                        body=body,
+                        from_email=from_email,
+                        to=[admin_email],
+                        reply_to=[email],
+                    )
+
+                    email_message.send(fail_silently=False)
+
+                    return redirect(f"{reverse('about')}?sent=1")
+
+                except BadHeaderError:
+                    mail_error = 'Некорректный заголовок письма.'
+                    logger.exception('BadHeaderError при отправке формы обратной связи')
+
+                except SMTPException:
+                    mail_error = 'SMTP-сервер не принял письмо. Проверьте пароль приложения Gmail и настройки SMTP.'
+                    logger.exception('SMTPException при отправке формы обратной связи')
+
+                except Exception:
+                    mail_error = 'Не удалось отправить письмо. Подробности ошибки смотри в консоли Django.'
+                    logger.exception('Ошибка при отправке формы обратной связи')
     else:
         form = ContactForm()
 
     return render(request, 'about.html', {
         'form': form,
-        'form_sent': request.GET.get('sent') == '1',
+        'form_sent': form_sent,
+        'mail_error': mail_error,
     })
 
 
